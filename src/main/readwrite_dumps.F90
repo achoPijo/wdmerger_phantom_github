@@ -1089,8 +1089,13 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  real,    intent(in)   :: tfile,alphafile
  integer, intent(out)  :: ierr
  logical               :: got_dustfrac,match
- logical               :: got_iphase,got_xyzh(4),got_vxyzu(4),got_abund(nabundances),got_alpha,got_poten
+ logical               :: got_iphase,got_xyzh(4),got_abund(nabundances),got_alpha,got_poten
  logical               :: got_sink_data(nsinkproperties),got_sink_vels(3),got_Bevol(maxBevol)
+#ifdef TEMPEVOLUTION
+ logical               :: got_vxyzu(5)
+#else
+ logical               :: got_vxyzu(4)
+#endif 
  character(len=lentag) :: tag,tagarr(64)
  integer :: k,i,iarr,ik
 !
@@ -1333,13 +1338,17 @@ subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,mass
  if (any(.not.got_vxyzu(1:3))) then
     write(*,*) 'ERROR: missing velocity information from file'
  endif
- if (maxvxyzu==4 .and. .not.got_vxyzu(4)) then
+ if (maxvxyzu>=4 .and. .not.got_vxyzu(4)) then
     do i=i1,i2
        vxyzu(4,i) = (1.0/(gamma-1.0))*polyk*rhoh(xyzh(4,i),get_pmass(i,use_gas))**(gamma - 1.)
        !print*,'u = ',vxyzu(4,i)
     enddo
     write(*,*) 'WARNING: u not in file but setting u = (K*rho**(gamma-1))/(gamma-1)'
  endif
+ if (maxvxyzu==5 .and. .not.got_vxyzu(5)) then
+    write(*,*) 'WARNING: T not in file'
+ endif
+
  if (h2chemistry .and. .not.all(got_abund)) then
     write(*,*) 'error in rdump: using H2 chemistry, but abundances not found in dump file'
     ierr = 9

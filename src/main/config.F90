@@ -14,7 +14,7 @@
 !
 !  OWNER: Daniel Price
 !
-!  $Id: 45636542a96e7694a8c1d63f98be949913788884 $
+!  $Id: 4f2e0ab896d5b6c23a138ffbeb27abb1428db556 $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -24,7 +24,7 @@
 module dim
  implicit none
  character(len=80), parameter :: &  ! module version
-    modid="$Id: 45636542a96e7694a8c1d63f98be949913788884 $"
+    modid="$Id: 4f2e0ab896d5b6c23a138ffbeb27abb1428db556 $"
 
  public
 
@@ -46,10 +46,14 @@ module dim
 #endif
 
  ! storage of thermal energy or not
-#ifdef ISOTHERMAL
+#ifdef TEMPEVOLUTION
+ integer, parameter :: maxvxyzu = 5
+#else
+#ifdef ISOTHERMAL                            
  integer, parameter :: maxvxyzu = 3
 #else
  integer, parameter :: maxvxyzu = 4
+#endif
 #endif
 
  ! maximum allowable number of neighbours (safest=maxp)

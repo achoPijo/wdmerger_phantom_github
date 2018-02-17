@@ -21,7 +21,7 @@
 !
 !  OWNER: James Wurster
 !
-!  $Id: 1ac7e86faec6a9df2e928355fbc3b689859e8651 $
+!  $Id: 9ef16b71c5eb09b8c81a119dd5c28ff029b7e663 $
 !
 !  RUNTIME PARAMETERS:
 !    Binary_separation -- initial separation of the binary
@@ -564,7 +564,7 @@ subroutine choose_spheres(polyk,iexist,id,master)
  ! set default file output parameters
  !
  if (id==master) write(*,"('Setting up ',a)") trim(sphere_opt(choice))
- select case (choice)
+ select case (choice) !CHNGCODE Maybe add a new case here for our problem
  case(iuniform)
     ! Uniform density sphere
     polyk       = 0.5

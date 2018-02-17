@@ -21,12 +21,13 @@
 !    10 = MESA EoS
 !    11 = isothermal eos with zero pressure
 !    14 = locally isothermal prescription from Farris et al. (2014) for binary system
+!    15 = Helmholtz Free Energy EOS Timmes & Swesty apj (1999)
 !
 !  REFERENCES: None
 !
 !  OWNER: Daniel Price
 !
-!  $Id: def85cceaf9dbc3cfe804a78d4a3b85d109f2c82 $
+!  $Id: 7e131aa11f10277d396f1ad6514e49bfc0d8542c $
 !
 !  RUNTIME PARAMETERS:
 !    X           -- hydrogen mass fraction
@@ -49,6 +50,8 @@
 !    rhocrit2    -- critical density 2 in g/cm^3 (barotropic eos)
 !    rhocrit2pwp -- critical density 2 in g/cm^3 (piecewise polytropic eos)
 !    rhocrit3    -- critical density 3 in g/cm^3 (barotropic eos)
+!	 Tmax        -- maximum temperature for Helmholtz tables (Helmholtz eos)
+!    Tmin        -- minimum temperature for Helmholtz tables (Helmholtz eos)
 !
 !  DEPENDENCIES: dim, eos_mesa, infile_utils, io, part, physcon, units
 !+
@@ -93,6 +96,8 @@ module eos
  !--Mean molecular weight if temperature required
  real,    public :: gmw            = 2.381
  real,    public :: X_in = 0.74, Z_in = 0.02
+ !--Define initial parameters for Helmholtz EOS  !REVISE Maybe initialize here abar an zbar while they are not implemented 
+ logical, public :: relflag = .false. ! relaxation flag
  !
  real            :: rhocritT,rhocrit0,rhocrit1,rhocrit2,rhocrit3
  real            :: fac2,fac3,log10polyk2,log10rhocritT,rhocritT0slope
@@ -106,22 +111,30 @@ contains
 !----------------------------------------------------------------
 !+
 !  subroutine returns pressure/density as a function of density
-!  (and position in the case of the isothermal disc)
+!  (and position in the case of the isothermal disc,and temperature in
+!  the case of helmholtz eos)
+!  !REVISE SOMETHING GOT TO CHANGE AS FOR HELMHOLTZ TEMPERATURE IS NEEDED TOO
+!  ALSO CHANGE GET_P at force.f90
 !+
 !----------------------------------------------------------------
-subroutine equationofstate(eos_type,ponrhoi,spsoundi,rhoi,xi,yi,zi,eni)
- use io,    only:fatal,error
- use part,  only:xyzmh_ptmass
- use units,   only:unit_density,unit_pressure,unit_ergg
+subroutine equationofstate(eos_type,ponrhoi,spsoundi,rhoi,xi,yi,zi, &
+                           eni,tempi,cvi,dPdTi)
+ use io,       only:fatal,error
+ use part,     only:xyzmh_ptmass
+ use units,    only:unit_density,unit_pressure,unit_ergg,unit_velocity,unit_energ
  use eos_mesa, only:get_eos_pressure_gamma1_mesa
+ use eos_helmholtz, only:get_eos_press_sound_cv_dPdT_helmholtz
 
  integer, intent(in)  :: eos_type
  real,    intent(in)  :: rhoi,xi,yi,zi
  real,    intent(out) :: ponrhoi,spsoundi
- real,    intent(in), optional :: eni
+ real,    intent(in), optional :: eni 
+ real,    intent(in), optional :: tempi
+ real,    intent(out),optional :: cvi, dPdTi
  real :: r,omega,bigH,polyk_new,r1,r2
  real :: gammai
- real :: cgsrhoi, cgseni, cgspgas, pgas, gam1
+ real :: cgsrhoi, cgseni, cgspgas, pgas, gam1, abar, zbar
+ real :: cgscv, cgsdPdT, cgsptot, cgsspsound, ptot
 
  select case(eos_type)
  case(1)
@@ -267,6 +280,25 @@ subroutine equationofstate(eos_type,ponrhoi,spsoundi,rhoi,xi,yi,zi,eni)
     r2=sqrt((xi-xyzmh_ptmass(1,2))**2+(yi-xyzmh_ptmass(2,2))**2 + (zi-xyzmh_ptmass(3,2))**2 )
     ponrhoi=polyk*(xyzmh_ptmass(4,1)*1/r1+xyzmh_ptmass(4,2)*1/r2)**(2*qfacdisc)
     spsoundi=sqrt(ponrhoi)
+    
+ case(15) !CHNGCODE
+ !
+ !-- Helmholtz EOS from table interpolation, cox & giuli chapter 24, Timmes & Swesty apj (1999)
+ !   Need Temperature[K] Density[g/cm**3] and composition (abar,zbar)
+    cgsrhoi = rhoi * unit_density
+  !  abar = 0.9     !REVISE IF THESE ARE TYPICAL VALUES FOR abar,zbar
+  !  zbar = 0.1
+    
+    call get_eos_press_sound_cv_dPdT_helmholtz(tempi,cgsrhoi,cgsptot,cgsspsound,cgscv,cgsdPdT)!,abar,zbar)
+    
+    ptot = cgsptot/ unit_pressure  !REVISE INTERESTING TO MAKE EOS CALL TRANSPARENT TO UNITS AND HANDLE UNIT CHANGE INSIDE THE FUNCTION
+    ponrhoi = ptot / rhoi
+    !print *, cgsspsound
+    !print *, unit_velocity
+    spsoundi = cgsspsound / unit_velocity
+    !print *, spsoundi
+    if (present(cvi)) cvi = cgscv /unit_ergg
+    if (present(dPdTi)) dPdTi = cgsdPdT / unit_pressure
 
  case default
     spsoundi = 0. ! avoids compiler warnings
@@ -290,8 +322,12 @@ real function get_spsound(ieos,xyzi,rhoi,vxyzui)
  real,         intent(in) :: vxyzui(maxvxyzu)
  real :: spsoundi,ponrhoi
 
- if (maxvxyzu==4) then
-    call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzi(1),xyzi(2),xyzi(3),vxyzui(4))
+ if (maxvxyzu>=4) then
+    if (maxvxyzu == 5) then
+       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzi(1),xyzi(2),xyzi(3),vxyzui(4),vxyzui(5))
+    else
+       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzi(1),xyzi(2),xyzi(3),vxyzui(4))
+    endif 
  else
     call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzi(1),xyzi(2),xyzi(3))
  endif
@@ -353,10 +389,11 @@ end function gamma_pwp
 !+
 !-----------------------------------------------------------------------
 subroutine init_eos(eos_type,ierr)
- use units,    only:unit_density,unit_velocity,unit_pressure
- use physcon,  only:mass_proton_cgs,kboltz
- use io,       only:error
- use eos_mesa, only:init_eos_mesa
+ use units,         only:unit_density,unit_velocity,unit_pressure
+ use physcon,       only:mass_proton_cgs,kboltz
+ use io,            only:error
+ use eos_mesa,      only:init_eos_mesa
+ use eos_helmholtz, only:init_eos_helmholtz
 
  integer, intent(in)  :: eos_type
  integer, intent(out) :: ierr
@@ -450,6 +487,12 @@ subroutine init_eos(eos_type,ierr)
  !
     call init_eos_mesa(X_in,Z_in,ierr)
 
+ case(15)
+  !
+  !--Helmholtz Eos initialization
+  !
+   call init_eos_helmholtz(ierr) 
+   
  end select
  done_init_eos = .true.
 
@@ -569,6 +612,8 @@ subroutine write_options_eos(iunit)
  case(10)
     call write_inopt(X_in,'X','hydrogen mass fraction',iunit)
     call write_inopt(Z_in,'Z','metallicity',iunit)
+ case(15)
+    call write_inopt(relflag,'relflag','T temperature is NOT evolved, F temperature IS evolved',iunit)
 
  end select
 
@@ -597,6 +642,10 @@ subroutine read_options_eos(name,valstring,imatch,igotall,ierr)
     read(valstring,*,iostat=ierr) gmw
     ! not compulsory to read in
     if (gmw <= 0.)  call fatal(label,'mu <= 0')
+ case('relflag')
+    read(valstring,*,iostat=ierr) relflag
+    ngot = ngot + 1
+    if (relflag /= .true. .and. relflag /= .false.) call fatal(label,'relaxation flag not logical')
 
  case('drhocrit')
     read(valstring,*,iostat=ierr) drhocrit0
@@ -680,6 +729,8 @@ subroutine read_options_eos(name,valstring,imatch,igotall,ierr)
     igotall = (ngot >= 9)
  elseif (ieos==9) then
     igotall = (ngot >= 9)
+ elseif (ieos==15) then
+    igotall = (ngot >= 2)
  else
     igotall = (ngot >= 1)
  endif
