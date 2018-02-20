@@ -15,7 +15,7 @@
 !
 !  OWNER: Jose Miguel Blanco
 !
-!  $Id: 84ed0e272041a6f892ad0629ee19cdcec2275109 $
+!  $Id: fed1eb61c5cdf5aa93e91dcf6c500fc4baefa0aa $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -129,33 +129,41 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     !
     ! Using prompts, determine the parameters the users wishes:
     !         mass unit, distance unit, binary setup?, mass of star(s), number of particles 
-    !
-    ierr = 1
-    do while (ierr /= 0)
-       call prompt('Enter mass unit (e.g. solarm,jupiterm,earthm)',mass_unit)
-       call select_unit(mass_unit,umass,ierr)
-       if (ierr /= 0) print "(a)",' ERROR: mass unit not recognised'
-    enddo
+    ! MODIFIED TO ENTER AUTOMATICALLY SOME FIXED INPUT
+    !ierr = 1
+    !do while (ierr /= 0)
+    !   call prompt('Enter mass unit (e.g. solarm,jupiterm,earthm)',mass_unit)
+    !   call select_unit(mass_unit,umass,ierr)
+    !   if (ierr /= 0) print "(a)",' ERROR: mass unit not recognised'
+    !enddo
+    mass_unit = "solarm"
+    umass = solarm
+    !ierr = 1
+    !do while (ierr /= 0)
+    !   call prompt('Enter distance unit (e.g. solarr,au,pc,kpc,0.1pc)',dist_unit)
+    !   call select_unit(dist_unit,udist,ierr)
+    !   if (ierr /= 0) print "(a)",' ERROR: length unit not recognised'
+    !enddo
+    dist_unit = "solarr"
+    udist = solarr
+    !if (maxvxyzu == 5) then
+    !   call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
+    !endif
+    Tin = 10000000.
     
-    ierr = 1
-    do while (ierr /= 0)
-       call prompt('Enter distance unit (e.g. solarr,au,pc,kpc,0.1pc)',dist_unit)
-       call select_unit(dist_unit,udist,ierr)
-       if (ierr /= 0) print "(a)",' ERROR: length unit not recognised'
-    enddo
-    
-    if (maxvxyzu == 5) then
-       call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
-    endif
+    !call prompt('Set up a binary system?',binary)
+    binary = .false.
 
-    call prompt('Set up a binary system?',binary)
-    
-    call prompt('Enter the total number of particles',np,0,maxp)
+    !call prompt('Enter the total number of particles',np,0,maxp)
+    np = 20000
     if (binary) then
-       call prompt('Enter the mass of star 1(code units)', mstar,0.d0)
-       call prompt('Enter the mass of star 2(code units)', mstar2,0.d0)
+       !call prompt('Enter the mass of star 1(code units)', mstar,0.d0)
+       !call prompt('Enter the mass of star 2(code units)', mstar2,0.d0)
+       mstar = 0.8
+       mstar2 = 0.6
     else
-       call prompt('Enter the mass of the star (code units)', mstar,0.d0)
+       !call prompt('Enter the mass of the star (code units)', mstar,0.d0)
+       mstar = 0.8
     endif
     write_setup = .true.
  endif
@@ -164,6 +172,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  !
  call set_units(dist=udist,mass=umass,G=1.d0)
 
+ 
  npart = np
  npartoftype(igas) = npart
 
@@ -183,10 +192,10 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     ! interacting with each other
     !
     do i=1,Nstar(1)
-       xyzh(1,i)=xyzh(1,i)-1000
+       xyzh(1,i)=xyzh(1,i)-1000.
     enddo
     do i=Nstar(1)+1,npart
-       xyzh(1,i)=xyzh(1,i)+1000
+       xyzh(1,i)=xyzh(1,i)+1000.
     enddo
     massoftype(igas) = (mstar+mstar2)/npart 
  else
@@ -197,7 +206,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
 
  ! REVISE need to build an if clause depending on whether ISOTHERMAL is 
  ! declared or not. Our default for now is ISOTHERMAL = YES
- vxyzu(1:3,:) = 0
+ vxyzu(1:3,:) = 0.
  ! REVISE maybe for binary want to put both stars in orbit so if relaxation is too slow they wont fall together
  
  !
@@ -239,10 +248,10 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
 
  !
  !--Set new runtime parameters
- tmax           =   2.                 !2 time units
- dtmax          =   1./utime           !1 second
- damp           =    0.1
- nfulldump      =   10
+ tmax           =    2.                 !2 time units
+ dtmax          =    1./utime           !1 second
+ damp           =    0.0                !no damp as it is a velocity dependent force and could be messing with velocity convergence
+ nfulldump      =    1
  iexternalforce =    0
  relflag        =    .false.
 
@@ -279,7 +288,7 @@ subroutine write_setupfile(filename)
  write(iunit,"(/,a)") '# number of particles and mass of star(s)'
  if (binary) then
     call write_inopt(Nstar(1)+Nstar(2),'ntotal','Total number of particles',iunit)
-    call write_inopt(mstar,'mstar','Mass of star 1 [code units]',iunit)
+    call write_inopt(mstar,'mstar1','Mass of star 1 [code units]',iunit)
     call write_inopt(mstar2,'mstar2','mass of star 2 [code units]',iunit)
     call write_inopt(Nstar(1),'Nstar1','number of particles of star 1',iunit)
     call write_inopt(Nstar(2),'Nstar2','number of particles of star 2',iunit)
@@ -320,8 +329,8 @@ subroutine read_setupfile(filename,ierr)
  nerr= nerr + ierr
  call read_inopt(dummy,'utime',db,ierr)
 
-if (maxvxyzu == 5) then
-    call read_inopt(Tin,'Tin',db,ierr)
+ if (maxvxyzu == 5) then
+    call read_inopt(Tin,'Temperature',db,ierr)
  endif
 
  call read_inopt(binary,'binary',db,ierr)
@@ -336,7 +345,7 @@ if (maxvxyzu == 5) then
  else
     call read_inopt(np,'ntotal',db,ierr)
     nerr= nerr + ierr
-    call read_inopt(mstar,'mstar1',db,ierr)
+    call read_inopt(mstar,'mstar',db,ierr)
     nerr= nerr + ierr
  endif
 
@@ -366,8 +375,10 @@ if (maxvxyzu == 5) then
     ierr = 1
     nerr = nerr + ierr
  endif
+
  if (nerr > 0) then
-    print "(1x,a,i2,a)",'Setup_wd: ',nerr,' error(s) during read of setup file'
+    print "(1x,a,i2,a)",'Setup_wd: ',nerr,' error(s) during read of setup file.'
+    print *,"Please, insert next your setup options "
     ierr = 1
  endif
 

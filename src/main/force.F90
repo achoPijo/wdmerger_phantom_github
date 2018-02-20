@@ -90,7 +90,7 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
                  ipart_rhomax,dt,stressmax)
  use dim,      only:maxp,ndivcurlv,ndivcurlB,maxvxyzu,maxalpha,maxneigh,maxstrain,&
                     switches_done_in_derivs,mhd,maxBevol,mhd_nonideal,use_dustfrac,lightcurve
- use eos,          only:use_entropy,gamma,equationofstate,get_temperature_from_ponrho
+ use eos,          only:use_entropy,gamma,equationofstate,get_temperature_from_ponrho,relflag
  use io,           only:iprint,fatal,iverbose,id,master,real4,warning,error
  use linklist,     only:ncells,ifirstincell,get_neighbour_list
  use options,      only:alpha,alphau,alphaB,beta, &
@@ -324,7 +324,7 @@ endif
 !$omp shared(xyzh,vxyzu,fxyzu,divcurlv,massoftype,iphase,abundance,straintensor,deltav) &
 !$omp shared(dt,dtmax,gradh,ishock_heating,ipdv_heating) &
 !$omp shared(alphaind,alpha,alphau,alphaB) &
-!$omp shared(irealvisc,realviscosity,useresistiveheat,bulkvisc,C_cour,C_force,C_cool,stressmax) &
+!$omp shared(irealvisc,realviscosity,useresistiveheat,bulkvisc,C_cour,C_force,C_cool,stressmax,relflag) &
 !$omp shared(n_R,n_electronT,use_sts) &
 !$omp firstprivate(straini,alphai) &
 !$omp private(icell,i,iamtypei,iamgasi,ierr) &
@@ -699,6 +699,7 @@ isgas: if (iamgasi) then
           if (maxvxyzu >= 4) fxyzu(4,i) = fxyz4 !REVISE This is a check on temperature and energy evolution
           if (maxvxyzu == 5) then 
              if (relflag) then
+                fxyzu(4,i) = 0.
                 fxyzu(5,i) = 0.
              else 
                 fxyzu(5,i) = fxyz5
@@ -1882,7 +1883,7 @@ subroutine get_P(icall,rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
 
   use dim,       only:maxvxyzu,maxstrain,maxp
   use part,      only:mhd
-  use eos,       only:equationofstate
+  use eos,       only:equationofstate,relflag
   use eos_helmholtz, only:helmholtz_energytemperature_switch
   use options,   only:ieos
   use viscosity, only:shearfunc
@@ -1909,7 +1910,7 @@ subroutine get_P(icall,rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
   rhogasi = rhoi*gasfrac       ! rhogas = (1-eps)*rho
   if (maxvxyzu >= 4) then
      if (maxvxyzu == 5) then
-        if (icall == 1) call helmholtz_energytemperature_switch(tempi,eni,rhogasi)
+        if (icall == 1) call helmholtz_energytemperature_switch(tempi,eni,rhogasi,relflag)
         call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni,tempi,cvi,dPdTi)
      else
         call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni)

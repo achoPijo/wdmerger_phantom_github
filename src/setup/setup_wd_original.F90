@@ -15,7 +15,7 @@
 !
 !  OWNER: Jose Miguel Blanco
 !
-!  $Id: 495500f6dcf1c9db8f4e3500f878965ed8ab5968 $
+!  $Id: 84ed0e272041a6f892ad0629ee19cdcec2275109 $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -47,7 +47,7 @@ contains
 !----------------------------------------------------------------
 subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,time,fileprefix)
  use centreofmass,only: reset_centreofmass 
- use eos,         only: ieos, equationofstate, init_eos,finish_eos
+ use eos,         only: ieos, equationofstate, init_eos,finish_eos,relflag
  use eos_helmholtz, only: tmaxhelmeos,tminhelmeos
  use dim,         only: maxp
  use io,          only: master
@@ -244,6 +244,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  damp           =    0.1
  nfulldump      =   10
  iexternalforce =    0
+ relflag        =    .false.
 
 end subroutine setpart
 !-----------------------------------------------------------------------

@@ -13,7 +13,7 @@
 !
 !  OWNER: 
 !
-!  $Id: 1e7750aaf6b00c856ac41ca0ac4d5091b7e66e5b $
+!  $Id: c2ae599291c57d71e81c2c48a0f1bef5956c6b4b $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -87,7 +87,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !  INTERNAL ENERGY CHANGES
 !+
 !----------------------------------------------------------------
- subroutine helmholtz_energytemperature_switch(temp,ener,den)!abar,zbar) !REVISE 
+ subroutine helmholtz_energytemperature_switch(temp,ener,den,relflag)!abar,zbar) !REVISE 
 !========================================================================
 
 !=========================================================================
@@ -107,6 +107,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !
  real,             intent(inout):: temp, ener
  real,             intent(in)   :: den!, abar, zbar !REVISE abar,zbar set manually for now until burn is implemented
+ logical,          intent(in)   :: relflag
 !
 !--Local variables
 !
@@ -187,13 +188,15 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !  constant. Check also if temperature and the temperature predicted
 !  from the internal energy differe more than a 5%
  rel = dabs(temp_iter-temp)/temp
- if ((newton >= max_newton).or.(rel > 0.05)) then
-     eosflag = 2
+ if (relflag) then
+    eosflag = 2
  else
-     eosflag = 1
- end if
-
-!eosflag = 1. ! REVISE Only follow energy evolution
+    if ((newton >= max_newton).or.(rel > 0.05)) then
+       eosflag = 2
+    else
+       eosflag = 1
+    end if
+ endif
 !
 !--If eosflag=1 we store temp_iter, whereas for eosflag=2 we store 
 !  etot_row
