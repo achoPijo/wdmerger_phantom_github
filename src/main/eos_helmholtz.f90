@@ -201,6 +201,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !--If eosflag=1 we store temp_iter, whereas for eosflag=2 we store 
 !  etot_row
 !
+
  if (eosflag == 2) then  ! Temperature as input
      call helmeos(temp, rho, abar, zbar, ierr, ener_opt=ener_iter)
 

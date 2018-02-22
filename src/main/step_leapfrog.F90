@@ -22,7 +22,7 @@
 !
 !  OWNER: Daniel Price
 !
-!  $Id: 77d0f083de65e913ca06190ecd8590d214d65c13 $
+!  $Id: 4eaf53d9168b915e640535dda0efd328669df8d1 $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -34,7 +34,7 @@ module step_lf_global
  use dim, only:maxp,maxvxyzu,maxBevol
  implicit none
  character(len=80), parameter, public :: &  ! module version
-    modid="$Id: 77d0f083de65e913ca06190ecd8590d214d65c13 $"
+    modid="$Id: 4eaf53d9168b915e640535dda0efd328669df8d1 $"
 
  real,            private :: vpred(maxvxyzu,maxp),dustpred(maxp)
  real(kind=4),    private :: Bpred(maxBevol,maxp)
