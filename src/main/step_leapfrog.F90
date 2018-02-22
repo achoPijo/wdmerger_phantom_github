@@ -82,7 +82,11 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
                           switches_done_in_derivs,iboundary,get_ntypes,npartoftype,&
                           dustfrac,dustevol,ddustfrac,alphaind,maxvecp,nptmass
  use eos,            only:get_spsound
- use eos_helmholtz,  only:tmaxhelmeos,tminhelmeos            !REVISE Maybe interesting to add #ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:tmaxhelmeos,tminhelmeos
+#ifdef TEMPEVOLUTION
+ use eos,            only:relflag
+ use eos_helmholtz,  only:helmholtz_energytemperature_switch
+#endif
  use options,        only:avdecayconst,alpha,ieos,alphamax
  use deriv,          only:derivs
  use timestep,       only:dterr,bignumber
@@ -460,6 +464,18 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
  endif
 
  enddo iterations
+
+#ifdef TEMPEVOLUTION
+!$omp parallel default(none)&
+!$omp shared(xyzh,vxyzu,massoftype,npart,relflag) &
+!$omp private(i)
+!$omp do schedule(runtime)
+ do i=1,npart
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),relflag)
+ enddo
+!$omp enddo
+!$omp end parallel
+#endif
 
  if (its > 1) call summary_variable('tolv',iosumtvi,0,real(its))
 

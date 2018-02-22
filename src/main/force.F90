@@ -90,7 +90,11 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
                  ipart_rhomax,dt,stressmax)
  use dim,      only:maxp,ndivcurlv,ndivcurlB,maxvxyzu,maxalpha,maxneigh,maxstrain,&
                     switches_done_in_derivs,mhd,maxBevol,mhd_nonideal,use_dustfrac,lightcurve
- use eos,          only:use_entropy,gamma,equationofstate,get_temperature_from_ponrho,relflag
+ use eos,          only:use_entropy,gamma,equationofstate,get_temperature_from_ponrho
+#ifdef TEMPEVOLUTION
+ use eos,          only:relflag
+ use eos_helmholtz,only:helmholtz_energytemperature_switch
+#endif
  use io,           only:iprint,fatal,iverbose,id,master,real4,warning,error
  use linklist,     only:ncells,ifirstincell,get_neighbour_list
  use options,      only:alpha,alphau,alphaB,beta, &
@@ -100,7 +104,7 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
                         alphaind,abundance,nabundances, &
                         ll,get_partinfo,iactive,gradh,&
                         hrho,iphase,maxphase,igas,iboundary,maxgradh,straintensor, &
-                        n_R,n_electronT,deltav
+                        n_R,n_electronT,deltav,rhoh
  use timestep,     only:dtcourant,dtforce,C_cour,C_force,C_cool,dtmax,bignumber,dtdiff
  use io_summary,   only:summary_variable, &
                         iosumdtf,iosumdtd,iosumdtv,iosumdtc,iosumdto,iosumdth,iosumdta, &
@@ -318,13 +322,27 @@ endif
 !
  if (maxgradh /= maxp) call fatal('force','need storage of gradh (maxgradh=maxp)')
 !
+ ! REVISE need to implement openmp and maybe mpi?
+
+#ifdef TEMPEVOLUTION
+!$omp parallel default(none)&
+!$omp shared(xyzh,vxyzu,massoftype,npart,relflag) &
+!$omp private(i)
+!$omp do schedule(runtime)
+ do i=1,npart
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),relflag)
+ enddo
+!$omp enddo
+!$omp end parallel
+#endif
+!
 !$omp parallel default(none) &
 !$omp shared(ncells,ll,ifirstincell,npart,icall) &
 !$omp shared(beta,gamma,icooling) &
-!$omp shared(xyzh,vxyzu,fxyzu,divcurlv,massoftype,iphase,abundance,straintensor,deltav) &
+!$omp shared(xyzh,vxyzu,fxyzu,divcurlv,massoftype,iphase,abundance,straintensor,deltav,relflag) &
 !$omp shared(dt,dtmax,gradh,ishock_heating,ipdv_heating) &
 !$omp shared(alphaind,alpha,alphau,alphaB) &
-!$omp shared(irealvisc,realviscosity,useresistiveheat,bulkvisc,C_cour,C_force,C_cool,stressmax,relflag) &
+!$omp shared(irealvisc,realviscosity,useresistiveheat,bulkvisc,C_cour,C_force,C_cool,stressmax) &
 !$omp shared(n_R,n_electronT,use_sts) &
 !$omp firstprivate(straini,alphai) &
 !$omp private(icell,i,iamtypei,iamgasi,ierr) &
@@ -504,15 +522,13 @@ endif
           ! calculate terms required in the force evaluation
           !
           if (maxvxyzu == 5) then
-             call get_P(1,rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
+             call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                      visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
                      xpartveci(itempi),cvi,dPdTi)
-             vxyzu(4,i) = xpartveci(ieni) 
-             vxyzu(5,i) = xpartveci(itempi)
           else
-             call get_P(0,rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
+             call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                      visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
@@ -1556,12 +1572,12 @@ end subroutine force
               !--calculate j terms (which were precalculated outside loop for i)
               !
               if (maxvxyzu == 5) then
-                 call get_P(0,rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
+                 call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
                          realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,cvj,dPdTj)
               else
-                 call get_P(0,rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
+                 call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
                          realviscosity,divvj,bulkvisc,strainj,stressmax)
@@ -1877,18 +1893,16 @@ end subroutine compute_forces
 !  quantities necessary to get a force, given that we have rho.
 !+
 !----------------------------------------------------------------
-subroutine get_P(icall,rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
+subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
                  ponrhoi,pro2i,pri,spsoundi,vwavei, &
                  sxxi,sxyi,sxzi,syyi,syzi,szzi,visctermiso,visctermaniso, &
                  realviscosity,divvi,bulkvisc,strain,stressmax,tempi,cvi,dPdTi) 
 
   use dim,       only:maxvxyzu,maxstrain,maxp
   use part,      only:mhd
-  use eos,       only:equationofstate,relflag
-  use eos_helmholtz, only:helmholtz_energytemperature_switch
+  use eos,       only:equationofstate
   use options,   only:ieos
   use viscosity, only:shearfunc
-  integer, intent(in)    :: icall     !0 = energy/temperature switch deactivated, 1 = energy/temperature switch activated
   real,    intent(in)    :: rhoi,rho1i,xi,yi,zi,pmassi!,eni
   real,    intent(in)    :: Bxi,Byi,Bzi,dustfraci
   real,    intent(out)   :: ponrhoi,pro2i,pri,spsoundi,vwavei
@@ -1911,7 +1925,6 @@ subroutine get_P(icall,rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
   rhogasi = rhoi*gasfrac       ! rhogas = (1-eps)*rho
   if (maxvxyzu >= 4) then
      if (maxvxyzu == 5) then
-        if (icall == 1) call helmholtz_energytemperature_switch(tempi,eni,rhogasi,relflag)
         call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni,tempi,cvi,dPdTi)
      else
         call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni)

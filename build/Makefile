@@ -119,7 +119,6 @@ endif
 
 ifeq ($(SETUP), whitedwarf) #CHNGCODE
 #   white dwarf merger simulation
-    FPPFLAGS= -DSORT_RADIUS_INIT 
     TEMPEVOLUTION=yes
     IND_TIMESTEPS=no
     GRAVITY=yes
