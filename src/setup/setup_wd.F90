@@ -151,8 +151,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     !endif
     Tin = 10000000.
     
-    !call prompt('Set up a binary system?',binary)
-    binary = .false.
+    call prompt('Set up a binary system?',binary)
+    !binary = .false.
 
     !call prompt('Enter the total number of particles',np,0,maxp)
     np = 20000
@@ -192,12 +192,12 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     ! interacting with each other
     !
     do i=1,Nstar(1)
-       xyzh(1,i)=xyzh(1,i)-1000.
+       xyzh(1,i)=xyzh(1,i)-100.
     enddo
     do i=Nstar(1)+1,npart
-       xyzh(1,i)=xyzh(1,i)+1000.
+       xyzh(1,i)=xyzh(1,i)+100.
     enddo
-    massoftype(igas) = (mstar+mstar2)/npart 
+    massoftype(igas) = (mstar+mstar2)/npart
  else
     Nstar(1) = npart
     call set_wd(npart,hfact,mstar,xyzh)
