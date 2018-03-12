@@ -117,6 +117,18 @@ ifeq ($(SETUP), galdiscmhd)
     KNOWN_SETUP=yes
 endif
 
+ifeq ($(SETUP), whitedwarf) #CHNGCODE
+#   white dwarf merger simulation
+    TEMPEVOLUTION=yes
+    IND_TIMESTEPS=no
+    GRAVITY=yes
+    CURLV=yes
+    SETUPFILE= setup_wd.f90 
+    KNOWN_SETUP=yes
+#   ANALYSIS= analysis_wdmerger.f90  !NEED TO CREATE FILE
+    MODFILE= moddump_wdmerger.f90
+endif
+
 ifeq ($(SETUP), turbdrive)
 #   driven turbulence
     ifeq ($(IND_TIMESTEPS), yes)
@@ -1294,6 +1306,10 @@ ifeq ($(ISOTHERMAL), yes)
     FPPFLAGS += -DISOTHERMAL
 endif
 
+ifeq ($(TEMPEVOLUTION), yes)
+    FPPFLAGS += -DTEMPEVOLUTION
+endif
+
 ifeq ($(MHD), yes)
     FPPFLAGS += -DMHD
 endif
@@ -1496,7 +1512,8 @@ endif
 SRCCHEM= fs_data.f90 mol_data.f90 utils_spline.f90 h2cooling.f90 h2chem.f90 cooling.f90
 
 SRCMESA= eos_mesa_microphysics.F90 eos_mesa.f90
-SRCEOS = ${SRCMESA} eos.F90
+SRCHELMHOLTZ= eos_helmholtz_microphysics.F90 eos_helmholtz.f90 
+SRCEOS = ${SRCMESA} ${SRCHELMHOLTZ} eos.F90
 
 SOURCES= physcon.f90 ${CONFIG} ${SRCKERNEL} io.F90 units.f90 boundary.f90 mpi_utils.F90 utils_omp.F90 utils_cpuinfo.f90 \
          utils_mathfunc.f90 part.F90 commons.f90 utils_dumpfiles.f90 utils_indtimesteps.F90 utils_infiles.f90 \
@@ -1509,10 +1526,10 @@ SOURCES= physcon.f90 ${CONFIG} ${SRCKERNEL} io.F90 units.f90 boundary.f90 mpi_ut
          ${DOMAIN} mpi_derivs.F90 ${LINKLIST} \
          ${SRCTURB} ${SRCNIMHD} ${SRCPHOTO} ${SRCINJECT} \
          ptmass.F90 readwrite_infile.F90 \
-	 dens.F90 force.F90 deriv.F90 energies.F90 \
+	     dens.F90 force.F90 deriv.F90 energies.F90 \
          sort_particles.F90 evwrite.F90 \
          step_leapfrog.F90 writeheader.F90 writegitinfo.f90 ${SRCAN} step_supertimestep.F90 mf_write.f90 evolve.F90\
-         geometry.f90 stretchmap.f90 prompting.f90 density_profiles.f90 set_unifdis.f90 set_sphere.f90 set_vfield.f90 \
+         geometry.f90 stretchmap.f90 prompting.f90 density_profiles.f90 set_unifdis.f90 set_sphere.f90 set_wd.f90 set_vfield.f90 \
          ${SETUPFILE} checksetup.F90 utils_testsuite.f90 \
          ${TEST_FASTMATH} test_kernel.f90 test_dust.F90 test_gravity.F90 \
          test_derivs.F90 test_cooling.f90 test_eos.f90 test_externf.f90 test_rwdump.f90 \
@@ -1586,7 +1603,7 @@ SRCSETUP= utils_omp.F90 utils_sort.f90 utils_timing.f90 utils_filenames.f90 util
           ${SRCTURB} ${SRCNIMHD} ${SRCCHEM} ${SRCPHOTO} \
           ptmass.F90 energies.F90 \
           geometry.f90 stretchmap.f90 prompting.f90 density_profiles.f90 \
-          set_unifdis.f90 set_sphere.f90 set_disc.F90 \
+          set_unifdis.f90 set_sphere.f90 set_wd.f90 set_disc.F90 \
           set_vfield.f90 sort_particles.F90 ${SRCINJECT} \
           ${SETUPFILE} checksetup.F90 \
           set_Bfield.f90 readwrite_infile.f90

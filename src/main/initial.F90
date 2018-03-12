@@ -508,11 +508,11 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
 !--write second header to logfile/screen
 !
  if (id==master) call write_header(2,infile,evfile,logfile,dumpfile,ntot)
-
  if (calc_erot) call get_erot_com(npart,xyzh,vxyzu,nptmass,xyzmh_ptmass,vxyz_ptmass)
  call init_evfile(ievfile,evfile)
  call write_evfile(time,dt)
  if (id==master) call write_evlog(iprint)
+
 #ifdef MFLOW
  call mflow_init(imflow,evfile,infile) !take evfile in input to create string.mf
  call mflow_write(time, dt)
@@ -527,7 +527,6 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
  call binpos_init(ibinpos,evfile) !take evfile in input to create string.binpos
  call binpos_write(time, dt)
 #endif
-
 
 !
 !--write initial conditions to output file

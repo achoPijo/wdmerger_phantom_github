@@ -14,7 +14,7 @@
 !
 !  OWNER: Daniel Price
 !
-!  $Id: a24debc022bf9a45099fe05d5f905aa5c3320fdb $
+!  $Id: 13b0b619836fb0250a3758b5ccfdc22706cfe950 $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -25,7 +25,7 @@
 module deriv
  implicit none
  character(len=80), parameter, public :: &  ! module version
-    modid="$Id: a24debc022bf9a45099fe05d5f905aa5c3320fdb $"
+    modid="$Id: 13b0b619836fb0250a3758b5ccfdc22706cfe950 $"
 
  public :: derivs
  real, private :: stressmax
@@ -119,6 +119,7 @@ subroutine derivs(icall,npart,nactive,xyzh,vxyzu,fxyzu,fext,divcurlv,divcurlB,Be
                         stressmax,fxyzu,fext,alphaind,gradh)
     call do_timing('dens',tlast,tcpulast)
  endif
+
 !
 ! compute forces
 !

@@ -19,7 +19,7 @@
 !
 !  OWNER: Daniel Price
 !
-!  $Id: 228bdf25b09816de0af70e69392c6084f92384bc $
+!  $Id: 28644aff017ecdfbc71a6075b0b26bc92286d026 $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -32,14 +32,14 @@
 module forces
  implicit none
  character(len=80), parameter, public :: &  ! module version
-    modid="$Id: 228bdf25b09816de0af70e69392c6084f92384bc $"
+    modid="$Id: 28644aff017ecdfbc71a6075b0b26bc92286d026 $"
 
  integer, parameter :: maxcellcache = 50000
 
  public :: force
 
  !--indexing for xpartveci array
- integer, parameter :: maxxpartveci = 13
+ integer, parameter :: maxxpartveci = 14
  integer, parameter :: &
        ixi  = 1, &
        iyi  = 2, &
@@ -53,7 +53,8 @@ module forces
        iBevolzi = 10, &
        ipsi = 11, &
        idustfraci = 12, &
-       itstop     = 13
+       itstop     = 13, &
+       itempi     = 14
 
  !--indexing for fsum array
  integer, parameter :: maxfsum = 17
@@ -90,6 +91,10 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
  use dim,      only:maxp,ndivcurlv,ndivcurlB,maxvxyzu,maxalpha,maxneigh,maxstrain,&
                     switches_done_in_derivs,mhd,maxBevol,mhd_nonideal,use_dustfrac,lightcurve
  use eos,          only:use_entropy,gamma,equationofstate,get_temperature_from_ponrho
+#ifdef TEMPEVOLUTION
+ use eos,          only:relflag
+ use eos_helmholtz,only:helmholtz_energytemperature_switch
+#endif
  use io,           only:iprint,fatal,iverbose,id,master,real4,warning,error
  use linklist,     only:ncells,ifirstincell,get_neighbour_list
  use options,      only:alpha,alphau,alphaB,beta, &
@@ -99,7 +104,7 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
                         alphaind,abundance,nabundances, &
                         ll,get_partinfo,iactive,gradh,&
                         hrho,iphase,maxphase,igas,iboundary,maxgradh,straintensor, &
-                        n_R,n_electronT,deltav
+                        n_R,n_electronT,deltav,rhoh
  use timestep,     only:dtcourant,dtforce,C_cour,C_force,C_cool,dtmax,bignumber,dtdiff
  use io_summary,   only:summary_variable, &
                         iosumdtf,iosumdtd,iosumdtv,iosumdtc,iosumdto,iosumdth,iosumdta, &
@@ -184,10 +189,10 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
  real :: visctermiso,visctermaniso
  real :: alphai
  real :: straini(6)
- real :: rhoi,rhogasi,dustfraci,fac,csi
+ real :: rhoi,rhogasi,dustfraci,fac,csi,cvi,dPdTi
  real(kind=8)       :: gradhi,gradsofti
  real               :: Bxi,Byi,Bzi,B2i,Bi,Bi1,divBsymmi,psii,dtau,frac_divB,betai
- real :: pdv_work,dudt_radi,shearvisc,fxyz4
+ real :: pdv_work,dudt_radi,shearvisc,fxyz4,fxyz5,pdv_work_temp
 #ifdef GRAVITY
  real    :: potensoft0,dum,dx,dy,dz,fxi,fyi,fzi,poti,epoti
  real    :: fgrav(20)
@@ -317,10 +322,24 @@ endif
 !
  if (maxgradh /= maxp) call fatal('force','need storage of gradh (maxgradh=maxp)')
 !
+ ! REVISE need to implement openmp and maybe mpi?
+
+#ifdef TEMPEVOLUTION
+!$omp parallel default(none)&
+!$omp shared(xyzh,vxyzu,massoftype,npart,relflag) &
+!$omp private(i)
+!$omp do schedule(runtime)
+ do i=1,npart
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),relflag)
+ enddo
+!$omp enddo
+!$omp end parallel
+#endif
+!
 !$omp parallel default(none) &
 !$omp shared(ncells,ll,ifirstincell,npart,icall) &
 !$omp shared(beta,gamma,icooling) &
-!$omp shared(xyzh,vxyzu,fxyzu,divcurlv,massoftype,iphase,abundance,straintensor,deltav) &
+!$omp shared(xyzh,vxyzu,fxyzu,divcurlv,massoftype,iphase,abundance,straintensor,deltav,relflag) &
 !$omp shared(dt,dtmax,gradh,ishock_heating,ipdv_heating) &
 !$omp shared(alphaind,alpha,alphau,alphaB) &
 !$omp shared(irealvisc,realviscosity,useresistiveheat,bulkvisc,C_cour,C_force,C_cool,stressmax) &
@@ -331,7 +350,7 @@ endif
 !$omp private(hi,hi1,hi21,hi31,hi41,rhoi,rho1i,gradhi,gradsofti,pmassi) &
 !$omp private(nneigh,idudtcool,ichem) &
 !$omp private(dhdrhoi) &
-!$omp private(ponrhoi,spsoundi,vwavei,pro2i,pri,temperaturei) &
+!$omp private(ponrhoi,spsoundi,vwavei,pro2i,pri,temperaturei,cvi,dPdTi) &
 !$omp private(vsigmax,dti,vsigdtc,dtcool,dtdrag) &
 !$omp private(divcurlvi,divvi,source,drhodti) &
 !$omp private(divcurlBi) &
@@ -341,7 +360,7 @@ endif
 !$omp private(sxxi,sxyi,sxzi,syyi,syzi,szzi) &
 !$omp private(xpartveci,fsum) &
 !$omp private(dtvisci,visctermiso,visctermaniso) &
-!$omp private(pdv_work,dudt_radi,shearvisc,fxyz4) &
+!$omp private(pdv_work,dudt_radi,shearvisc,fxyz4,fxyz5,pdv_work_temp) &
 #ifdef LIGHTCURVE
 !$omp shared(luminosity) &
 #endif
@@ -448,7 +467,8 @@ endif
        xpartveci(ivyi) = vxyzu(2,i)
        xpartveci(ivzi) = vxyzu(3,i)
        if (maxvxyzu >= 4) xpartveci(ieni) = vxyzu(4,i)
-
+       if (maxvxyzu == 5) xpartveci(itempi) = vxyzu(5,i)
+       
        if (mhd .and. iamgasi) then
           Bxi = Bevol(1,i)
           Byi = Bevol(2,i)
@@ -501,10 +521,19 @@ endif
           !
           ! calculate terms required in the force evaluation
           !
-          call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
+          if (maxvxyzu == 5) then
+             call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
-                     visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax)
+                     visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
+                     xpartveci(itempi),cvi,dPdTi)
+          else
+             call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
+                     pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
+                     vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
+                     visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
+                     xpartveci(itempi))  
+          endif
 
 #ifdef DUST
           !
@@ -633,6 +662,7 @@ isgas: if (iamgasi) then
                            + straini(4)**2 + straini(6)**2)
           endif
           fxyz4 = 0.
+          fxyz5 = 0.
           if (use_entropy) then
              if (ishock_heating > 0) then
                 fxyz4 = fxyz4 + (gamma - 1.)*rhoi**(1.-gamma)*fsum(idudtdissi)
@@ -640,14 +670,17 @@ isgas: if (iamgasi) then
           else
              fac = rhoi/rhogasi
              pdv_work = ponrhoi*rho1i*drhodti
+             pdv_work_temp = xpartveci(itempi)*rho1i*rho1i*dPdTi*drhodti/cvi
              if (ipdv_heating > 0) then
                 fxyz4 = fxyz4 + fac*pdv_work
+                fxyz5 = fxyz5 + fac*pdv_work_temp
              endif
              if (ishock_heating > 0) then
                 fxyz4 = fxyz4 + fac*fsum(idudtdissi)
+                fxyz5 = fxyz5 + fac*fsum(idudtdissi)/cvi
              endif
-#ifdef LIGHTCURVE
-             if (lightcurve) then
+#ifdef LIGHTCURVE 
+             if (lightcurve) then         !REVISE MEANING LIGHTCURVE
                 pdv_work = ponrhoi*rho1i*drhodti
                 if (pdv_work > tiny(pdv_work)) then ! pdv_work < 0 is possible, and we want to ignore this case
                    dudt_radi = fac*pdv_work + fac*fsum(idudtdissi)
@@ -663,6 +696,7 @@ isgas: if (iamgasi) then
              endif
              !--add conductivity and resistive heating
              fxyz4 = fxyz4 + fac*fsum(idendtdissi)
+             fxyz5 = fxyz5 + fac*fsum(idendtdissi)/cvi
              if (icooling > 0) then
                 if (h2chemistry) then
                    idudtcool = 1
@@ -678,7 +712,15 @@ isgas: if (iamgasi) then
                 fxyz4 = fxyz4 + 0.5*fac*rho1i*fsum(idudtdusti)
              endif
           endif
-          if (maxvxyzu >= 4) fxyzu(4,i) = fxyz4
+          if (maxvxyzu >= 4) fxyzu(4,i) = fxyz4 !REVISE This is a check on temperature and energy evolution
+          if (maxvxyzu == 5) then 
+             if (relflag) then
+                fxyzu(4,i) = 0.
+                fxyzu(5,i) = 0.
+             else 
+                fxyzu(5,i) = fxyz5
+             endif
+          endif 
        endif
 
        dtclean = bignumber
@@ -1140,6 +1182,7 @@ endif isgas
  endif
 #endif
 
+
 end subroutine force
 
 !----------------------------------------------------------------
@@ -1227,7 +1270,7 @@ end subroutine force
   real :: dpsitermj,grkernj,grgrkernj,autermj,avBtermj,vsigj,spsoundj
   real :: gradpj,pro2j,projsxj,projsyj,projszj,sxxj,sxyj,sxzj,syyj,syzj,szzj,psitermj,dBrhoterm
   real :: visctermisoj,visctermanisoj,enj,hj,mrhoj5,alphaj,pmassj,rho1j
-  real :: rhoj,ponrhoj,prj,rhoav1
+  real :: rhoj,ponrhoj,prj,rhoav1,tempj,cvj,dPdTj
   real :: hj1,hj21,q2j,qj,vwavej,divvj
   real :: strainj(6)
 #ifdef GRAVITY
@@ -1316,6 +1359,8 @@ end subroutine force
   Bzj = 0.
   visctermisoj = 0.
   visctermanisoj = 0.
+  cvj = 0.
+  dPdTj = 0.
 
   loop_over_neighbours2: do n = 1,nneigh
 
@@ -1435,6 +1480,7 @@ end subroutine force
         if (mhd) usej = .true.
         if (use_dust .or. use_dustfrac) usej = .true.
         if (maxvxyzu >= 4 .and. .not.gravity) usej = .true.
+        if (maxvxyzu == 5) usej = .true. 
 
         !--get individual timestep/ multiphase information (querying iphase)
         if (maxphase==maxp) then
@@ -1460,7 +1506,6 @@ end subroutine force
            iamgasj = .false.
            usej    = .false.
         endif
-
         !--get dv : needed for timestep and av term
         dvx = xpartveci(ivxi) - vxyzu(1,j)
         dvy = xpartveci(ivyi) - vxyzu(2,j)
@@ -1470,6 +1515,7 @@ end subroutine force
         if (iamgasj .and. maxvxyzu >= 4) then
            enj   = vxyzu(4,j)
            denij = xpartveci(ieni) - enj
+           if (maxvxyzu == 5) tempj = vxyzu(5,j)
         else
            denij = 0.
         endif
@@ -1499,7 +1545,6 @@ end subroutine force
            vsigi = max(-projv,0.0)
            if (vsigi > vsigmax) vsigmax = vsigi
         endif
-
         !--get terms required for particle j
         if (usej) then
            hj       = 1./hj1
@@ -1522,16 +1567,21 @@ end subroutine force
                  dustfracj = 0.
                  sqrtrhodustfracj = 0.
               endif
-
               if (maxalpha==maxp)  alphaj  = alphaind(1,j)
               !
               !--calculate j terms (which were precalculated outside loop for i)
               !
-              call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
+              if (maxvxyzu == 5) then
+                 call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
+                         ponrhoj,pro2j,prj,spsoundj,vwavej, &
+                         sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
+                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,cvj,dPdTj)
+              else
+                 call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
                          realviscosity,divvj,bulkvisc,strainj,stressmax)
-
+              endif
               mrhoj5   = 0.5*pmassj*rho1j
               autermj  = mrhoj5*alphau
               avBtermj = mrhoj5*alphaB*rho1j
@@ -1846,21 +1896,24 @@ end subroutine compute_forces
 subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
                  ponrhoi,pro2i,pri,spsoundi,vwavei, &
                  sxxi,sxyi,sxzi,syyi,syzi,szzi,visctermiso,visctermaniso, &
-                 realviscosity,divvi,bulkvisc,strain,stressmax)
+                 realviscosity,divvi,bulkvisc,strain,stressmax,tempi,cvi,dPdTi) 
 
   use dim,       only:maxvxyzu,maxstrain,maxp
   use part,      only:mhd
   use eos,       only:equationofstate
   use options,   only:ieos
   use viscosity, only:shearfunc
-  real,    intent(in)  :: rhoi,rho1i,xi,yi,zi,pmassi,eni
-  real,    intent(in)  :: Bxi,Byi,Bzi,dustfraci
-  real,    intent(out) :: ponrhoi,pro2i,pri,spsoundi,vwavei
-  real,    intent(out) :: sxxi,sxyi,sxzi,syyi,syzi,szzi
-  real,    intent(out) :: visctermiso,visctermaniso
-  logical, intent(in)  :: realviscosity
-  real,    intent(in)  :: divvi,bulkvisc,stressmax
-  real,    intent(in)  :: strain(6)
+  real,    intent(in)    :: rhoi,rho1i,xi,yi,zi,pmassi!,eni
+  real,    intent(in)    :: Bxi,Byi,Bzi,dustfraci
+  real,    intent(out)   :: ponrhoi,pro2i,pri,spsoundi,vwavei
+  real,    intent(out)   :: sxxi,sxyi,sxzi,syyi,syzi,szzi
+  real,    intent(out)   :: visctermiso,visctermaniso
+  logical, intent(in)    :: realviscosity
+  real,    intent(in)    :: divvi,bulkvisc,stressmax
+  real,    intent(in)    :: strain(6)
+  real,    intent(inout) :: eni
+  real,    intent(inout),  optional :: tempi
+  real,    intent(out), optional :: cvi,dPdTi 
 
   real :: Bro2i,Brhoxi,Brhoyi,Brhozi,rhogasi,gasfrac
   real :: stressiso,term,graddivvcoeff,del2vcoeff
@@ -1871,7 +1924,11 @@ subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
   gasfrac = (1. - dustfraci)  ! rhogas/rho
   rhogasi = rhoi*gasfrac       ! rhogas = (1-eps)*rho
   if (maxvxyzu >= 4) then
-     call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni)
+     if (maxvxyzu == 5) then
+        call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni,tempi,cvi,dPdTi)
+     else
+        call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni)
+     endif
   else
      call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi)
   endif
