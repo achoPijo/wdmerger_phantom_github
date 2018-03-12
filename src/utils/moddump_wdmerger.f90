@@ -41,6 +41,7 @@ contains
 !-----------------------------------------------------------------------
 
 subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
+ use eos,            only: relflag
  use io,             only: iprint,fatal
  use prompting,      only: prompt
  use options,        only: iexternalforce,nfulldump,damp
@@ -118,10 +119,11 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  !
  !--Set new runtime parameters
  tmax           =   10.*2.*pi/omega           !Ten orbits
- dtmax          =   2.*pi/omega/10.           !Ten timesteps per orbit
+ dtmax          =   2.*pi/omega/20.           !Ten timesteps per orbit
  damp           =    0.
- nfulldump      =   10
+ nfulldump      =    1
  iexternalforce =    0
+ relflag        =  .false.
  !
  return
 end subroutine modify_dump

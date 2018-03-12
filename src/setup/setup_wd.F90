@@ -70,11 +70,16 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  character(len=20), intent(in)    :: fileprefix
  real,              intent(out)   :: vxyzu(:,:)
  real,              parameter     :: mue=2.0d0
- real                             :: K,K_cgs,cvi,densi,dummyponrhoi,dummyspsoundi
+ real                             :: K,K_cgs,cvi,densi,dummyponrhoi,dummyspsoundi,tff,R1,R2
  character(len=120)               :: setupfile,inname
  logical                          :: write_setup
  integer                          :: i, ierr
 
+ !
+ !--Initializations
+ !
+ R1=0.
+ R2=0.
  !
  ! Set default units
  !
@@ -191,6 +196,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     ! Separate the stars so they are isolated and can be relaxed without 
     ! interacting with each other
     !
+    R1=maxval(xyzh(1,1:Nstar(1)))
+    R2=maxval(xyzh(1,Nstar(1)+1:npart))
     do i=1,Nstar(1)
        xyzh(1,i)=xyzh(1,i)-100.
     enddo
@@ -202,6 +209,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     Nstar(1) = npart
     call set_wd(npart,hfact,mstar,xyzh)
     massoftype(igas) = mstar/npart
+    R1=maxval(xyzh(1,1:Nstar(1)))
  endif
 
  ! REVISE need to build an if clause depending on whether ISOTHERMAL is 
@@ -247,10 +255,18 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  call write_setupfile(setupfile)
 
  !
+ !--Compute freefall time
+ !
+ if (binary) then
+    tff=min((pi/2.)*(R1**(3./2.))/sqrt(2.*mstar),(pi/2.)*(R2**(3./2.))/sqrt(2.*mstar2))
+ else
+    tff=(pi/2.)*(R1**(3./2.))/sqrt(2.*mstar)
+ endif
+ !
  !--Set new runtime parameters
  tmax           =    2.                 !2 time units
  dtmax          =    1./utime           !1 second
- damp           =    0.0                !no damp as it is a velocity dependent force and could be messing with velocity convergence
+ damp           =    1/tff              !
  nfulldump      =    1
  iexternalforce =    0
  relflag        =    .true.
