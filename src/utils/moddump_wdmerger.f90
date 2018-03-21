@@ -59,7 +59,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  integer                   :: i,ierr
  real                      :: com(3),com_star1(3),com_star2(3),vcom(3)
  real                      :: rad1,rad2,mstar1,mstar2,mtotal, omega, omega2    !CHNGCODE added omega
- real                      :: xcm1,xcm2,ycm1,ycm2
+ real                      :: xcm1,xcm2,ycm1,ycm2,r1,r2
  real                      :: c_code,tmax0 
  character(len=120)        :: setupfile
 
@@ -74,7 +74,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  !--Request parameters (unless hardcoded to use defaults)
  ! now determine the parameters of their new orbit
  if (.not.use_defaults) then
-    call prompt('Enter desired separation:',separation,0.)
+    !call prompt('Enter desired separation:',separation,0.)
     call prompt('Use irrotational initial conditions?',useirrinit,.false.)              ! CHANGE to implement our desired initial conditions
  endif
  !
@@ -85,6 +85,12 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  mstar1 = Nstar(1) * massoftype(igas)
  mstar2 = Nstar(2) * massoftype(igas)
  mtotal = npart  * massoftype(igas)
+ r1 = maxval(xyzh(1:3,1:Nstar(1)))
+ r2 = maxval(xyzh(1:3,Nstar(1)+1:npart))
+
+ separation = separation_from_Rochelobe(mstar1,mstar2,r1,r2)
+
+
  !
  !--Calcuate the new orbital parameters
  rad1   =  separation * mstar2/mtotal           ! distance of star 1 from the CoM
@@ -95,7 +101,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  else
     omega2 = -0.0 * omega
  endif
-
+ 
  !
  !--Place stars on new orbits
  !  for simplicity, assume stars are on the x-axis                             !Take here into account both options co-rotating and irrotational
@@ -119,11 +125,11 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  !
  !--Set new runtime parameters
  tmax           =   10.*2.*pi/omega           !Ten orbits
- dtmax          =   2.*pi/omega/20.           !Ten timesteps per orbit
+ dtmax          =   2.*pi/omega/50.           !50 timesteps per orbit
  damp           =    0.
  nfulldump      =    1
  iexternalforce =    0
- relflag        =  .false.
+ relflag        =   .false.
  !
  return
 end subroutine modify_dump
@@ -180,5 +186,26 @@ if (nerr > 0) then
  call close_db(db)
 
 end subroutine read_Nstar_from_setup
+
+!------------------------------------
+! Compute estimate of separation for 
+! start of Roche Lobe overflow
+! Eggleton (1983) ApJ 268, 368-369
+!------------------------------------
+real function separation_from_Rochelobe(m1,m2,R1,R2)
+ real, intent(in) :: m1,m2,R1,R2
+ real :: q,q13,q23,RL
+
+ if (m1 <= m2) then
+    q = m1/m2
+    RL = R1
+ else
+    q = m2/m1
+    RL = R2
+ endif
+ q13 = q**(1./3.)
+ q23 = q13*q13 
+ separation_from_Rochelobe = RL / (0.49*q23/(0.6*q23 + log(1. + q13)))
+end function separation_from_Rochelobe
 
 end module moddump

@@ -125,7 +125,7 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
     CURLV=yes
     SETUPFILE= setup_wd.f90 
     KNOWN_SETUP=yes
-#   ANALYSIS= analysis_wdmerger.f90  !NEED TO CREATE FILE
+    ANALYSIS= density_profiles.o analysis_wd.f90  
     MODFILE= moddump_wdmerger.f90
 endif
 
