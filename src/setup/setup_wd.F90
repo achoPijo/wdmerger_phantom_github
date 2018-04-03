@@ -160,7 +160,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     !binary = .false.
 
     !call prompt('Enter the total number of particles',np,0,maxp)
-    np = 20000
+    np = 200000
     if (binary) then
        !call prompt('Enter the mass of star 1(code units)', mstar,0.d0)
        !call prompt('Enter the mass of star 2(code units)', mstar2,0.d0)

@@ -126,7 +126,7 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
     SETUPFILE= setup_wd.f90 
     KNOWN_SETUP=yes
     ANALYSIS= density_profiles.o analysis_wd.f90  
-    MODFILE= moddump_wdmerger.f90
+    MODFILE= moddump_relaxedstar.f90
 endif
 
 ifeq ($(SETUP), turbdrive)
