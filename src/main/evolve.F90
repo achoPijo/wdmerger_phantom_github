@@ -148,11 +148,8 @@ use mf_write,          only:binpos_write
  should_conserve_energy = (maxvxyzu==4 .and. ieos==2 .and. icooling==0 .and. &
                            ipdv_heating==1 .and. ishock_heating==1 &
                            .and. (.not.mhd .or. iresistive_heating==1))
- print *, should_conserve_energy
  should_conserve_momentum = (npartoftype(iboundary)==0)
- print *, should_conserve_momentum
  should_conserve_angmom   = (npartoftype(iboundary)==0)
- print *, should_conserve_angmom
  should_conserve_dustmass = use_dustfrac
 
  noutput          = 1
@@ -351,7 +348,7 @@ use mf_write,          only:binpos_write
     dtprint = min(tprint,tmax) - time + epsilon(dtmax)
     if (dtprint <= epsilon(dtmax) .or. dtprint >= (1.0-1e-8)*dtmax ) dtprint = dtmax + epsilon(dtmax)
     dt = min(dtforce,dtcourant,dterr,dtmax+epsilon(dtmax),dtprint)
-!
+!   ATTENTION HERE NEW TIMESTEP IS SET
 !--write log every step (NB: must print after dt has been set in order to identify timestep constraint)
 !
     if (id==master) call print_dtlog(iprint,time,dt,dtforce,dtcourant,dterr,dtmax,dtprint)

@@ -72,7 +72,8 @@ end subroutine init_step
 !  main timestepping routine
 !+
 !------------------------------------------------------------
-subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
+subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew) 
+ use corot_binary_relaxation, only:reduce_separation,compute_omega
  use dim,            only:maxp,ndivcurlv,maxvxyzu,maxptmass,maxalpha,use_dustfrac,nalpha,h2chemistry
  use io,             only:iprint,fatal,iverbose,id,master,warning
  use options,        only:damp,tolv,iexternalforce,icooling
@@ -83,6 +84,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
                           dustfrac,dustevol,ddustfrac,alphaind,maxvecp,nptmass
  use eos,            only:get_spsound
  use eos_helmholtz,  only:tmaxhelmeos,tminhelmeos
+ use externalforces, only:iext_corotate
 #ifdef TEMPEVOLUTION
  use eos,            only:relflag
  use eos_helmholtz,  only:helmholtz_energytemperature_switch
@@ -482,6 +484,12 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
  if (maxits > 1 .and. its >= maxits) then
     call summary_printout(iprint,nptmass)
     call fatal('step','VELOCITY ITERATIONS NOT CONVERGED!!')
+ endif
+
+ if (iexternalforce == iext_corotate) then
+    call reduce_separation(xyzh,vxyzu,npart,dtnew)
+    call derivs(1,npart,nactive,xyzh,vxyzu,fxyzu,fext,divcurlv,divcurlB,Bpred,dBevol,dustfrac,ddustfrac,timei,dtsph,dtnew)
+    call compute_omega(xyzh,vxyzu,fxyzu(:,:),npart)
  endif
 
  return

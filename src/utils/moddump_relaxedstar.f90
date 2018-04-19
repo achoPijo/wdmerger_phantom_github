@@ -41,16 +41,16 @@ contains
 !-----------------------------------------------------------------------
 
 subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
- use eos,            only: relflag
- use io,             only: iprint,fatal
- use prompting,      only: prompt
- use options,        only: iexternalforce,nfulldump,damp
- use part,           only: igas
- use units,          only: unit_velocity,utime
- use physcon,        only: c,pi
- use timestep,       only: tmax, dtmax
- use centreofmass,   only: get_centreofmass,reset_centreofmass                 
- use externalforces, only: iext_gwinspiral
+ use eos,               only: relflag
+ use io,                only: iprint,fatal
+ use prompting,         only: prompt
+ use options,           only: iexternalforce,nfulldump,damp
+ use part,              only: igas
+ use units,             only: unit_velocity,utime
+ use physcon,           only: c,pi
+ use timestep,          only: tmax, dtmax
+ use centreofmass,      only: get_centreofmass,reset_centreofmass                 
+ use externalforces,    only: iext_gwinspiral
  use extern_gwinspiral, only: Nstar
  integer, intent(inout)    :: npart
  integer, intent(inout)    :: npartoftype(:)
@@ -63,12 +63,13 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  real                      :: c_code,tmax0 
  character(len=120)        :: setupfile
 
+ !
+ !--Restart velocity                     
+ vxyzu(1:3,:) = 0.0
  !--Reset centre of mass location 
  call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
 
- !
- !--Restart velocity                     
- vxyzu(1:3,:) = 0.0                             ! reset velocity
+                             ! reset velocity
  !
  !--Set new runtime parameters
  tmax           =    2.                 !2 time units

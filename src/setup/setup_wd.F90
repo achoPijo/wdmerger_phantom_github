@@ -52,7 +52,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  use dim,         only: maxp
  use io,          only: master
  use kernel,      only: hfact_default
- use options,     only: iexternalforce,nfulldump,damp
+ use options,     only: iexternalforce,nfulldump,damp,alphau
  use part,        only: igas,rhoh
  use physcon,     only: solarm,solarr,pi,planckh,mass_electron_cgs,mass_proton_cgs
  use prompting,   only: prompt
@@ -159,13 +159,13 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     call prompt('Set up a binary system?',binary)
     !binary = .false.
 
-    !call prompt('Enter the total number of particles',np,0,maxp)
-    np = 200000
+    call prompt('Enter the total number of particles',np,0,maxp)
+    !np = 200000
     if (binary) then
-       !call prompt('Enter the mass of star 1(code units)', mstar,0.d0)
-       !call prompt('Enter the mass of star 2(code units)', mstar2,0.d0)
-       mstar = 0.8
-       mstar2 = 0.6
+       call prompt('Enter the mass of star 1(code units)', mstar,0.d0)
+       call prompt('Enter the mass of star 2(code units)', mstar2,0.d0)
+       !mstar = 1.0
+       !mstar2 = 0.8
     else
        !call prompt('Enter the mass of the star (code units)', mstar,0.d0)
        mstar = 0.8
@@ -250,12 +250,14 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  call finish_eos(ieos,ierr)
 
  !
- ! Write setup file as exact mass will depend on the lambert solution iteration
+ ! Write setup file as exact mass will depend on the lane-emden solution iteration
  !
  call write_setupfile(setupfile)
 
  !
  !--Compute freefall time
+ !
+ !--If binary choose the frefall time from the more massive star
  !
  if (binary) then
     tff=min((pi/2.)*(R1**(3./2.))/sqrt(2.*mstar),(pi/2.)*(R2**(3./2.))/sqrt(2.*mstar2))
@@ -269,6 +271,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  damp           =    1/tff              !
  nfulldump      =    1
  iexternalforce =    0
+ alphau         =    0
  relflag        =    .true.
 
 end subroutine setpart
