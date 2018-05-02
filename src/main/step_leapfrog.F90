@@ -491,7 +491,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
     call derivs(1,npart,nactive,xyzh,vxyzu,fxyzu,fext,divcurlv,divcurlB,Bpred,dBevol,dustfrac,ddustfrac,timei,dtsph,dtnew)
     call compute_omega(xyzh,vxyzu,fxyzu(:,:),npart)
  endif
-
+ 
  return
 end subroutine step
 

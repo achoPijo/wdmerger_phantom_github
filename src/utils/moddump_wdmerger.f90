@@ -31,8 +31,11 @@ module moddump
  logical, parameter :: use_defaults = .false.  ! if .true. will automatically use default values
                                                ! if .false., will ask user to prompt new values
  !--The default values
- real,    private   :: separation   = 50.
- logical, private   :: useirrinit   = .false.
+ real,    private   :: separation           = 0.05
+ logical, private   :: use_irr_init         = .false.
+ logical, private   :: use_corotating_frame = .true.
+ logical, private   :: binary               = .true.
+ logical, private   :: use_relocation       = .false.
 
  public             :: modify_dump
  private
@@ -41,134 +44,155 @@ contains
 !-----------------------------------------------------------------------
 
 subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
- use eos,               only: relflag
- use io,                only: iprint,fatal
- use prompting,         only: prompt
- use options,           only: iexternalforce,nfulldump,damp
- use part,              only: igas
- use units,             only: unit_velocity,utime
- use physcon,           only: c,pi
- use timestep,          only: tmax, dtmax
- use centreofmass,      only: get_centreofmass,reset_centreofmass                 
- use externalforces,    only: iext_corotate
- use extern_corotate,   only: omega_corotate
- use extern_gwinspiral, only: Nstar
+ use corot_binary_relaxation, only: dynfac
+ use eos,                     only: relflag
+ use io,                      only: iprint,fatal
+ use prompting,               only: prompt
+ use options,                 only: iexternalforce,nfulldump,damp
+ use part,                    only: igas
+ use units,                   only: unit_velocity,utime
+ use physcon,                 only: c,pi
+ use timestep,                only: tmax, dtmax
+ use centreofmass,            only: get_centreofmass,reset_centreofmass                 
+ use externalforces,          only: iext_corotate
+ use extern_corotate,         only: omega_corotate
+ use extern_gwinspiral,       only: Nstar
  integer, intent(inout)    :: npart
  integer, intent(inout)    :: npartoftype(:)
  real,    intent(inout)    :: massoftype(:)
  real,    intent(inout)    :: xyzh(:,:),vxyzu(:,:)
  integer                   :: i,ierr
- real                      :: com(3),com_star1(3),com_star2(3),vcom(3)
+ real                      :: xcom1(3),xcom2(3),vcom1(3),vcom2(3)
  real                      :: rad1,rad2,mstar1,mstar2,mtotal, omega, omega2    !CHNGCODE added omega
  real                      :: xcm1,xcm2,ycm1,ycm2,r1,r2
- real                      :: c_code,tmax0 
- logical                   :: use_corotating_frame,binary
  character(len=120)        :: setupfile
 
  call prompt('Is this a binary setup?', binary)
 
  if (binary) then
 
-    !
     !-- PROMPT TO ASK FOR THE SETUP FILE TO CHECK THE VALUES OF NSTAR1 AND NSTAR2
-    !
-    call prompt('Enter file name for the setup: ', setupfile)
+    !call prompt('Enter file name for the setup: ', setupfile)
+    setupfile='wd.setup'
     call read_Nstar_from_setup(setupfile,ierr)
    
-    !
     !--Check particle numbers
     if (Nstar(1) <= 0 .or. Nstar(2) <= 0) call fatal('moddump','Require particle numbers in both stars')
     !
     !--Request parameters (unless hardcoded to use defaults)
-    ! now determine the parameters of their new orbit
+    ! 
     if (.not.use_defaults) then
        !call prompt('Enter desired separation:',separation,0.)
-       call prompt('Use irrotational initial conditions?',useirrinit,.false.)              ! CHANGE to implement our desired initial conditions
+       call prompt('Use irrotational initial conditions?',use_irr_init)
+       !-- Relocation?
+       call prompt('Relocate centers of mass?',use_relocation)
+       !-- Desired separation between centers of mass?
+       if (use_relocation) call prompt('Enter desired separtation',separation)
+       !-- Use a corrotating frame?
+       call prompt('Use a corotating frame?',use_corotating_frame)
+       !if (use_corotating_frame) call prompt ('Enter desired dynfac',dynfac)
     endif
-    !
-    !--Reset centre of mass location 
-    call reset_centreofmass(Nstar(1),xyzh(:,1:Nstar(1)),vxyzu(:,1:Nstar(1)))
-    call reset_centreofmass(Nstar(2),xyzh(:,Nstar(1)+1:npart),vxyzu(:,Nstar(1)+1:npart))
-   
+
+    !-- Compute masses
     mstar1 = Nstar(1) * massoftype(igas)
     mstar2 = Nstar(2) * massoftype(igas)
     mtotal = npart  * massoftype(igas)
-    r1 = maxval(xyzh(1:3,1:Nstar(1)))
-    r2 = maxval(xyzh(1:3,Nstar(1)+1:npart))
-   
-    call prompt('Enter desired separtation',separation)
-    !separation = separation_from_Rochelobe(mstar1,mstar2,r1,r2)
-   
-   
-    !
-    !--Calcuate the new orbital parameters
-    rad1   =  separation * mstar2/mtotal           ! distance of star 1 from the CoM
-    rad2   =  separation * mstar1/mtotal           ! distance of star 2 from the CoM
-    omega  =  sqrt(mtotal/separation**3)           ! orbital rotational speed
-    if (useirrinit) then
-       omega2 = -1.0 * omega                       ! spin velocity of the stars, assuming sinchronaized spin speeds
-    else
-       omega2 = -0.0 * omega
-    endif
     
-    !
-    !-- Use a corrotating frame?
-    !
-    call prompt('Use a corotating frame?',use_corotating_frame)
-    
-    if (use_corotating_frame) then
-       omega_corotate = omega
-       !
-       !--Place stars on new orbits
-       !  for simplicity, place stars are on the x-axis                         
-       vxyzu(1:3,:) = 0.0                             ! reset velocity
+
+   
+   
+    if (use_relocation) then
+       !--Reset centre of mass location 
+       call reset_centreofmass(Nstar(1),xyzh(:,1:Nstar(1)),vxyzu(:,1:Nstar(1)))
+       call reset_centreofmass(Nstar(2),xyzh(:,Nstar(1)+1:npart),vxyzu(:,Nstar(1)+1:npart))
+
+       !-- Obtain new separation from Roche Lobe
+       !r1 = maxval(xyzh(1:3,1:Nstar(1)))
+       !r2 = maxval(xyzh(1:3,Nstar(1)+1:npart))
+       !separation = separation_from_Rochelobe(mstar1,mstar2,r1,r2)
+
+       !--Calcuate the new orbital parameters
+       rad1   =  separation * mstar2/mtotal           ! distance of star 1 from the CoM
+       rad2   =  separation * mstar1/mtotal           ! distance of star 2 from the CoM
+       omega  =  sqrt(mtotal/separation**3)           ! orbital rotational speed
+       if (use_irr_init) then
+          omega2 = -1.0 * omega                       ! spin velocity of the stars, assuming sinchronaized spin speeds
+       else
+          omega2 = -0.0 * omega
+       endif
+
        xcm1 = - rad1
        ycm1 = 0
        xcm2 = rad2
        ycm2 = 0
+
+    else
+       call get_centreofmass(xcom1,vcom1,Nstar(1),xyzh(:,1:Nstar(1)),vxyzu(:,1:Nstar(1)))
+       call get_centreofmass(xcom2,vcom2,Nstar(2),xyzh(:,Nstar(1)+1:npart),vxyzu(:,Nstar(1)+1:npart))
+       separation = sqrt((xcom1(1)-xcom2(1))**2+(xcom1(2)-xcom2(2))**2+(xcom1(3)-xcom2(3))**2)
+       print *, separation
+       print *, mtotal
+       omega  =  sqrt(mtotal/separation**3) 
+       print *, omega
+       xcm1=xcom1(1)
+       xcm2=xcom2(1)
+       ycm1=xcom1(2)
+       ycm2=xcom2(2)
+    endif
+
+    !-- Determine individual star spin
+    if (use_irr_init) then
+       omega2 = -1.0 * omega  !-- spin velocity of the stars, assuming sinchronized spin speeds
+    else
+       omega2 = -0.0 * omega
+    endif
+
+    
+    if (use_corotating_frame) then
+
+       vxyzu(1:3,:) = 0.0                             ! reset velocity
+
        do i=1,Nstar(1)
-          xyzh(1,i)  =  xyzh(1,i) + xcm1
+          if (use_relocation) xyzh(1,i)  =  xyzh(1,i) + xcm1
           vxyzu(1,i) =  omega2*(-xyzh(2,i)+ycm1)
           vxyzu(2,i) =  omega2*(xyzh(1,i)-xcm1)
           vxyzu(3,i) =  0.0d0
        enddo
        do i=Nstar(1)+1,npart
-          xyzh(1,i)  =  xyzh(1,i) + xcm2
+          if (use_relocation) xyzh(1,i)  =  xyzh(1,i) + xcm2
           vxyzu(1,i) =  omega2*(-xyzh(2,i)+ycm2)
           vxyzu(2,i) =  omega2*(xyzh(1,i)-xcm2)
           vxyzu(3,i) =  0.0d0 
        enddo  
       
+       omega_corotate = omega
        iexternalforce = iext_corotate
+
     else
-       !
-       !--Place stars on new orbits
-       !  for simplicity, place stars are on the x-axis                           
+                           
        vxyzu(1:3,:) = 0.0                             ! reset velocity
-       xcm1 = - rad1
-       ycm1 = 0
-       xcm2 = rad2
-       ycm2 = 0
+
        do i=1,Nstar(1)
-          xyzh(1,i)  =  xyzh(1,i) + xcm1
+          if (use_relocation) xyzh(1,i)  =  xyzh(1,i) + xcm1
           vxyzu(1,i) =  -xyzh(2,i)*(omega+omega2)+omega2*ycm1
           vxyzu(2,i) =  xyzh(1,i)*(omega+omega2)-omega2*xcm1
           vxyzu(3,i) =  0.0d0
        enddo
        do i=Nstar(1)+1,npart
-          xyzh(1,i)  =  xyzh(1,i) + xcm2
+          if (use_relocation) xyzh(1,i)  =  xyzh(1,i) + xcm2
           vxyzu(1,i) =  -xyzh(2,i)*(omega+omega2)+omega2*ycm2
           vxyzu(2,i) =  xyzh(1,i)*(omega+omega2)-omega2*xcm2
           vxyzu(3,i) =  0.0d0 
        enddo
        
        iexternalforce = 0
+       damp           = 0.
     endif
       
     !
     !--Set new runtime parameters
-    tmax           =   3.*2.*pi/omega            !Three orbits
-    dtmax          =   2.*pi/omega/50.           !50 timesteps per orbit
+    tmax           =   50.*2.*pi/omega                !50 orbits
+    dtmax          =   2.*pi/(omega*(2**(3/2)))/50.   !50 timesteps per aprox final orbit
     !
    
  else
@@ -187,7 +211,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     !
  endif
  
- damp           =    0.
+ !damp           =    0.
  nfulldump      =    1
  relflag        =   .false.
 

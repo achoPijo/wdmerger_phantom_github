@@ -445,7 +445,7 @@ logical function is_velocity_dependent(iexternalforce)
  integer, intent(in) :: iexternalforce
 
  select case(iexternalforce)
- case(iext_corotate,iext_prdrag,iext_lensethirring,iext_einsteinprec,iext_gnewton)
+ case(iext_prdrag,iext_lensethirring,iext_einsteinprec,iext_gnewton)!iext_corotate,
     is_velocity_dependent = .true.
  case default
     is_velocity_dependent = .false.

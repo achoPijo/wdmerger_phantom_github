@@ -24,6 +24,8 @@
 module corot_binary_relaxation
  implicit none
 
+ real, public :: dynfac = 20.
+
  public  :: reduce_separation,compute_omega
 
  private :: read_Nstars_from_setup
@@ -33,6 +35,7 @@ contains
 subroutine reduce_separation(xyzh,vxyzu,npart,dt)
  use io,              only: fatal
  use centreofmass,    only: reset_centreofmass,get_centreofmass
+ use extern_corotate, only: omega_corotate 
  use options,         only: damp
  use part,            only: igas,massoftype
  use setbinary,       only: L1_point
@@ -41,10 +44,11 @@ subroutine reduce_separation(xyzh,vxyzu,npart,dt)
  real,             intent(in)    :: dt
 
  integer                      :: i,ierr,ncount,Nstar1,Nstar2
- real                         :: mstar1,mstar2,separation
- real                         :: newseparation,separationdiff,dynfac
+ real                         :: mstar1,mstar2
+ real                         :: newseparation,separationdiff,separation
+ real                         :: centrifugalpot,gravpot1,gravpot2,omega
 
- real                         :: xcom1(3),xcom2(3),vcom1(3),vcom2(3),dr(3)
+ real                         :: xcom1(3),xcom2(3),vcom1(3),vcom2(3)
  logical                      :: iexist
  character(len=120)           :: setupfile
 
@@ -83,20 +87,25 @@ subroutine reduce_separation(xyzh,vxyzu,npart,dt)
  !
  ncount = 0
  do i=Nstar1+1,npart
-    dr(:)=xyzh(1:3,i)-xcom1(:)
-    if (sqrt(dr(1)**2+dr(2)**2+dr(3)**2) < L1_point(mstar1/mstar2)*separation) then
+    gravpot1 = -mstar1/sqrt((xyzh(1,i)-xcom1(1))**2+(xyzh(2,i)-xcom1(2))**2+(xyzh(3,i)-xcom1(3))**2)
+    gravpot2 = -mstar2/sqrt((xyzh(1,i)-xcom2(1))**2+(xyzh(2,i)-xcom2(2))**2+(xyzh(3,i)-xcom2(3))**2)
+    omega = (xyzh(1,i)*vxyzu(2,i)-xyzh(2,i)*vxyzu(1,i))+omega_corotate
+    centrifugalpot= -(1/2)*((omega*xyzh(1,i))**2+(omega*xyzh(2,i))**2)
+    if ((gravpot1 - gravpot2 - centrifugalpot) <= 0. .and. abs(gravpot1-gravpot2-centrifugalpot) > 5e-4) then
        ncount=ncount+1
     endif
  enddo
  
- !print *, ncount !ADD A STOPING CONDITION
- 
- if (ncount > 0) call fatal('corot_binary_relaxation','Roche Lobe overflow achieved')
+ !-- Stoping condition
+ if (ncount > 0) then
+    print *, 'separation'
+    print *, separation
+    call fatal('corot_binary_relaxation','Roche Lobe overflow achieved')
+ endif
  !
  !-- Compute new separation
  !
  !-- dynfac is the factor relating the shrinking timescale with the dynamical timescale dyn/shrink
- dynfac = 20.
  !-- damp = 1/tff  and tff~=tdyn2
  separationdiff = separation * damp * dt / dynfac 
  newseparation  = separation - separationdiff
@@ -107,6 +116,15 @@ subroutine reduce_separation(xyzh,vxyzu,npart,dt)
 
  xyzh(1,1:Nstar1)       = xyzh(1,1:Nstar1)       - newseparation*mstar2/(mstar1+mstar2)
  xyzh(1,Nstar1+1:npart) = xyzh(1,Nstar1+1:npart) + newseparation*mstar1/(mstar1+mstar2)
+
+ print *, '-----------------------------------------'
+ print *, 'separation'
+ print *, separation
+ print *, newseparation
+ print *, separationdiff
+ print *, damp
+ print *, dt
+ print *, '-----------------------------------------' 
 
 end subroutine reduce_separation
 
@@ -122,9 +140,9 @@ subroutine compute_omega(xyzh,vxyzu,fxyzu,npart)
  real,             intent(in) :: xyzh(:,:),vxyzu(:,:),fxyzu(:,:)
 
  integer                      :: i,ierr,Nstar1,Nstar2
- real                         :: mstar1,mstar2,omega1,omega2
+ real                         :: mstar1,mstar2,omega,omega1,omega2
 
- real                         :: xcom1(3),xcom2(3),vcom1(3),vcom2(3),fcm1(3),fcm2(3)
+ real                         :: xcomtot(3),vcomtot(3),xcom1(3),xcom2(3),vcom1(3),vcom2(3),fcm1(3),fcm2(3)
  logical                      :: iexist
  character(len=120)           :: setupfile
 
@@ -151,6 +169,7 @@ subroutine compute_omega(xyzh,vxyzu,fxyzu,npart)
 
  call get_centreofmass(xcom2,vcom2,Nstar2,xyzh(:,Nstar1+1:npart),vxyzu(:,Nstar1+1:npart))
 
+ call get_centreofmass(xcomtot,vcomtot,npart,xyzh(:,:),vxyzu(:,:))
  !
  !-- Loop over each star to obtain fcm1 and fcm2
  !
@@ -167,16 +186,39 @@ subroutine compute_omega(xyzh,vxyzu,fxyzu,npart)
  fcm1(:)=fcm1(:)/mstar1
  fcm2(:)=fcm2(:)/mstar2
 
+ omega =sqrt((mstar1+mstar2)/((sqrt((xcom1(1)-xcom2(1))**2+(xcom1(2)-xcom2(2))**2+(xcom1(3)-xcom1(3))**2))**3))
  omega1=sqrt(sqrt(fcm1(1)**2+fcm1(2)**2+fcm1(3)**2)/(mstar1*sqrt(xcom1(1)**2)))
  omega2=sqrt(sqrt(fcm2(1)**2+fcm2(2)**2+fcm2(3)**2)/(mstar2*sqrt(xcom2(1)**2)))
 
  
- print *, '-----------------------------------------'
- print *, omega1
- print *, omega2
- print *, '-----------------------------------------'
+ !print *, '-----------------------------------------'
+ !print *, 'fcm1'
+ !print *, fcm1(1)
+ !print *, fcm1(2)
+ !print *, fcm1(3)
+ !print *, 'fcm2'
+ !print *, fcm2(1)
+ !print *, fcm2(2)
+ !print *, fcm2(3)
+ !print *, 'xcomtot'
+ !print *, xcomtot(1)
+ !print *, xcomtot(2)
+ !print *, xcomtot(3) 
+ !print *, 'xcom1'
+ !print *, xcom1(1)
+ !print *, xcom1(2)
+ !print *, xcom1(3)
+ !print *, 'xcom2'
+ !print *, xcom2(1)
+ !print *, xcom2(2)
+ !print *, xcom2(3)
+ !print *, 'omega' 
+ !print *, omega 
+ !print *, omega1
+ !print *, omega2
+ !print *, '-----------------------------------------'
 
- omega_corotate = (omega1+omega2)/2  !ATTENTION WILL THIS BE REFLECTED IN THE .in file?
+ omega_corotate = omega!(omega1+omega2)/2  !ATTENTION WILL THIS BE REFLECTED IN THE .in file?
 
 end subroutine compute_omega
 
