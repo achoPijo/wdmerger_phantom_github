@@ -168,6 +168,10 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
       
        omega_corotate = omega
        iexternalforce = iext_corotate
+       !
+       !--Set new runtime parameters
+       tmax           =   50.*2.*pi/omega                !50 orbits large enough for RLO to occur
+       dtmax          =   2.*pi/(sqrt(mtotal/(separation/3)**3))/50.   !50 timesteps per aprox final orbit
 
     else
                            
@@ -185,15 +189,16 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
           vxyzu(2,i) =  xyzh(1,i)*(omega+omega2)-omega2*xcm2
           vxyzu(3,i) =  0.0d0 
        enddo
+       !
+       !--Set new runtime parameters
+       tmax           =   50.*2.*pi/omega   !50 orbits large enough for RLO to occur
+       dtmax          =   2.*pi/omega/50.   !50 timesteps per  orbit
        
        iexternalforce = 0
        damp           = 0.
     endif
       
-    !
-    !--Set new runtime parameters
-    tmax           =   50.*2.*pi/omega                !50 orbits large enough for RLO to occur
-    dtmax          =   2.*pi/(sqrt(mtotal/(separation/3)**3))/50.   !50 timesteps per aprox final orbit
+
     !
    
  else

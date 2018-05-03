@@ -8,8 +8,8 @@
 !  MODULE: analysis
 !
 !  DESCRIPTION:
-!  Analysis routine check whether ddensity profile corresponds to that of 
-!  a polytrope
+!  Analysis routine to obtain temperature density angular velocity and keplerian velocity 
+!  from a given dumpfile
 !
 !  REFERENCES: None
 !
