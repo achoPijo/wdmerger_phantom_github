@@ -1741,7 +1741,7 @@ cleanphantom2power:
 OBJMOD1 = utils_omp.F90 utils_summary.f90 utils_filenames.f90 utils_indtimesteps.F90 \
           checksetup.f90 prompting.f90 \
           set_Bfield.f90 mpi_domain.F90 ${LINKLIST} \
-          partinject.F90 random.f90 set_disc.F90 set_binary.f90 ${SRCINJECT} \
+          partinject.F90 random.f90 set_disc.F90 set_binary.f90 ${SRCINJECT} corot_binary_relaxation.f90\
           ${SRCTURB} ${SRCNIMHD} ${SRCCHEM} ${SRCPHOTO} \
           density_profiles.f90 ptmass.F90 readwrite_infile.f90 ${MODFILE:.f90=.o}
 OBJMOD2 = ${OBJMOD1:.F90=.o}
