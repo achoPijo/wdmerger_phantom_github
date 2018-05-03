@@ -192,8 +192,8 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
       
     !
     !--Set new runtime parameters
-    tmax           =   50.*2.*pi/omega                !50 orbits
-    dtmax          =   2.*pi/(omega*(2**(3/2)))/50.   !50 timesteps per aprox final orbit
+    tmax           =   50.*2.*pi/omega                !50 orbits large enough for RLO to occur
+    dtmax          =   2.*pi/(sqrt(mtotal/(separation/3)**3))/50.   !50 timesteps per aprox final orbit
     !
    
  else
