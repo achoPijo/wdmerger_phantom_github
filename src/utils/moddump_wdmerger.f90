@@ -90,7 +90,8 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
        if (use_relocation) call prompt('Enter desired separtation',separation)
        !-- Use a corrotating frame?
        call prompt('Use a corotating frame?',use_corotating_frame)
-       !if (use_corotating_frame) call prompt ('Enter desired dynfac',dynfac)
+       !--
+       if (use_corotating_frame) call prompt ('Enter desired dynfac',dynfac)
     endif
 
     !-- Compute masses
