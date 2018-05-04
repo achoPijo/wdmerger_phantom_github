@@ -192,11 +192,13 @@ end subroutine update_coriolis_leapfrog
 !+
 !-----------------------------------------------------------------------
 subroutine write_options_corotate(iunit)
- use infile_utils, only:write_inopt
+ use infile_utils,            only:write_inopt
+ use corot_binary_relaxation, only:dynfac
  integer, intent(in) :: iunit
 
  write(iunit,"(/,a)") '# options relating to corotating frame'
  call write_inopt(omega_corotate,'omega_corotate','angular speed of corotating frame',iunit)
+ call write_inopt(dynfac,'dynfac','factor relating tapproach and tdyn',iunit)
 
 end subroutine write_options_corotate
 
@@ -206,8 +208,9 @@ end subroutine write_options_corotate
 !+
 !-----------------------------------------------------------------------
 subroutine read_options_corotate(name,valstring,imatch,igotall,ierr)
- use io,      only:fatal
- use physcon, only:pi
+ use io,                      only:fatal
+ use physcon,                 only:pi
+ use corot_binary_relaxation, only:dynfac
  character(len=*), intent(in)  :: name,valstring
  logical,          intent(out) :: imatch,igotall
  integer,          intent(out) :: ierr
@@ -220,11 +223,14 @@ subroutine read_options_corotate(name,valstring,imatch,igotall,ierr)
  case('omega_corotate')
     read(valstring,*,iostat=ierr) omega_corotate
     ngot = ngot + 1
+ case('dynfac')
+    read(valstring,*,iostat=ierr) dynfac
+    ngot = ngot + 1
  case default
     imatch = .false.
  end select
 
- igotall = (ngot >= 1)
+ igotall = (ngot >= 2)
 
 end subroutine read_options_corotate
 

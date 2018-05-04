@@ -36,6 +36,7 @@
 !    dumpfile           -- dump file to start from
 !    etamhd             -- fixed physical resistivity value
 !    hfact              -- h in units of particle spacing [h = hfact(m/rho)^(1/3)]
+!    iexternalforce     -- external forces (0=off, 1=on)
 !    ipdv_heating       -- heating from PdV work (0=off, 1=on)
 !    irealvisc          -- physical viscosity type (0=none,1=const,2=Shakura/Sunyaev)
 !    iresistive_heating -- resistive heating (0=off, 1=on)
