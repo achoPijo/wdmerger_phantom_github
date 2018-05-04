@@ -1480,7 +1480,7 @@ end subroutine force
         if (mhd) usej = .true.
         if (use_dust .or. use_dustfrac) usej = .true.
         if (maxvxyzu >= 4 .and. .not.gravity) usej = .true.
-        if (maxvxyzu == 5) usej = .true. 
+        !if (maxvxyzu == 5) usej = .true. !USEJCHANGE 
 
         !--get individual timestep/ multiphase information (querying iphase)
         if (maxphase==maxp) then
@@ -1575,7 +1575,7 @@ end subroutine force
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
-                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,cvj,dPdTj)
+                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj)!,cvj,dPdTj) !USEJCHANGE
               else
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
