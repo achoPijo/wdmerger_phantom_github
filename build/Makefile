@@ -123,7 +123,7 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
     IND_TIMESTEPS=no
     GRAVITY=yes
     CURLV=yes
-    SETUPFILE= setup_wd.f90 
+    SETUPFILE= corot_binary_relaxation.o setup_wd.f90 
     KNOWN_SETUP=yes
     ANALYSIS= density_profiles.o analysis_maximum_temperature.f90  
     MODFILE= moddump_wdmerger.f90
