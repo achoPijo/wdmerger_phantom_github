@@ -34,6 +34,7 @@ module extern_corotate
  !  and can be changed in the input file
  !
  real, public :: omega_corotate = 1.
+ real, public :: dynfac         = 20.
 
  public :: update_coriolis_leapfrog
  public :: get_coriolis_force,get_centrifugal_force
@@ -193,7 +194,6 @@ end subroutine update_coriolis_leapfrog
 !-----------------------------------------------------------------------
 subroutine write_options_corotate(iunit)
  use infile_utils,            only:write_inopt
- use corot_binary_relaxation, only:dynfac
  integer, intent(in) :: iunit
 
  write(iunit,"(/,a)") '# options relating to corotating frame'
@@ -210,7 +210,6 @@ end subroutine write_options_corotate
 subroutine read_options_corotate(name,valstring,imatch,igotall,ierr)
  use io,                      only:fatal
  use physcon,                 only:pi
- use corot_binary_relaxation, only:dynfac
  character(len=*), intent(in)  :: name,valstring
  logical,          intent(out) :: imatch,igotall
  integer,          intent(out) :: ierr

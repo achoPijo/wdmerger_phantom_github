@@ -24,8 +24,6 @@
 module corot_binary_relaxation
  implicit none
 
- real, public :: dynfac = 20.
-
  public  :: reduce_separation,compute_omega
 
  private :: read_Nstars_from_setup
@@ -35,7 +33,7 @@ contains
 subroutine reduce_separation(xyzh,vxyzu,npart,dt)
  use io,              only: fatal
  use centreofmass,    only: reset_centreofmass,get_centreofmass
- use extern_corotate, only: omega_corotate 
+ use extern_corotate, only: omega_corotate,dynfac
  use options,         only: damp
  use part,            only: igas,massoftype
  use setbinary,       only: L1_point

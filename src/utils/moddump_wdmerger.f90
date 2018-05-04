@@ -44,7 +44,6 @@ contains
 !-----------------------------------------------------------------------
 
 subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
- use corot_binary_relaxation, only: dynfac
  use eos,                     only: relflag
  use io,                      only: iprint,fatal
  use prompting,               only: prompt
@@ -55,7 +54,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  use timestep,                only: tmax, dtmax
  use centreofmass,            only: get_centreofmass,reset_centreofmass                 
  use externalforces,          only: iext_corotate
- use extern_corotate,         only: omega_corotate
+ use extern_corotate,         only: omega_corotate,dynfac
  use extern_gwinspiral,       only: Nstar
  integer, intent(inout)    :: npart
  integer, intent(inout)    :: npartoftype(:)
