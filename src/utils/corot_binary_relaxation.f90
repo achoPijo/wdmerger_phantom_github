@@ -124,6 +124,8 @@ subroutine reduce_separation(xyzh,vxyzu,npart,dt)
  print *, separationdiff
  print *, damp
  print *, dt
+ print *, 'dynfac'
+ print *, dynfac
  print *, '-----------------------------------------' 
 
 end subroutine reduce_separation
