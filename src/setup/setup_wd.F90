@@ -167,8 +167,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
        !mstar = 1.0
        !mstar2 = 0.8
     else
-       !call prompt('Enter the mass of the star (code units)', mstar,0.d0)
-       mstar = 0.8
+       call prompt('Enter the mass of the star (code units)', mstar,0.d0)
+       !mstar = 0.8
     endif
     write_setup = .true.
  endif
