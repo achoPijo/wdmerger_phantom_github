@@ -123,6 +123,7 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
     IND_TIMESTEPS=no
     GRAVITY=yes
     CURLV=yes
+    KERNEL=quintic
     SETUPFILE= setup_wd.f90 
     KNOWN_SETUP=yes
     ANALYSIS= density_profiles.o analysis_maximum_temperature.f90  
