@@ -714,7 +714,7 @@ isgas: if (iamgasi) then
           endif
           if (maxvxyzu >= 4) fxyzu(4,i) = fxyz4 !REVISE This is a check on temperature and energy evolution
           if (maxvxyzu == 5) then 
-             if (relflag) then
+             if (relflag == 1) then
                 fxyzu(4,i) = 0.
                 fxyzu(5,i) = 0.
              else 

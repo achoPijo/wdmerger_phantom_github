@@ -272,7 +272,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  nfulldump      =    1
  iexternalforce =    0
  alphau         =    0
- relflag        =    .true.
+ relflag        =    1
 
 end subroutine setpart
 !-----------------------------------------------------------------------
