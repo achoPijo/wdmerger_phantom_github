@@ -218,7 +218,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  
  !damp           =    0.
  nfulldump      =    1
- relflag        =   .false.
+ relflag        =    2
 
 
  return
