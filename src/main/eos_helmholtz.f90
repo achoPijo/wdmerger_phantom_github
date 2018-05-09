@@ -27,8 +27,8 @@ module eos_helmholtz
 
  implicit none
 
- real(8), parameter :: tmaxhelmeos=5.0d9, tminhelmeos=1.0d3
- real(8), parameter :: cgsrhominhelmeos=1.0d0*5899.39, cgsrhomaxhelmeos=1.0d8*5899.39 !in cgs units
+ real(8), parameter :: tmaxhelmeos=1.0d11, tminhelmeos=1.0d4
+ real(8), parameter :: cgsrhominhelmeos=1.0d-3, cgsrhomaxhelmeos=1.0d11 !in cgs units
 
  public  :: init_eos_helmholtz, get_eos_press_sound_cv_dPdT_helmholtz, helmholtz_energytemperature_switch
  public  :: tmaxhelmeos, tminhelmeos, cgsrhomaxhelmeos, cgsrhominhelmeos
@@ -107,7 +107,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !
  real,             intent(inout):: temp, ener
  real,             intent(in)   :: den!, abar, zbar !REVISE abar,zbar set manually for now until burn is implemented
- logical,          intent(in)   :: relflag
+ integer,          intent(in)   :: relflag
 !
 !--Local variables
 !
@@ -188,14 +188,16 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !  constant. Check also if temperature and the temperature predicted
 !  from the internal energy differe more than a 5%
  rel = dabs(temp_iter-temp)/temp
- if (relflag) then
+ if (relflag == 1) then
     eosflag = 2
- else
+ else if (relflag == 2) then
     if ((newton >= max_newton).or.(rel > 0.05)) then
        eosflag = 2
     else
        eosflag = 1
     end if
+ else if (relflag == 3) then
+    eosflag = 1
  endif
 !
 !--If eosflag=1 we store temp_iter, whereas for eosflag=2 we store 

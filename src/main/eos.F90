@@ -97,7 +97,7 @@ module eos
  real,    public :: gmw            = 2.381
  real,    public :: X_in = 0.74, Z_in = 0.02
  !--Define initial parameters for Helmholtz EOS  !REVISE Maybe initialize here abar an zbar while they are not implemented 
- logical, public :: relflag = .false. ! relaxation flag
+ integer, public :: relflag = 1 ! relaxation flag
  !
  real            :: rhocritT,rhocrit0,rhocrit1,rhocrit2,rhocrit3
  real            :: fac2,fac3,log10polyk2,log10rhocritT,rhocritT0slope
@@ -613,7 +613,7 @@ subroutine write_options_eos(iunit)
     call write_inopt(X_in,'X','hydrogen mass fraction',iunit)
     call write_inopt(Z_in,'Z','metallicity',iunit)
  case(15)
-    call write_inopt(relflag,'relflag','T temperature is NOT evolved, F temperature IS evolved',iunit)
+    call write_inopt(relflag,'relflag','1 temperature is constant, 2 temperature IS evolved, 3 energy is evolved',iunit)
 
  end select
 
@@ -645,7 +645,7 @@ subroutine read_options_eos(name,valstring,imatch,igotall,ierr)
  case('relflag')
     read(valstring,*,iostat=ierr) relflag
     ngot = ngot + 1
-    if (relflag /= .true. .and. relflag /= .false.) call fatal(label,'relaxation flag not logical')
+    if (relflag /= 1 .and. relflag /= 2 .and. relflag /= 3) call fatal(label,'relaxation flag not valid, must be an integer value from 1 to 3')
 
  case('drhocrit')
     read(valstring,*,iostat=ierr) drhocrit0
