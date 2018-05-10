@@ -260,7 +260,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  !--If binary choose the frefall time from the more massive star
  !
  if (binary) then
-    tff=min((pi/2.)*(R1**(3./2.))/sqrt(2.*mstar),(pi/2.)*(R2**(3./2.))/sqrt(2.*mstar2))
+    tff=max((pi/2.)*(R1**(3./2.))/sqrt(2.*mstar),(pi/2.)*(R2**(3./2.))/sqrt(2.*mstar2))
  else
     tff=(pi/2.)*(R1**(3./2.))/sqrt(2.*mstar)
  endif
