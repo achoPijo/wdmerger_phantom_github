@@ -106,6 +106,7 @@ use mf_write,          only:vmflow_write
 #ifdef BINPOS
 use mf_write,          only:binpos_write
 #endif
+ use corot_binary_relaxation, only:rlo_flag
 
  character(len=*), intent(in)    :: infile
  character(len=*), intent(inout) :: logfile,evfile,dumpfile
@@ -375,7 +376,7 @@ use mf_write,          only:binpos_write
 !--Determine if this is the correct time to write to the data file
 !
     at_dump_time = (time >= tmax).or.((mod(nsteps,nout)==0).and.(nout > 0)) &
-                   .or.((nsteps >= nmax).and.(nmax >= 0))
+                   .or.((nsteps >= nmax).and.(nmax >= 0).or.rlo_flag)
 #ifdef IND_TIMESTEPS
     if (istepfrac==2**nbinmax) at_dump_time = .true.
 #else

@@ -22,6 +22,9 @@
 !+
 !--------------------------------------------------------------------------
 module corot_binary_relaxation
+
+    logical, public :: rlo_flag = .false.
+
  implicit none
 
  public  :: reduce_separation,compute_omega
@@ -98,7 +101,11 @@ subroutine reduce_separation(xyzh,vxyzu,npart,dt)
  if (ncount > 0) then
     print *, 'separation'
     print *, separation
-    call fatal('corot_binary_relaxation','Roche Lobe overflow achieved')
+    if (rlo_flag) then
+       call fatal('corot_binary_relaxation','Roche Lobe overflow achieved')
+    else
+       rlo_flag=.true.
+    endif
  endif
  !
  !-- Compute new separation
