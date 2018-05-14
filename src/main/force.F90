@@ -1295,6 +1295,16 @@ end subroutine force
   real :: vsigavi,vsigavj,term
   real :: dustfraci,dustfracj,tsi,sqrtrhodustfraci,sqrtrhodustfracj !,vsigeps,depsdissterm
   logical :: usej
+  !sound speed monitoring
+  integer :: printparticlei
+  real    :: maxprojvi,iunit
+  logical                      :: iexist
+  character(len=120)           :: fileout
+  !------------------------
+  !sound speed monitoring
+  printparticlei = 8230
+  maxprojvi = 0.
+  !-----------------------
 
   fsum(:) = 0.
   vsigmax = 0.
@@ -1511,6 +1521,12 @@ end subroutine force
         dvy = xpartveci(ivyi) - vxyzu(2,j)
         dvz = xpartveci(ivzi) - vxyzu(3,j)
         projv = dvx*runix + dvy*runiy + dvz*runiz
+
+        !sound speed monitoring
+        if (i==printparticlei) then
+           maxprojvi=max(-maxprojvi,-projv)
+        endif
+        !-----------------------------------
 
         if (iamgasj .and. maxvxyzu >= 4) then
            enj   = vxyzu(4,j)
@@ -1883,6 +1899,35 @@ ifgas: if (iamgasi .and. iamgasj) then
 #endif
      endif is_sph_neighbour
   enddo loop_over_neighbours2
+  
+  !sound speed monitoring
+  if (i == printparticlei) then
+
+     iunit=9
+     fileout = 'soundmonitoring.dat'
+     inquire(file=trim(fileout),exist=iexist)
+     if (iexist) then
+        open(iunit,file=fileout,status='old',position='append')
+        
+        write(iunit,'(6(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi
+    
+        close(iunit)
+     else
+        open(iunit,file=fileout,status='new')
+        write(iunit,"('#',6(1x,'[',i2.2,1x,a11,']',2x))") &
+            1,'alphai',    &
+            2,'spsoundi', &
+            3,'vwavei', &
+            4,'maxprojvi', &
+            5,'tempi', &
+            6,'hi'
+        
+        write(iunit,'(6(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi
+    
+        close(iunit)
+     endif
+  endif
+  !----------------------------------------------
 
   return
 end subroutine compute_forces
