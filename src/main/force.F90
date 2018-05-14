@@ -1909,20 +1909,21 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(6(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi
+        write(iunit,'7(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i
     
         close(iunit)
      else
         open(iunit,file=fileout,status='new')
-        write(iunit,"('#',6(1x,'[',i2.2,1x,a11,']',2x))") &
+        write(iunit,"('#',7(1x,'[',i2.2,1x,a11,']',2x))") &
             1,'alphai',    &
             2,'spsoundi', &
             3,'vwavei', &
             4,'maxprojvi', &
             5,'tempi', &
-            6,'hi'
+            6,'hi', &
+            7,'rho1i'
         
-        write(iunit,'(6(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi
+        write(iunit,'(7(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i
     
         close(iunit)
      endif
