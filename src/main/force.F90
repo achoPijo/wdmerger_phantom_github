@@ -1909,7 +1909,7 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'7(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i
+        write(iunit,'(7(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i
     
         close(iunit)
      else
