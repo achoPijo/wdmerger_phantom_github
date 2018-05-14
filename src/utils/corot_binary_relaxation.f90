@@ -23,9 +23,9 @@
 !--------------------------------------------------------------------------
 module corot_binary_relaxation
 
-    logical, public :: rlo_flag = .false.
-
  implicit none
+
+ logical, public :: rlo_flag = .false.
 
  public  :: reduce_separation,compute_omega
 
