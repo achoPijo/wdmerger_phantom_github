@@ -455,7 +455,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
              hnew      = 0.8*hi
           endif
        endif
-       if (hnew > 0.005) hnew = 0.005
+       if (hnew > 0.005) hnew = 0.003
 
        gradhi = 1./omegai
        gradsofti = gradsofti*dhdrhoi
