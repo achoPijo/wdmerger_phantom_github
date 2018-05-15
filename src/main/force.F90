@@ -1227,7 +1227,7 @@ end subroutine force
 #ifdef IND_TIMESTEPS
   use part,        only:ibinold
 #endif
-  use timestep,    only:bignumber
+  use timestep,    only:bignumber,time !sound speed monitoring added time
   use options,     only:overcleanfac
   integer,         intent(in)  :: i
   logical,         intent(in)  :: iamgasi,iamdusti
@@ -1296,8 +1296,8 @@ end subroutine force
   real :: dustfraci,dustfracj,tsi,sqrtrhodustfraci,sqrtrhodustfracj !,vsigeps,depsdissterm
   logical :: usej
   !sound speed monitoring
-  integer :: printparticlei
-  real    :: maxprojvi,iunit
+  integer :: printparticlei,iunit
+  real    :: maxprojvi,vsigavi
   logical                      :: iexist
   character(len=120)           :: fileout
   !------------------------
@@ -1539,6 +1539,10 @@ end subroutine force
            !--work out vsig for timestepping and av
            vsigi   = max(vwavei - beta*projv,0.)
            vsigavi = max(alphai*vwavei - beta*projv,0.)
+           !sound speed monitoring
+           if (i==printparticlei) then
+              maxvsigavi=max(maxvsigavi,vsigavi)
+           endif
            if (vsigi > vsigmax) vsigmax = vsigi
 
            if (mhd) then
@@ -1909,21 +1913,24 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(7(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i
+        write(iunit,'(10(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi)
     
         close(iunit)
      else
         open(iunit,file=fileout,status='new')
-        write(iunit,"('#',7(1x,'[',i2.2,1x,a11,']',2x))") &
-            1,'alphai',    &
-            2,'spsoundi', &
-            3,'vwavei', &
-            4,'maxprojvi', &
-            5,'tempi', &
-            6,'hi', &
-            7,'rho1i'
+        write(iunit,"('#',10(1x,'[',i2.2,1x,a11,']',2x))") &
+            1,'time',      &
+            2,'alphai',    &
+            3,'spsoundi',  &
+            4,'vwavei',    &
+            5,'maxprojvi', &
+            6,'tempi',     &
+            7,'hi',        &
+            8,'rho1i',     &
+            9,'dudtdissi', &
+           10,'vsigavi)'
         
-        write(iunit,'(7(1pe18.10,1x))') alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i
+        write(iunit,'(10(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi)
     
         close(iunit)
      endif
