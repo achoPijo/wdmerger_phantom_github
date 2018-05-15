@@ -1304,6 +1304,7 @@ end subroutine force
   !sound speed monitoring
   printparticlei = 8230
   maxprojvi = 0.
+  maxvsigavi = 0.
   !-----------------------
 
   fsum(:) = 0.
@@ -1913,7 +1914,7 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(10(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi)
+        write(iunit,'(10(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi
     
         close(iunit)
      else
@@ -1930,7 +1931,7 @@ ifgas: if (iamgasi .and. iamgasj) then
             9,'dudtdissi', &
            10,'vsigavi)'
         
-        write(iunit,'(10(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi)
+        write(iunit,'(10(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi
     
         close(iunit)
      endif
