@@ -1297,7 +1297,7 @@ end subroutine force
   logical :: usej
   !sound speed monitoring
   integer :: printparticlei,iunit
-  real    :: maxprojvi,vsigavi
+  real    :: maxprojvi,maxvsigavi
   logical                      :: iexist
   character(len=120)           :: fileout
   !------------------------
