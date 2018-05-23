@@ -1539,7 +1539,7 @@ end subroutine force
         if (iamgasi .and. iamgasj) then
            !--work out vsig for timestepping and av
            vsigi   = max(vwavei - beta*projv,0.)
-           vsigavi = max(alphai*vwavei - beta*projv,0.)
+           vsigavi = max(alphai*vwavei - alphai*beta*projv,0.)
            !sound speed monitoring
            if (i==printparticlei) then
               maxvsigavi=max(maxvsigavi,vsigavi)
