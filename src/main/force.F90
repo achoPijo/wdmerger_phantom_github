@@ -1521,7 +1521,7 @@ end subroutine force
         dvx = xpartveci(ivxi) - vxyzu(1,j)
         dvy = xpartveci(ivyi) - vxyzu(2,j)
         dvz = xpartveci(ivzi) - vxyzu(3,j)
-        projv = dvx*runix + dvy*runiy + dvz*runiz
+        projv = (dvx*runix + dvy*runiy + dvz*runiz)*sqrt(rij2)/(sqrt(rij2)+0.1*hi) !CHECK
 
         !sound speed monitoring
         if (i==printparticlei) then
@@ -1544,6 +1544,7 @@ end subroutine force
            if (i==printparticlei) then
               maxvsigavi=max(maxvsigavi,vsigavi)
            endif
+           !-----------------------
            if (vsigi > vsigmax) vsigmax = vsigi
 
            if (mhd) then
