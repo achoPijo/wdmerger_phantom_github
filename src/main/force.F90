@@ -1915,7 +1915,7 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,gradkerni
+        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,grkerni
     
         close(iunit)
      else
@@ -1933,7 +1933,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            10,'vsigavi', &
            11,'gradkerni'
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,gradkerni
+        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,grkerni
     
         close(iunit)
      endif
