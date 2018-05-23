@@ -1915,12 +1915,12 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(10(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi
+        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,gradkerni
     
         close(iunit)
      else
         open(iunit,file=fileout,status='new')
-        write(iunit,"('#',10(1x,'[',i2.2,1x,a11,']',2x))") &
+        write(iunit,"('#',11(1x,'[',i2.2,1x,a11,']',2x))") &
             1,'time',      &
             2,'alphai',    &
             3,'spsoundi',  &
@@ -1930,9 +1930,10 @@ ifgas: if (iamgasi .and. iamgasj) then
             7,'hi',        &
             8,'rho1i',     &
             9,'dudtdissi', &
-           10,'vsigavi)'
+           10,'vsigavi', &
+           11,'gradkerni'
         
-        write(iunit,'(10(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi
+        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,gradkerni
     
         close(iunit)
      endif
