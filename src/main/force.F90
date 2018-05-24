@@ -1521,7 +1521,7 @@ end subroutine force
         dvx = xpartveci(ivxi) - vxyzu(1,j)
         dvy = xpartveci(ivyi) - vxyzu(2,j)
         dvz = xpartveci(ivzi) - vxyzu(3,j)
-        projv = (dvx*runix + dvy*runiy + dvz*runiz)*sqrt(rij2)/(sqrt(rij2)+0.1*hi) !CHECK
+        projv = dvx*runix + dvy*runiy + dvz*runiz
 
         !sound speed monitoring
         if (i==printparticlei) then
@@ -1539,7 +1539,7 @@ end subroutine force
         if (iamgasi .and. iamgasj) then
            !--work out vsig for timestepping and av
            vsigi   = max(vwavei - beta*projv,0.)
-           vsigavi = max(alphai*vwavei - alphai*beta*projv,0.)
+           vsigavi = max(alphai*vwavei - beta*projv,0.)!CHECK
            !sound speed monitoring
            if (i==printparticlei) then
               maxvsigavi=max(maxvsigavi,vsigavi)
@@ -1609,7 +1609,7 @@ end subroutine force
               avBtermj = mrhoj5*alphaB*rho1j
 
               vsigj = max(vwavej - beta*projv,0.)
-              vsigavj = max(alphaj*vwavej - beta*projv,0.)
+              vsigavj = max(alphaj*vwavej - beta*projv,0.)!CHECK
               if (vsigj > vsigmax) vsigmax = vsigj
            else
               vsigj = max(-projv,0.)
@@ -1662,7 +1662,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
 
            !--energy conservation from artificial viscosity (don't need j term)
-           dudtdissi = -0.5*pmassj*rho1i*vsigavi*projv**2*grkerni
+           dudtdissi = -0.5*pmassj*rho1i*(vsigavi+beta*projv)*projv**2*grkerni !CHECK
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj
@@ -1915,7 +1915,7 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,grkerni
+        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(ponrhoi*rhoi),maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,grkerni
     
         close(iunit)
      else
@@ -1924,7 +1924,7 @@ ifgas: if (iamgasi .and. iamgasj) then
             1,'time',      &
             2,'alphai',    &
             3,'spsoundi',  &
-            4,'vwavei',    &
+            4,'Pi',    &
             5,'maxprojvi', &
             6,'tempi',     &
             7,'hi',        &
@@ -1933,7 +1933,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            10,'vsigavi', &
            11,'gradkerni'
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,vwavei,maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,grkerni
+        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(ponrhoi*rhoi),maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,vsigavi,grkerni
     
         close(iunit)
      endif

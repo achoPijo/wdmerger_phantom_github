@@ -39,10 +39,10 @@ module eos_helmholtz
 
  integer, parameter :: speciesmax = 15
  character(len=10) :: speciesname(speciesmax)
- real :: xmass(speciesmax) ! mass fraction of species
+ real :: xmass(speciesmax,maxp) ! mass fraction of species
  real :: Aion(speciesmax)  ! number of nucleons
  real :: Zion(speciesmax)  ! number of protons
- real :: abar, zbar
+ real :: abar(maxp), zbar(maxp)
 
 contains
 
@@ -94,14 +94,16 @@ subroutine init_eos_helmholtz(ierr)
  ! set the mass weightings of each species
  ! currently hard-coded to 50/50 carbon-oxygen
  ! TODO: update this be set by user at runtime
- xmass(:) = 0.0
- xmass(3) = 0.5
- xmass(4) = 0.5
+ do i=1,npart 
+    xmass(:,i) = 0.0
+    xmass(3,i) = 0.5
+    xmass(4,i) = 0.5
+ enddo
 
-  if (sum(xmass(:)) > 1.0+tiny(xmass) .or. sum(xmass(:)) < 1.0-tiny(xmass)) then
-    call warning('eos_helmholtz', 'mass fractions total != 1')
-    ierr = 1
-    return
+ if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
+   call warning('eos_helmholtz', 'mass fractions total != 1')
+   ierr = 1
+   return
  endif
 
  call eos_helmholtz_calc_AbarZbar()
@@ -278,11 +280,17 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !  See Section 2.1 of Timmes & Swesty (2000)
 !+
 !----------------------------------------------------------------------------------------
-subroutine eos_helmholtz_calc_AbarZbar()
+subroutine eos_helmholtz_calc_AbarZbar(npart)
 
- abar = 1.0 / sum(xmass(:) / aion(:))
- zbar = abar * sum(xmass(:) * zion(:) / aion(:))
+ implicit none
 
+ integer, intent(in):: npart
+ integer            :: i
+
+ do i=1,npart
+    abar(i) = 1.0 / sum(xmass(:,i) / aion(:))
+    zbar(i) = abar(i) * sum(xmass(:,i) * zion(:) / aion(:))
+ enddo
 end subroutine eos_helmholtz_calc_AbarZbar
 
 !----------------------------------------------------------------
