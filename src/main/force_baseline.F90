@@ -1229,7 +1229,6 @@ end subroutine force
 #endif
   use timestep,    only:bignumber,time !sound speed monitoring added time
   use options,     only:overcleanfac
-  use units,       only:unit_density
   integer,         intent(in)  :: i
   logical,         intent(in)  :: iamgasi,iamdusti
   real,            intent(in)  :: xpartveci(:)
@@ -1908,7 +1907,6 @@ ifgas: if (iamgasi .and. iamgasj) then
   enddo loop_over_neighbours2
   
   !sound speed monitoring
-  printpartclei = -1 ! CHECK condition to not monitor, comment if you want to monitor the different variables
   if (i == printparticlei) then
 
      iunit=9
@@ -1917,7 +1915,7 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(pro2i*rhoi**2),maxprojvi,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi,grkerni
+        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(pro2i*rhoi**2),maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,maxvsigavi,grkerni
     
         close(iunit)
      else
@@ -1935,7 +1933,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            10,'vsigavi', &
            11,'gradkerni'
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(pro2i*rhoi**2),maxprojvi,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi,grkerni
+        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(pro2i*rhoi**2),maxprojvi,xpartveci(itempi),hi,rho1i,dudtdissi,maxvsigavi,grkerni
     
         close(iunit)
      endif
