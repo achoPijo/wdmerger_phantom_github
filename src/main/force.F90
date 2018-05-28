@@ -1908,7 +1908,7 @@ ifgas: if (iamgasi .and. iamgasj) then
   enddo loop_over_neighbours2
   
   !sound speed monitoring
-  printpartclei = -1 ! CHECK condition to not monitor, comment if you want to monitor the different variables
+  printparticlei = -1 ! CHECK condition to not monitor, comment if you want to monitor the different variables
   if (i == printparticlei) then
 
      iunit=9
