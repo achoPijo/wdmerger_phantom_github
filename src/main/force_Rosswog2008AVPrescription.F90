@@ -1648,9 +1648,6 @@ end subroutine force
            vsigavj = 0.
            dustfracj = 0.
            sqrtrhodustfracj = 0.
-           !Monahan 1992 and Rosswog 2008 descrption of Artificial viscosity
-           fj = 0.
-           !---------------------------------------------------------------
         endif
 
 ifgas: if (iamgasi .and. iamgasj) then
@@ -1675,8 +1672,8 @@ ifgas: if (iamgasi .and. iamgasj) then
 #else
         if (projv < 0.) then
            !--add av term to pressure
-                     gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*fi*projv*hi*(1/(sqrt(rij2)+0.1*hi))*grkerni
-           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*fj*projv*hj*(1/(sqrt(rij2)+0.1*hj))*grkernj
+                     gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*fi*projv*hi*(1/(sqrt(rij2)+0.1*hi)))*grkerni
+           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*fj*projv*hj*(1/(sqrt(rij2)+0.1*hj)))*grkernj
 
            !--energy conservation from artificial viscosity (don't need j term)
 
