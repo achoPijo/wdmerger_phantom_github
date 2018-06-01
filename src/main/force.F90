@@ -1675,7 +1675,7 @@ ifgas: if (iamgasi .and. iamgasj) then
 
            !--energy conservation from artificial viscosity (don't need j term)
            if (usej) then
-              dudtdissi = -0.5*pmassj*rho1i*((fi+fj)/2)*vsigavi*projv**2*grkerni !CHECK
+              dudtdissi = -0.5*pmassj*(1/((1/rho1i+1/rho1j)/2))*((fi+fj)/2)*((vsigavi+vsigavj)/2)*projv**2*grkerni !CHECK
            else
               dudtdissi = -0.5*pmassj*rho1i*fi*vsigavi*projv**2*grkerni
            endif
