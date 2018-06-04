@@ -1663,7 +1663,16 @@ ifgas: if (iamgasi .and. iamgasj) then
            if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv*hj/(sqrt(rij2)+0.1*hj))*grkernj
 
            !--energy conservation from artificial viscosity (don't need j term)
-           dudtdissi = -0.5*pmassj*rho1i*vsigavi*hi/(sqrt(rij2)+0.1*hi)*projv**2*grkerni !CHECK
+           if (usej) then
+              !Monahan 1992 and Rosswog 2008 descrption of Artificial viscosity
+              hij=(hi+hj)/2
+              dudtdissi = -0.5*pmassj*rho1i*vsigavi*hij*(1/(sqrt(rij2)+0.1*hij))*projv**2*grkerni !CHECK !Monahan 1992 and Rosswog 2008 descrption of Artificial viscosity
+           else
+              dudtdissi = -0.5*pmassj*rho1i*vsigavi*hi/(sqrt(rij2)+0.1*hi)*projv**2*grkerni !CHECK
+           endif
+
+
+
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj
