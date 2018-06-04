@@ -1302,6 +1302,7 @@ end subroutine force
   logical                      :: iexist
   character(len=120)           :: fileout
   !------------------------
+  real    :: hij
   !sound speed monitoring
   printparticlei = 8230
   maxprojvi = 0.
