@@ -1551,7 +1551,7 @@ end subroutine force
         if (iamgasi .and. iamgasj) then
            !--work out vsig for timestepping and av
            vsigi   = max(vwavei - beta*projv,0.)
-           vsigavi = max(alphai*(vwavei - beta*projv*hi/(sqrt(rij2)+hi)),0.)!CHECK
+           vsigavi = max(alphai*(vwavei - beta*projv*hi/(sqrt(rij2)+0.1*hi)),0.)!CHECK
            !sound speed monitoring
            if (i==printparticlei) then
               maxvsigavi=max(maxvsigavi,vsigavi)
@@ -1625,7 +1625,7 @@ end subroutine force
               !---------------------------------------------
 
               vsigj = max(vwavej - beta*projv,0.)
-              vsigavj = max(alphaj*(vwavej - beta*projv*hj/(sqrt(rij2)+hj)),0.)!CHECK
+              vsigavj = max(alphaj*(vwavej - beta*projv*hj/(sqrt(rij2)+0.1*hj)),0.)!CHECK
               if (vsigj > vsigmax) vsigmax = vsigj
            else
               vsigj = max(-projv,0.)
@@ -1674,11 +1674,11 @@ ifgas: if (iamgasi .and. iamgasj) then
 #else
         if (projv < 0.) then
            !--add av term to pressure
-                     gradpi = pmassj*(pro2i - 0.5*rho1i*fi*hi/(sqrt(rij2)+hi)*vsigavi*projv)*grkerni
-           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*fj*hj/(sqrt(rij2)+hj)*vsigavj*projv)*grkernj
+                     gradpi = pmassj*(pro2i - 0.5*rho1i*fi*hi/(sqrt(rij2)+0.1*hi)*vsigavi*projv)*grkerni
+           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*fj*hj/(sqrt(rij2)+0.1*hj)*vsigavj*projv)*grkernj
 
            !--energy conservation from artificial viscosity (don't need j term)
-           dudtdissi = -0.5*pmassj*rho1i*fi*hi/(sqrt(rij2)+hi)*vsigavi*projv**2*grkerni !CHECK
+           dudtdissi = -0.5*pmassj*rho1i*fi*hi/(sqrt(rij2)+0.1*hi)*vsigavi*projv**2*grkerni !CHECK
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj
