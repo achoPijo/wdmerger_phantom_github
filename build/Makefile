@@ -128,7 +128,7 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
     KNOWN_SETUP=yes
     ANALYSIS= density_profiles.o analysis_maximum_temperature.f90  
     MODFILE= moddump_wdmerger.f90
-    MORRIS_MONAGHAN= yes
+    #MORRIS_MONAGHAN= yes
 
 endif
 
