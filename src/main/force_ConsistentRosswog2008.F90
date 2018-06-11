@@ -1306,7 +1306,6 @@ end subroutine force
   real    ::fi,fj,rhoij,hij,alphaij,rij,csij,hrfactor
   !-------------------------
   !sound speed monitoring
-  printparticlei = 8230
   maxprojvi = 0.
   maxvsigavi = 0.
   !-----------------------
@@ -1683,7 +1682,7 @@ ifgas: if (iamgasi .and. iamgasj) then
                      gradpi = pmassj*(pro2i - 0.5*(projv/rhoij)*hrfactor*(alphaij*(csij-beta*projv*hrfactor)))*grkerni
            if (usej) gradpj = pmassj*(pro2j - 0.5*(projv/rhoij)*hrfactor*(alphaij*(csij-beta*projv*hrfactor)))*grkernj
 
-           !--energy conservation from artificial viscosity (don't need j term)
+           !--energy conservation from artificial viscosity (need j term)
            dudtdissi = -0.5*pmassj*(projv/rhoij)*hrfactor*alphaij*(csij-beta*projv*hrfactor)*projv*grkerni !CHECK
         else
                      gradpi = pmassj*pro2i*grkerni

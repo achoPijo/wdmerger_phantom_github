@@ -1303,7 +1303,6 @@ end subroutine force
   character(len=120)           :: fileout
   !------------------------
   !sound speed monitoring
-  printparticlei = 8230
   maxprojvi = 0.
   maxvsigavi = 0.
   !-----------------------
