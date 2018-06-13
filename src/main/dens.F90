@@ -144,6 +144,9 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
  use units,     only:unit_density
  use viscosity, only:irealvisc,bulkvisc,shearparam
  use io_summary,only:summary_variable,iosumhup,iosumhdn
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:abar,zbar
+#endif
  integer,      intent(in)    :: icall,npart,nactive
  real,         intent(inout) :: xyzh(:,:)
  real,         intent(in)    :: vxyzu(:,:),fxyzu(:,:),fext(:,:)
@@ -197,9 +200,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
  real(kind=4) :: t1,t2,t3
  logical      :: have_sent
 #endif
-#ifdef TEMPEVOLUTION
- use eos_helmholtz,  only:abar,zbar
-#endif
+
 
  if (iverbose >= 3 .and. id==master) &
     write(iprint,*) ' cell cache =',isizecellcache,' neigh cache = ',isizeneighcache,' icall = ',icall
