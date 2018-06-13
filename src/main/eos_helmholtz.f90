@@ -33,7 +33,7 @@ module eos_helmholtz
 
  public  :: init_eos_helmholtz, get_eos_press_sound_cv_dPdT_helmholtz, helmholtz_energytemperature_switch
  public  :: tmaxhelmeos, tminhelmeos, cgsrhomaxhelmeos, cgsrhominhelmeos
- public  :: speciesmax,speciesname,xmass,abar,zbar
+ public  :: speciesmax,speciesname,xmass,abar,zbar,eos_helmholtz_calc_AbarZbar
  private
 
  ! these set the mixture of species
