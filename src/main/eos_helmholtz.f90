@@ -53,7 +53,6 @@ contains
 !+
 !----------------------------------------------------------------
 subroutine init_eos_helmholtz(ierr)
- 
  integer, intent(out) :: ierr
  ierr = 0
 
@@ -92,24 +91,6 @@ subroutine init_eos_helmholtz(ierr)
  Aion(14) = 56.0  ;  Zion(14) = 28.0  ! nickel
  Aion(15) = 60.0  ;  Zion(15) = 30.0  ! zinc
 
- ! set the mass weightings of each species
- ! currently hard-coded to 50/50 carbon-oxygen
- ! TODO: update this to be set by user at runtime
- do i=1,npart 
-    xmass(:,i) = 0.0
-    xmass(3,i) = 0.5
-    xmass(4,i) = 0.5
- enddo
-
- do i=1,npart
-    if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
-      call warning('eos_helmholtz', 'mass fractions total != 1')
-      ierr = 1
-      return
-    endif
- enddo
-
- call eos_helmholtz_calc_AbarZbar(npart)
 
 end subroutine init_eos_helmholtz
 
@@ -283,17 +264,16 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !  See Section 2.1 of Timmes & Swesty (2000)
 !+
 !----------------------------------------------------------------------------------------
-subroutine eos_helmholtz_calc_AbarZbar(npart)
+subroutine eos_helmholtz_calc_AbarZbar(xmassi,abari,zbari)
 
  implicit none
 
- integer, intent(in):: npart
- integer            :: i
+ real,  intent(in):: xmassi
+ real, intent(out):: abari,zbari
 
- do i=1,npart
-    abar(i) = 1.0 / sum(xmass(:,i) / aion(:))
-    zbar(i) = abar(i) * sum(xmass(:,i) * zion(:) / aion(:))
- enddo
+    abari = 1.0 / sum(xmassi(:) / aion(:))
+    zbari = abari * sum(xmassi(:) * zion(:) / aion(:))
+
 end subroutine eos_helmholtz_calc_AbarZbar
 
 !----------------------------------------------------------------
