@@ -59,6 +59,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  use timestep,    only: tmax, dtmax
  use units,       only: set_units, select_unit, unit_pressure, unit_density
  use white_dwarf, only: set_wd
+ use io,          only:warning
 
  integer,           intent(in)    :: id
  integer,           intent(inout) :: npart
