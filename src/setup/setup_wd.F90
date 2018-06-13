@@ -236,6 +236,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     xmass(3,i) = 0.5
     xmass(4,i) = 0.5
     call eos_helmholtz_calc_AbarZbar(xmass(:,i),abar(i),zbar(i))
+    print *, abar(i)
  enddo
 
  do i=1,npart
