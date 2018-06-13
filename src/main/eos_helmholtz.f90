@@ -105,7 +105,6 @@ subroutine get_eos_press_sound_cv_dPdT_helmholtz(temp,den,abari,zbari,pres,sound
  real, intent(in)    :: temp, den , abari, zbari
  real, intent(out)   :: pres, sound, cv, dPdT
  integer             :: ierr
- real                :: abar, zbar
  character(len=40), parameter  :: label = 'get_eos_press_sound_cv_dPdT_helmholtz'
 
  ierr = 0
@@ -249,7 +248,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !
 
  if (eosflag == 2) then  ! Temperature as input
-     call helmeos(temp, rho, abar, zbar, ierr, ener_opt=ener_iter)
+     call helmeos(temp, rho, abari, zbari, ierr, ener_opt=ener_iter)
 
      ener = ener_iter/unit_ergg
  else                    ! Internal energy as input
@@ -268,7 +267,7 @@ subroutine eos_helmholtz_calc_AbarZbar(xmassi,abari,zbari)
 
  implicit none
 
- real,  intent(in):: xmassi
+ real,  intent(in):: xmassi(:)
  real, intent(out):: abari,zbari
 
     abari = 1.0 / sum(xmassi(:) / aion(:))
