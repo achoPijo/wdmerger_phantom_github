@@ -263,7 +263,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     if (maxvxyzu == 5) then
        vxyzu(5,i) = Tin
        call equationofstate(ieos,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
-                            tempi=Tin,abar(i),zbar(i),cvi=cvi)
+                            tempi=Tin,abari=abar(i),zbari=zbar(i),cvi=cvi)
        vxyzu(4,i) = Tin*cvi
     endif
  enddo
