@@ -202,13 +202,6 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
 #endif
 
 
- !--TESTING
- print *, xyzh(1,50000)
- print *, xyzh(2,50000)
- print *, xyzh(3,50000)
- print *, xyzh(4,50000)
- print *, "-------------"
- !-----------------
  if (iverbose >= 3 .and. id==master) &
     write(iprint,*) ' cell cache =',isizecellcache,' neigh cache = ',isizeneighcache,' icall = ',icall
 
@@ -382,14 +375,6 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
     endif
 
     ifilledneighcache = .false.
-
-    !--TESTING
-    print *, xyzh(1,50000)
-    print *, xyzh(2,50000)
-    print *, xyzh(3,50000)
-    print *, xyzh(4,50000)
-    print *, "-------------"
-    !-----------------
 
     itsdensity = 0
 
