@@ -57,17 +57,33 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !-- Initialization
 
  !--------------
-print *, xyzh(1,49999)
-print *, xyzh(2,49999)
-print *, xyzh(3,49999)
-print *, xyzh(4,49999)
+ !--------------
+print *, vxyzu(1,49999)
+print *, vxyzu(2,49999)
+print *, vxyzu(3,49999)
+print *, vxyzu(4,49999)
+print *, vxyzu(5,49999)
 
 print *, "------------"
 
-print *, xyzh(1,50000)
-print *, xyzh(2,50000)
-print *, xyzh(3,50000)
-print *, xyzh(4,50000)
+print *, vxyzu(1,50000)
+print *, vxyzu(2,50000)
+print *, vxyzu(3,50000)
+print *, vxyzu(4,50000)
+print *, vxyzu(5,50000)
+
+
+!print *, xyzh(1,49999)
+!print *, xyzh(2,49999)
+!print *, xyzh(3,49999)
+!print *, xyzh(4,49999)
+!
+!print *, "------------"
+!
+!print *, xyzh(1,50000)
+!print *, xyzh(2,50000)
+!print *, xyzh(3,50000)
+!print *, xyzh(4,50000)
 
 
 
