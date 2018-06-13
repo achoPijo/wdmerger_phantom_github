@@ -93,7 +93,7 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
  use eos,          only:use_entropy,gamma,equationofstate,get_temperature_from_ponrho
 #ifdef TEMPEVOLUTION
  use eos,          only:relflag
- use eos_helmholtz,only:helmholtz_energytemperature_switch
+ use eos_helmholtz,only:helmholtz_energytemperature_switch,abar,zbar
 #endif
  use io,           only:iprint,fatal,iverbose,id,master,real4,warning,error
  use linklist,     only:ncells,ifirstincell,get_neighbour_list
@@ -326,11 +326,11 @@ endif
 
 #ifdef TEMPEVOLUTION
 !$omp parallel default(none)&
-!$omp shared(xyzh,vxyzu,massoftype,npart,relflag) &
+!$omp shared(xyzh,vxyzu,massoftype,npart,abar,zbar,relflag) &
 !$omp private(i)
 !$omp do schedule(runtime)
  do i=1,npart
-    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),relflag)
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),abar(i),zbar(i),relflag)
  enddo
 !$omp enddo
 !$omp end parallel
@@ -339,7 +339,7 @@ endif
 !$omp parallel default(none) &
 !$omp shared(ncells,ll,ifirstincell,npart,icall) &
 !$omp shared(beta,gamma,icooling) &
-!$omp shared(xyzh,vxyzu,fxyzu,divcurlv,massoftype,iphase,abundance,straintensor,deltav,relflag) &
+!$omp shared(xyzh,vxyzu,fxyzu,divcurlv,massoftype,iphase,abundance,straintensor,deltav) &
 !$omp shared(dt,dtmax,gradh,ishock_heating,ipdv_heating) &
 !$omp shared(alphaind,alpha,alphau,alphaB) &
 !$omp shared(irealvisc,realviscosity,useresistiveheat,bulkvisc,C_cour,C_force,C_cool,stressmax) &
@@ -369,6 +369,9 @@ endif
 !$omp shared(xyzmh_ptmass,nptmass,poten) &
 !$omp shared(rhomax,ipart_rhomax,icreate_sinks,rho_crit,r_crit2) &
 !$omp private(rhomax_thread,ipart_rhomax_thread,use_part,j) &
+#endif
+#ifdef TEMPEVOLUTION
+!$omp shared(abar,zbar,relflag) &
 #endif
 #ifdef MPI
 !$omp shared(id,ireqrecv,ireqsend,xrecvbuf,xsendbuf,nprocs,have_sent) &
@@ -526,7 +529,7 @@ endif
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                      visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
-                     xpartveci(itempi),cvi,dPdTi)
+                     xpartveci(itempi),abar(i),zbar(i),cvi,dPdTi)
           else
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
@@ -1230,6 +1233,9 @@ end subroutine force
   use timestep,    only:bignumber,time !sound speed monitoring added time
   use options,     only:overcleanfac
   use units,       only:unit_density
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:abar,zbar
+#endif
   integer,         intent(in)  :: i
   logical,         intent(in)  :: iamgasi,iamdusti
   real,            intent(in)  :: xpartveci(:)
@@ -1597,7 +1603,7 @@ end subroutine force
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
-                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj)!,cvj,dPdTj) !USEJCHANGE
+                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,abar(j),zbar(j))!,cvj,dPdTj) !USEJCHANGE
               else
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
@@ -1953,7 +1959,7 @@ end subroutine compute_forces
 subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
                  ponrhoi,pro2i,pri,spsoundi,vwavei, &
                  sxxi,sxyi,sxzi,syyi,syzi,szzi,visctermiso,visctermaniso, &
-                 realviscosity,divvi,bulkvisc,strain,stressmax,tempi,cvi,dPdTi) 
+                 realviscosity,divvi,bulkvisc,strain,stressmax,tempi,abari,zbari,cvi,dPdTi) 
 
   use dim,       only:maxvxyzu,maxstrain,maxp
   use part,      only:mhd
@@ -1970,6 +1976,7 @@ subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
   real,    intent(in)    :: strain(6)
   real,    intent(inout) :: eni
   real,    intent(inout),  optional :: tempi
+  real,    intent(in),  optional :: abari,zbari
   real,    intent(out), optional :: cvi,dPdTi 
 
   real :: Bro2i,Brhoxi,Brhoyi,Brhozi,rhogasi,gasfrac
@@ -1982,7 +1989,7 @@ subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
   rhogasi = rhoi*gasfrac       ! rhogas = (1-eps)*rho
   if (maxvxyzu >= 4) then
      if (maxvxyzu == 5) then
-        call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni,tempi,cvi,dPdTi)
+        call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni,tempi,abari,zbari,cvi,dPdTi)
      else
         call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni)
      endif

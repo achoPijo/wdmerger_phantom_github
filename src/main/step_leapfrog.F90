@@ -87,7 +87,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
  use externalforces, only:iext_corotate
 #ifdef TEMPEVOLUTION
  use eos,            only:relflag
- use eos_helmholtz,  only:helmholtz_energytemperature_switch
+ use eos_helmholtz,  only:helmholtz_energytemperature_switch,abar,zbar
 #endif
  use options,        only:avdecayconst,alpha,ieos,alphamax
  use deriv,          only:derivs
@@ -254,7 +254,11 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
        if (maxalpha==maxp) then
           hi   = xyzh(4,i)
           rhoi = rhoh(hi,pmassi)
+#ifdef TEMPEVOLUTION
+          spsoundi = get_spsound(ieos,xyzh(:,i),rhoi,vpred(:,i),abar(i),zbar(i))
+#else
           spsoundi = get_spsound(ieos,xyzh(:,i),rhoi,vpred(:,i))
+#endif
           tdecay1  = avdecayconst*spsoundi/hi
           ddenom   = 1./(1. + dtsph*tdecay1) ! implicit integration for decay term
           if (nalpha >= 2) then

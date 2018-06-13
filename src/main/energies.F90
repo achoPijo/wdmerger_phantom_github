@@ -96,6 +96,10 @@ subroutine compute_energies(t)
 #ifdef LIGHTCURVE
  use part,         only:luminosity
 #endif
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:abar,zbar
+#endif
+
  real, intent(in) :: t
  real    :: ev_data_thread(0:inumev)
  real    :: xi,yi,zi,hi,vxi,vyi,vzi,v2i,Bxi,Byi,Bzi,rhoi,angx,angy,angz
@@ -154,6 +158,9 @@ subroutine compute_energies(t)
 !
 !$omp parallel default(none) &
 !$omp shared(xyzh,vxyzu,iexternalforce,npart,t,id) &
+#ifdef TEMPEVOLUTION
+!$omp shared(abar,zbar) &
+#endif
 !$omp shared(alphaind,massoftype,irealvisc) &
 !$omp shared(ieos,gamma,nptmass,xyzmh_ptmass,vxyz_ptmass) &
 !$omp shared(Bxyz,Bevol,divBsymm,divcurlB,alphaB,iphase,poten,dustfrac) &
@@ -294,7 +301,7 @@ subroutine compute_energies(t)
           if (maxvxyzu >= 4) then
              etherm = etherm + pmassi*utherm(vxyzu(4,i),rhoi)*gasfrac
              if (maxvxyzu == 4) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i))
-             if (maxvxyzu == 5) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i),vxyzu(5,i))
+             if (maxvxyzu == 5) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i),vxyzu(5,i),abar(i),zbar(i))
           else
              call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi)
              if (ieos==2 .and. gamma > 1.001) then

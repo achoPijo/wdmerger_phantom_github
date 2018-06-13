@@ -93,20 +93,22 @@ subroutine init_eos_helmholtz(ierr)
 
  ! set the mass weightings of each species
  ! currently hard-coded to 50/50 carbon-oxygen
- ! TODO: update this be set by user at runtime
+ ! TODO: update this to be set by user at runtime
  do i=1,npart 
     xmass(:,i) = 0.0
     xmass(3,i) = 0.5
     xmass(4,i) = 0.5
  enddo
 
- if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
-   call warning('eos_helmholtz', 'mass fractions total != 1')
-   ierr = 1
-   return
- endif
+ do i=1,npart
+    if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
+      call warning('eos_helmholtz', 'mass fractions total != 1')
+      ierr = 1
+      return
+    endif
+ enddo
 
- call eos_helmholtz_calc_AbarZbar()
+ call eos_helmholtz_calc_AbarZbar(npart)
 
 end subroutine init_eos_helmholtz
 
@@ -116,19 +118,19 @@ end subroutine init_eos_helmholtz
 !  temperature and density
 !+
 !----------------------------------------------------------------
-subroutine get_eos_press_sound_cv_dPdT_helmholtz(temp,den,pres,sound,cv,dPdT)!,abar,zbar) !REVISE ADD other variables obtained by helmeos needed by hydro_rs like dPdt internal energy etc as optional inputs
+subroutine get_eos_press_sound_cv_dPdT_helmholtz(temp,den,abari,zbari,pres,sound,cv,dPdT) !REVISE ADD other variables obtained by helmeos needed by hydro_rs like dPdt internal energy etc as optional inputs
  use io,         only:fatal
- real, intent(in)    :: temp, den !, abar, zbar
+ real, intent(in)    :: temp, den , abari, zbari
  real, intent(out)   :: pres, sound, cv, dPdT
  integer             :: ierr
  real                :: abar, zbar
  character(len=40), parameter  :: label = 'get_eos_press_sound_cv_dPdT_helmholtz'
 
  ierr = 0
- abar = 1./(17./240.) !VALUES FOR 40% C 60% O !REVISE when xss is included
- zbar = 0.5/(17./240.)
+ !abar = 1./(17./240.) !VALUES FOR 40% C 60% O !REVISE when xss is included
+ !zbar = 0.5/(17./240.)
 
- call helmeos(temp,den,abar,zbar,ierr,pres,sound,cv_opt=cv,dpresdt_opt=dPdT)
+ call helmeos(temp,den,abari,zbari,ierr,pres,sound,cv_opt=cv,dpresdt_opt=dPdT)
 
  !print *, sound
  !print *, abar
@@ -147,7 +149,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !  INTERNAL ENERGY CHANGES
 !+
 !----------------------------------------------------------------
- subroutine helmholtz_energytemperature_switch(temp,ener,den,relflag)!abar,zbar) !REVISE 
+ subroutine helmholtz_energytemperature_switch(temp,ener,den,abari,zbari,relflag) !REVISE 
 !========================================================================
 
 !=========================================================================
@@ -166,14 +168,14 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !--I/O variables
 !
  real,             intent(inout):: temp, ener
- real,             intent(in)   :: den!, abar, zbar !REVISE abar,zbar set manually for now until burn is implemented
+ real,             intent(in)   :: den, abari, zbari !REVISE abar,zbar set manually for now until burn is implemented
  integer,          intent(in)   :: relflag
 !
 !--Local variables
 !
  integer, parameter :: max_newton=50
  real(8), parameter :: eos_tol=1.0d-8
- real(8)  :: abar, zbar, ewant, temp_iter, ener_iter, tnew, errorp, rel, denerdt!, asum,zsum
+ real(8)  :: ewant, temp_iter, ener_iter, tnew, errorp, rel, denerdt!, asum,zsum,abar,zbar
  integer  :: k, newton, eosflag, ierr
  real     :: rho
 !
@@ -196,8 +198,8 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 ! abar = 1.0/asum
 ! zbar = zsum/asum
 ! 
- abar = 1/0.25 !VALUES FOR 100% He 
- zbar = 0.5/0.25
+ !abar = 1/0.25 !VALUES FOR 100% He 
+ !zbar = 0.5/0.25
 !-------------------------------
 !--Loop over particles doing the Newton-Raphson iteration
 !
@@ -208,7 +210,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !
 !--Call EOS
 !
-      call helmeos(temp_iter, rho, abar, zbar, ierr, ener_opt=ener_iter, denerdt_opt=denerdt) !REVISE implement error warning mechanism
+      call helmeos(temp_iter, rho, abari, zbari, ierr, ener_opt=ener_iter, denerdt_opt=denerdt) !REVISE implement error warning mechanism
       
 !
 !--New temperature

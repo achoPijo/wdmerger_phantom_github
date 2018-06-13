@@ -197,6 +197,9 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
  real(kind=4) :: t1,t2,t3
  logical      :: have_sent
 #endif
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:abar,zbar
+#endif
 
  if (iverbose >= 3 .and. id==master) &
     write(iprint,*) ' cell cache =',isizecellcache,' neigh cache = ',isizeneighcache,' icall = ',icall
@@ -264,6 +267,9 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
 !$omp private(psii,Bxi,Byi,Bzi,gradBi,Bi,alphaBi) &
 !$omp private(denom,rmatrix) &
 !$omp reduction(max:stressmax,rhomax) &
+#ifdef TEMPEVOLUTION
+!$omp shared(abar,zbar) &
+#endif
 #ifdef MPI
 !$omp reduction(+:nwarnroundoff) &
 !$omp shared(id,ireqrecv,ireqsend,xrecvbuf,xbuf,nprocs,have_sent) &
@@ -540,7 +546,12 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
        ! Cullen & Dehnen (2010) viscosity switch, set alphaloc
        !
        if (nalpha >= 2 .and. iamgasi) then
-          spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
+#ifdef TEMPEVOLUTION
+          spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),abar(i),zbar(i))    
+#else
+          spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))        
+#endif        
+
           alphaind(2,i) = real4(get_alphaloc(divcurlvi(5),spsoundi,hi,xi_limiter,alpha,alphamax))
        endif
     else ! we always need div v for h prediction
@@ -1214,13 +1225,14 @@ end subroutine exactlinear
 !  (called from step for decay timescale in alpha switches)
 !+
 !----------------------------------------------------------------
-real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi)
+real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi,abari,zbari)
  use eos,  only:equationofstate
  use part, only:maxp,mhd,maxvxyzu,rhoh
  real,         intent(in) :: xyzhi(4),pmassi
  real,         intent(in) :: vxyzui(maxvxyzu)
  integer,      intent(in) :: ieos
  real(kind=4), intent(in), optional :: Bxyzi(3)
+ real,         intent(in), optional :: abari,zbari
  real :: spsoundi,hi,rhoi,ponrhoi,valfven2i
 
  hi = xyzhi(4)
@@ -1229,7 +1241,7 @@ real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi)
     call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3),vxyzui(4))
  else
     if (maxvxyzu==5) then
-       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3),vxyzui(4),vxyzui(5))
+       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3),vxyzui(4),vxyzui(5),abari,zbari)
     else
        call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3))
     endif

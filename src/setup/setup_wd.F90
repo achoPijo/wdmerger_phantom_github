@@ -48,7 +48,7 @@ contains
 subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,time,fileprefix)
  use centreofmass,only: reset_centreofmass 
  use eos,         only: ieos, equationofstate, init_eos,finish_eos,relflag
- use eos_helmholtz, only: tmaxhelmeos,tminhelmeos
+ use eos_helmholtz, only: tmaxhelmeos,tminhelmeos,abar,zbar
  use dim,         only: maxp
  use io,          only: master
  use kernel,      only: hfact_default
@@ -243,7 +243,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     if (maxvxyzu == 5) then
        vxyzu(5,i) = Tin
        call equationofstate(ieos,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
-                            tempi=Tin,cvi=cvi)
+                            tempi=Tin,abar(i),zbar(i),cvi=cvi)
        vxyzu(4,i) = Tin*cvi
     endif
  enddo
