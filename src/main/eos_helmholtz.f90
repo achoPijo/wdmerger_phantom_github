@@ -55,6 +55,7 @@ contains
 !----------------------------------------------------------------
 subroutine init_eos_helmholtz(ierr)
  use dim, only: maxp
+ use io,  only:warning
  integer, intent(out) :: ierr
  integer              :: i
  ierr = 0
