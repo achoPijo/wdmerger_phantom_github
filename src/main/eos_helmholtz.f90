@@ -56,6 +56,7 @@ contains
 subroutine init_eos_helmholtz(ierr)
  use dim, only: maxp
  integer, intent(out) :: ierr
+ integer              :: i
  ierr = 0
 
  call read_eos_helmholtz(ierr)
@@ -103,7 +104,7 @@ subroutine init_eos_helmholtz(ierr)
     call eos_helmholtz_calc_AbarZbar(xmass(:,i),abar(i),zbar(i))
  enddo
 
- do i=1,npart
+ do i=1,maxp
     if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
       call warning('eos_helmholtz', 'mass fractions total != 1')
       ierr = 1
