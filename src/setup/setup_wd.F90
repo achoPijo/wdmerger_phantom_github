@@ -228,25 +228,6 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  
  call init_eos(ieos,ierr)
 
- ! set the mass weightings of each species
- ! currently hard-coded to 50/50 carbon-oxygen
- ! TODO: update this to be set by user at runtime
- do i=1,npart 
-    xmass(:,i) = 0.0
-    xmass(3,i) = 0.5
-    xmass(4,i) = 0.5
-    call eos_helmholtz_calc_AbarZbar(xmass(:,i),abar(i),zbar(i))
- enddo
-
- do i=1,npart
-    if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
-      call warning('eos_helmholtz', 'mass fractions total != 1')
-      ierr = 1
-      return
-    endif
- enddo
-
-
  do i=1,npart
     densi = rhoh(xyzh(4,i),massoftype(igas))
     if (maxvxyzu==4) then

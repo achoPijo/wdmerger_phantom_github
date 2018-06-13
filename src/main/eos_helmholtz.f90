@@ -54,6 +54,7 @@ contains
 !+
 !----------------------------------------------------------------
 subroutine init_eos_helmholtz(ierr)
+ use dim, only: maxp
  integer, intent(out) :: ierr
  ierr = 0
 
@@ -91,6 +92,24 @@ subroutine init_eos_helmholtz(ierr)
  Aion(13) = 52.0  ;  Zion(13) = 26.0  ! iron
  Aion(14) = 56.0  ;  Zion(14) = 28.0  ! nickel
  Aion(15) = 60.0  ;  Zion(15) = 30.0  ! zinc
+
+ ! set the mass weightings of each species
+ ! currently hard-coded to 50/50 carbon-oxygen
+ ! TODO: update this to be set by user at runtime
+ do i=1,maxp 
+    xmass(:,i) = 0.0
+    xmass(3,i) = 0.5
+    xmass(4,i) = 0.5
+    call eos_helmholtz_calc_AbarZbar(xmass(:,i),abar(i),zbar(i))
+ enddo
+
+ do i=1,npart
+    if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
+      call warning('eos_helmholtz', 'mass fractions total != 1')
+      ierr = 1
+      return
+    endif
+ enddo
 
 
 end subroutine init_eos_helmholtz
