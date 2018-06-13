@@ -246,17 +246,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     endif
  enddo
 
-print *, vxyzu(1,49999)
-print *, vxyzu(2,49999)
-print *, vxyzu(3,49999)
 
-print *, "------------"
-
-print *, vxyzu(1,50000)
-print *, vxyzu(2,50000)
-print *, vxyzu(3,50000)
-
- 
  do i=1,npart
     densi = rhoh(xyzh(4,i),massoftype(igas))
     if (maxvxyzu==4) then
