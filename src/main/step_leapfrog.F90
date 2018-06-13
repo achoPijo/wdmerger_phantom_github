@@ -198,6 +198,9 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 #ifdef IND_TIMESTEPS
 !$omp shared(twas,timei) &
 #endif
+#ifdef TEMPEVOLUTION
+!$omp shared(abar,zbar) &
+#endif
 !$omp private(hi,rhoi,tdecay1,source,ddenom,hdti) &
 !$omp private(i,spsoundi,alphaloci,divvdti) &
 !$omp firstprivate(pmassi,itype,avdecayconst,alpha)
