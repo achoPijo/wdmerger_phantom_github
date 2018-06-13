@@ -24,6 +24,7 @@ module eos_helmholtz
 
  
  use helmholtz_microphysics
+ use dim, only:maxp
 
  implicit none
 
