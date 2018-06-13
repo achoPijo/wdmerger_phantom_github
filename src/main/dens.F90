@@ -507,8 +507,13 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
        write(iprint,*) 'x,y,z = ',xyzh(1:3,i)
        write(iprint,*) 'v_x,v_y,v_z = ',vxyzu(1:3,i)
        if (maxvxyzu >= 4) write(iprint,*) 'u = ',vxyzu(4,i)
-       write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
-       write(iprint,*) 'temperature = ',get_temperature(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
+       if (maxvxyzu == 5) then
+          write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),abar(i),zbar(i))
+          write(iprint,*) 'temperature = ',vxyzu(5,i)
+       else
+          write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
+          write(iprint,*) 'temperature = ',get_temperature(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
+       endif
        call fatal('densityiterate','could not converge in density',i,'error',abs(hnew-hi)/hi_old)
     endif
 !
