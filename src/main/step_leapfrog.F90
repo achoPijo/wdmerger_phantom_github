@@ -473,11 +473,11 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 
 #ifdef TEMPEVOLUTION
 !$omp parallel default(none)&
-!$omp shared(xyzh,vxyzu,massoftype,npart,relflag) &
+!$omp shared(xyzh,vxyzu,massoftype,npart,abar,zbar,relflag) &
 !$omp private(i)
 !$omp do schedule(runtime)
  do i=1,npart
-    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),relflag)
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),abar(i),zbar(i),relflag)
  enddo
 !$omp enddo
 !$omp end parallel
