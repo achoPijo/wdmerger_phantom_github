@@ -88,6 +88,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 #ifdef TEMPEVOLUTION
  use eos,            only:relflag
  use eos_helmholtz,  only:helmholtz_energytemperature_switch,xmass
+#endif
  use options,        only:avdecayconst,alpha,ieos,alphamax
  use deriv,          only:derivs
  use timestep,       only:dterr,bignumber
