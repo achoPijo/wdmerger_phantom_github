@@ -1100,8 +1100,9 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  logical               :: got_dustfrac,match
  logical               :: got_iphase,got_xyzh(4),got_abund(nabundances),got_alpha,got_poten
  logical               :: got_sink_data(nsinkproperties),got_sink_vels(3),got_Bevol(maxBevol)
+ logical               :: got_xmass(speciesmax)
 #ifdef TEMPEVOLUTION
- logical               :: got_vxyzu(5),got_xmass(speciesmax)
+ logical               :: got_vxyzu(5)
 #else
  logical               :: got_vxyzu(4)
 #endif 
@@ -1120,9 +1121,8 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  got_sink_data = .false.
  got_sink_vels = .false.
  got_Bevol     = .false.
-#ifdef TEMPEVOLUTION
- got_xmass(speciesmax)=(.false.)
-#endif
+ got_xmass     =.false.
+
 
  over_arraylengths: do iarr=1,narraylengths
 
@@ -1183,7 +1183,7 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  !
  call check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,massoftype,&
                    alphafile,tfile,phantomdump,got_iphase,got_xyzh,got_vxyzu,got_alpha, &
-                   got_abund,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
+                   got_abund,got_xmass,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
                    iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr)
 
  return
@@ -1275,7 +1275,7 @@ end subroutine check_block_header
 !---------------------------------------------------------------
 subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,massoftype,&
                         alphafile,tfile,phantomdump,got_iphase,got_xyzh,got_vxyzu,got_alpha, &
-                        got_abund,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
+                        got_abund,got_xmass,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
                         iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr)
  use dim,  only:maxp,maxvxyzu,maxalpha,maxBevol,mhd,use_dustfrac,h2chemistry
  use eos,  only:polyk,gamma
@@ -1287,7 +1287,7 @@ subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,mass
  integer,         intent(in)    :: i1,i2,npartoftype(:),npartread,nptmass,nsinkproperties
  real,            intent(in)    :: massoftype(:),alphafile,tfile
  logical,         intent(in)    :: phantomdump,got_iphase,got_xyzh(:),got_vxyzu(:),got_alpha
- logical,         intent(in)    :: got_abund(:),got_dustfrac,got_sink_data(:),got_sink_vels(:),got_Bevol(:)
+ logical,         intent(in)    :: got_abund(:),got_xmass(:),got_dustfrac,got_sink_data(:),got_sink_vels(:),got_Bevol(:)
  integer(kind=1), intent(inout) :: iphase(:)
  real,            intent(inout) :: vxyzu(:,:)
  real(kind=4),    intent(inout) :: alphaind(:,:), Bevol(:,:)
