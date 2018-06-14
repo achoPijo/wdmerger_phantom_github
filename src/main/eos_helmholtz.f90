@@ -54,10 +54,7 @@ contains
 !+
 !----------------------------------------------------------------
 subroutine init_eos_helmholtz(ierr)
- use dim, only: maxp
- use io,  only:warning
  integer, intent(out) :: ierr
- integer              :: i
  ierr = 0
 
  call read_eos_helmholtz(ierr)
@@ -95,25 +92,6 @@ subroutine init_eos_helmholtz(ierr)
  Aion(14) = 56.0  ;  Zion(14) = 28.0  ! nickel
  Aion(15) = 60.0  ;  Zion(15) = 30.0  ! zinc
 
- ! set the mass weightings of each species
- ! currently hard-coded to 50/50 carbon-oxygen
- ! TODO: update this to be set by user at runtime
- do i=1,maxp 
-    xmass(:,i) = 0.0
-    xmass(3,i) = 0.5
-    xmass(4,i) = 0.5
-    call eos_helmholtz_calc_AbarZbar(xmass(:,i),abar(i),zbar(i))
- enddo
-
- do i=1,maxp
-    if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
-      call warning('eos_helmholtz', 'mass fractions total != 1')
-      ierr = 1
-      return
-    endif
- enddo
-
-
 end subroutine init_eos_helmholtz
 
 !----------------------------------------------------------------
@@ -122,16 +100,19 @@ end subroutine init_eos_helmholtz
 !  temperature and density
 !+
 !----------------------------------------------------------------
-subroutine get_eos_press_sound_cv_dPdT_helmholtz(temp,den,abari,zbari,pres,sound,cv,dPdT) !REVISE ADD other variables obtained by helmeos needed by hydro_rs like dPdt internal energy etc as optional inputs
+subroutine get_eos_press_sound_cv_dPdT_helmholtz(temp,den,xmassi,pres,sound,cv,dPdT) !REVISE ADD other variables obtained by helmeos needed by hydro_rs like dPdt internal energy etc as optional inputs
  use io,         only:fatal
- real, intent(in)    :: temp, den , abari, zbari
+ real, intent(in)    :: temp, den , xmassi(:)
  real, intent(out)   :: pres, sound, cv, dPdT
+ real                :: abari,zbari
  integer             :: ierr
  character(len=40), parameter  :: label = 'get_eos_press_sound_cv_dPdT_helmholtz'
 
  ierr = 0
  !abar = 1./(17./240.) !VALUES FOR 40% C 60% O !REVISE when xss is included
  !zbar = 0.5/(17./240.)
+
+ call eos_helmholtz_calc_AbarZbar(xmassi,abari,zbari)
 
  call helmeos(temp,den,abari,zbari,ierr,pres,sound,cv_opt=cv,dpresdt_opt=dPdT)
 
@@ -152,7 +133,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !  INTERNAL ENERGY CHANGES
 !+
 !----------------------------------------------------------------
- subroutine helmholtz_energytemperature_switch(temp,ener,den,abari,zbari,relflag) !REVISE 
+ subroutine helmholtz_energytemperature_switch(temp,ener,den,xmassi,relflag) !REVISE 
 !========================================================================
 
 !=========================================================================
@@ -171,7 +152,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !--I/O variables
 !
  real,             intent(inout):: temp, ener
- real,             intent(in)   :: den, abari, zbari !REVISE abar,zbar set manually for now until burn is implemented
+ real,             intent(in)   :: den, xmassi !REVISE abar,zbar set manually for now until burn is implemented
  integer,          intent(in)   :: relflag
 !
 !--Local variables
@@ -180,7 +161,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
  real(8), parameter :: eos_tol=1.0d-8
  real(8)  :: ewant, temp_iter, ener_iter, tnew, errorp, rel, denerdt!, asum,zsum,abar,zbar
  integer  :: k, newton, eosflag, ierr
- real     :: rho
+ real     :: rho,abari,zbari
 !
 !--Set initial data for the EOS
 !
@@ -213,6 +194,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !
 !--Call EOS
 !
+      call eos_helmholtz_calc_AbarZbar(xmassi,abari,zbari)
       call helmeos(temp_iter, rho, abari, zbari, ierr, ener_opt=ener_iter, denerdt_opt=denerdt) !REVISE implement error warning mechanism
       
 !
@@ -270,6 +252,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !
 
  if (eosflag == 2) then  ! Temperature as input
+     call eos_helmholtz_calc_AbarZbar(xmassi,abari,zbari)
      call helmeos(temp, rho, abari, zbari, ierr, ener_opt=ener_iter)
 
      ener = ener_iter/unit_ergg
@@ -289,7 +272,7 @@ subroutine eos_helmholtz_calc_AbarZbar(xmassi,abari,zbari)
 
  implicit none
 
- real,  intent(in):: xmassi(speciesmax)
+ real,  intent(in):: xmassi(:)
  real, intent(out):: abari,zbari
 
     abari = 1.0 / sum(xmassi(:) / aion(:))

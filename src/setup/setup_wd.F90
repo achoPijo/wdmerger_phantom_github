@@ -48,7 +48,7 @@ contains
 subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,time,fileprefix)
  use centreofmass,only: reset_centreofmass 
  use eos,         only: ieos, equationofstate, init_eos,finish_eos,relflag
- use eos_helmholtz, only: tmaxhelmeos,tminhelmeos,abar,zbar,xmass,eos_helmholtz_calc_AbarZbar
+ use eos_helmholtz, only: tmaxhelmeos,tminhelmeos,xmass
  use dim,         only: maxp
  use io,          only: master
  use kernel,      only: hfact_default
@@ -59,7 +59,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  use timestep,    only: tmax, dtmax
  use units,       only: set_units, select_unit, unit_pressure, unit_density
  use white_dwarf, only: set_wd
- use io,          only:warning
+ use io,          only: warning
 
  integer,           intent(in)    :: id
  integer,           intent(inout) :: npart
@@ -228,6 +228,26 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  
  call init_eos(ieos,ierr)
 
+ ! set the mass weightings of each species
+ ! currently hard-coded to 50/50 carbon-oxygen
+ ! TODO: update this to be set by user at runtime
+ do i=1,npart
+    xmass(:,i) = 0.0
+    xmass(3,i) = 0.5
+    xmass(4,i) = 0.5
+ enddo
+
+ do i=1,npart
+    if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
+      call warning('eos_helmholtz', 'mass fractions total != 1')
+      ierr = 1
+      return
+    endif
+ enddo
+
+
+
+
  do i=1,npart
     densi = rhoh(xyzh(4,i),massoftype(igas))
     if (maxvxyzu==4) then
@@ -245,7 +265,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     if (maxvxyzu == 5) then
        vxyzu(5,i) = Tin
        call equationofstate(ieos,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
-                            tempi=Tin,abari=abar(i),zbari=zbar(i),cvi=cvi)
+                            tempi=Tin,xmassi=xmass(:,i),cvi=cvi)
        vxyzu(4,i) = Tin*cvi
     endif
  enddo

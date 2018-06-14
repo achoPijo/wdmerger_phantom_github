@@ -118,7 +118,7 @@ contains
 !+
 !----------------------------------------------------------------
 subroutine equationofstate(eos_type,ponrhoi,spsoundi,rhoi,xi,yi,zi, &
-                           eni,tempi,abari,zbari,cvi,dPdTi)
+                           eni,tempi,xmassi,cvi,dPdTi)
  use io,       only:fatal,error
  use part,     only:xyzmh_ptmass
  use units,    only:unit_density,unit_pressure,unit_ergg,unit_velocity,unit_energ
@@ -130,7 +130,7 @@ subroutine equationofstate(eos_type,ponrhoi,spsoundi,rhoi,xi,yi,zi, &
  real,    intent(out) :: ponrhoi,spsoundi
  real,    intent(in), optional :: eni 
  real,    intent(in), optional :: tempi
- real,    intent(in), optional :: abari,zbari
+ real,    intent(in), optional :: xmassi(:)
  real,    intent(out),optional :: cvi, dPdTi
  real :: r,omega,bigH,polyk_new,r1,r2
  real :: gammai
@@ -290,7 +290,7 @@ subroutine equationofstate(eos_type,ponrhoi,spsoundi,rhoi,xi,yi,zi, &
   !  abar = 0.9     !REVISE IF THESE ARE TYPICAL VALUES FOR abar,zbar
   !  zbar = 0.1
     
-    call get_eos_press_sound_cv_dPdT_helmholtz(tempi,cgsrhoi,abari,zbari,cgsptot,cgsspsound,cgscv,cgsdPdT)!,abar,zbar)
+    call get_eos_press_sound_cv_dPdT_helmholtz(tempi,cgsrhoi,xmassi,cgsptot,cgsspsound,cgscv,cgsdPdT)!,abar,zbar)
     
     ptot = cgsptot/ unit_pressure  !REVISE INTERESTING TO MAKE EOS CALL TRANSPARENT TO UNITS AND HANDLE UNIT CHANGE INSIDE THE FUNCTION
     ponrhoi = ptot / rhoi
@@ -316,17 +316,17 @@ end subroutine equationofstate
 !  (called from step for decay timescale in alpha switches)
 !+
 !----------------------------------------------------------------
-real function get_spsound(ieos,xyzi,rhoi,vxyzui,abari,zbari)
+real function get_spsound(ieos,xyzi,rhoi,vxyzui,xmassi)
  use dim, only:maxvxyzu
  integer,      intent(in) :: ieos
  real,         intent(in) :: xyzi(:),rhoi
  real,         intent(in) :: vxyzui(maxvxyzu)
- real,         intent(in), optional :: abari,zbari
+ real,         intent(in), optional :: xmassi(:)
  real :: spsoundi,ponrhoi
 
  if (maxvxyzu>=4) then
     if (maxvxyzu == 5) then
-       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzi(1),xyzi(2),xyzi(3),vxyzui(4),vxyzui(5),abari,zbari)
+       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzi(1),xyzi(2),xyzi(3),vxyzui(4),vxyzui(5),xmassi)
     else
        call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzi(1),xyzi(2),xyzi(3),vxyzui(4))
     endif 

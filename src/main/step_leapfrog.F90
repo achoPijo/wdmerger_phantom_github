@@ -87,8 +87,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
  use externalforces, only:iext_corotate
 #ifdef TEMPEVOLUTION
  use eos,            only:relflag
- use eos_helmholtz,  only:helmholtz_energytemperature_switch,abar,zbar
-#endif
+ use eos_helmholtz,  only:helmholtz_energytemperature_switch,xmass
  use options,        only:avdecayconst,alpha,ieos,alphamax
  use deriv,          only:derivs
  use timestep,       only:dterr,bignumber
@@ -199,7 +198,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !$omp shared(twas,timei) &
 #endif
 #ifdef TEMPEVOLUTION
-!$omp shared(abar,zbar) &
+!$omp shared(xmass) &
 #endif
 !$omp private(hi,rhoi,tdecay1,source,ddenom,hdti) &
 !$omp private(i,spsoundi,alphaloci,divvdti) &
@@ -258,7 +257,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
           hi   = xyzh(4,i)
           rhoi = rhoh(hi,pmassi)
 #ifdef TEMPEVOLUTION
-          spsoundi = get_spsound(ieos,xyzh(:,i),rhoi,vpred(:,i),abar(i),zbar(i))
+          spsoundi = get_spsound(ieos,xyzh(:,i),rhoi,vpred(:,i),xmass(:,i))
 #else
           spsoundi = get_spsound(ieos,xyzh(:,i),rhoi,vpred(:,i))
 #endif
@@ -476,11 +475,11 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 
 #ifdef TEMPEVOLUTION
 !$omp parallel default(none)&
-!$omp shared(xyzh,vxyzu,massoftype,npart,abar,zbar,relflag) &
+!$omp shared(xyzh,vxyzu,massoftype,npart,xmass,relflag) &
 !$omp private(i)
 !$omp do schedule(runtime)
  do i=1,npart
-    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),abar(i),zbar(i),relflag)
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),xmass(:,i),relflag)
  enddo
 !$omp enddo
 !$omp end parallel

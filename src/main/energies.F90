@@ -97,7 +97,7 @@ subroutine compute_energies(t)
  use part,         only:luminosity
 #endif
 #ifdef TEMPEVOLUTION
- use eos_helmholtz,  only:abar,zbar
+ use eos_helmholtz,  only:xmass
 #endif
 
  real, intent(in) :: t
@@ -159,7 +159,7 @@ subroutine compute_energies(t)
 !$omp parallel default(none) &
 !$omp shared(xyzh,vxyzu,iexternalforce,npart,t,id) &
 #ifdef TEMPEVOLUTION
-!$omp shared(abar,zbar) &
+!$omp shared(xmass) &
 #endif
 !$omp shared(alphaind,massoftype,irealvisc) &
 !$omp shared(ieos,gamma,nptmass,xyzmh_ptmass,vxyz_ptmass) &
@@ -301,7 +301,7 @@ subroutine compute_energies(t)
           if (maxvxyzu >= 4) then
              etherm = etherm + pmassi*utherm(vxyzu(4,i),rhoi)*gasfrac
              if (maxvxyzu == 4) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i))
-             if (maxvxyzu == 5) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i),vxyzu(5,i),abar(i),zbar(i))
+             if (maxvxyzu == 5) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i),vxyzu(5,i),xmass(:,i))
           else
              call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi)
              if (ieos==2 .and. gamma > 1.001) then

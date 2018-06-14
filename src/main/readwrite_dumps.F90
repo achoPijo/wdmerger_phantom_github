@@ -317,6 +317,9 @@ subroutine write_fulldump(t,dumpfile,ntotal,iorder,sphNG)
  use dim,  only:mhd_nonideal
  use part, only:ionfrac_eta,ionfrac_eta_label
 #endif
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:nuc_burn,xmass,speciesmax,xmass_label
+#endif 
  real,             intent(in) :: t
  character(len=*), intent(in) :: dumpfile
  integer,          intent(in), optional :: iorder(:)
@@ -436,6 +439,9 @@ subroutine write_fulldump(t,dumpfile,ntotal,iorder,sphNG)
        if (h2chemistry)  call write_array(1,abundance,abundance_label,nabundances,npart,k,ipass,idump,nums,ierrs(4))
        if (use_dust)     call write_array(1,dustfrac,'dustfrac',npart,k,ipass,idump,nums,ierrs(5))
        if (use_dustfrac) call write_array(1,deltav,deltav_label,3,npart,k,ipass,idump,nums,ierrs(6))
+#ifdef TEMPEVOLUTION
+       if (nuc_burn)     call write_array(1,xmass,xmass_label,speciesmax,npart,k,ipass,idump,nums,ierrs(15))
+#endif 
 
        ! write pressure to file
        if (ieos==10 .and. k==i_real) then
@@ -1082,6 +1088,9 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
 #ifdef IND_TIMESTEPS
  use part,       only:dt_in
 #endif
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:nuc_burn,xmass,speciesmax,xmass_label
+#endif 
  integer, intent(in)   :: i1,i2,noffset,narraylengths,nums(:,:),npartread,npartoftype(:),idisk1,iprint
  real,    intent(in)   :: massoftype(:)
  integer, intent(in)   :: nptmass,nsinkproperties
@@ -1092,7 +1101,7 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  logical               :: got_iphase,got_xyzh(4),got_abund(nabundances),got_alpha,got_poten
  logical               :: got_sink_data(nsinkproperties),got_sink_vels(3),got_Bevol(maxBevol)
 #ifdef TEMPEVOLUTION
- logical               :: got_vxyzu(5)
+ logical               :: got_vxyzu(5),got_xmass(speciesmax)
 #else
  logical               :: got_vxyzu(4)
 #endif 
@@ -1111,6 +1120,9 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  got_sink_data = .false.
  got_sink_vels = .false.
  got_Bevol     = .false.
+#ifdef TEMPEVOLUTION
+ got_xmass(speciesmax)=(.false.)
+#else
 
  over_arraylengths: do iarr=1,narraylengths
 
@@ -1137,6 +1149,7 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
           if (h2chemistry) then
              call read_array(abundance,abundance_label,got_abund,ik,i1,i2,noffset,idisk1,tag,match,ierr)
           endif
+          if (nuc_burn) call read_array(xmass,xmass_label,got_xmass,ik,i1,i2,noffset,idisk1,tag,match,ierr)
           if (maxalpha==maxp) call read_array(alphaind(1,:),'alpha',got_alpha,ik,i1,i2,noffset,idisk1,tag,match,ierr)
 
           !
@@ -1354,6 +1367,13 @@ subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,mass
     ierr = 9
     return
  endif
+
+ if (nuc_burn .and. .not.all(got_xmass)) then
+    write(*,*) 'error in rdump: using nuclear burning, but abundances not found in dump file'
+    ierr = 15
+    return
+ endif
+
  if (maxalpha==maxp) then
     if (got_alpha) then
        if (alphafile < 0.99 .and. tfile > 0.) then

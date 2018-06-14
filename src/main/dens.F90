@@ -145,7 +145,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
  use viscosity, only:irealvisc,bulkvisc,shearparam
  use io_summary,only:summary_variable,iosumhup,iosumhdn
 #ifdef TEMPEVOLUTION
- use eos_helmholtz,  only:abar,zbar
+ use eos_helmholtz,  only:xmass
 #endif
  integer,      intent(in)    :: icall,npart,nactive
  real,         intent(inout) :: xyzh(:,:)
@@ -269,7 +269,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
 !$omp private(denom,rmatrix) &
 !$omp reduction(max:stressmax,rhomax) &
 #ifdef TEMPEVOLUTION
-!$omp shared(abar,zbar) &
+!$omp shared(xmass) &
 #endif
 #ifdef MPI
 !$omp reduction(+:nwarnroundoff) &
@@ -508,7 +508,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
        write(iprint,*) 'v_x,v_y,v_z = ',vxyzu(1:3,i)
        if (maxvxyzu >= 4) write(iprint,*) 'u = ',vxyzu(4,i)
        if (maxvxyzu == 5) then
-          write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),abar(i),zbar(i))
+          write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),xmass(:,i))
           write(iprint,*) 'temperature = ',vxyzu(5,i)
        else
           write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
@@ -553,7 +553,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
        !
        if (nalpha >= 2 .and. iamgasi) then
 #ifdef TEMPEVOLUTION
-          spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),abar(i),zbar(i))    
+          spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),xmass(:,i))    
 #else
           spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))        
 #endif        
@@ -1231,14 +1231,14 @@ end subroutine exactlinear
 !  (called from step for decay timescale in alpha switches)
 !+
 !----------------------------------------------------------------
-real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi,abari,zbari)
+real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi,xmassi)
  use eos,  only:equationofstate
  use part, only:maxp,mhd,maxvxyzu,rhoh
  real,         intent(in) :: xyzhi(4),pmassi
  real,         intent(in) :: vxyzui(maxvxyzu)
  integer,      intent(in) :: ieos
  real(kind=4), intent(in), optional :: Bxyzi(3)
- real,         intent(in), optional :: abari,zbari
+ real,         intent(in), optional :: xmassi(:)
  real :: spsoundi,hi,rhoi,ponrhoi,valfven2i
 
  hi = xyzhi(4)
@@ -1247,7 +1247,7 @@ real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi,abari,zbari)
     call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3),vxyzui(4))
  else
     if (maxvxyzu==5) then
-       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3),vxyzui(4),vxyzui(5),abari,zbari)
+       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3),vxyzui(4),vxyzui(5),xmassi)
     else
        call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3))
     endif
