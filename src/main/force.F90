@@ -1997,7 +1997,7 @@ subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
   real,    intent(in)    :: strain(6)
   real,    intent(inout) :: eni
   real,    intent(inout),  optional :: tempi
-  real,    intent(in),  optional :: xmassi
+  real,    intent(in),  optional :: xmassi(:)
   real,    intent(out), optional :: cvi,dPdTi 
 
   real :: Bro2i,Brhoxi,Brhoyi,Brhozi,rhogasi,gasfrac
