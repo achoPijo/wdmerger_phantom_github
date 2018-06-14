@@ -1122,7 +1122,7 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  got_Bevol     = .false.
 #ifdef TEMPEVOLUTION
  got_xmass(speciesmax)=(.false.)
-#else
+#endif
 
  over_arraylengths: do iarr=1,narraylengths
 
@@ -1151,7 +1151,7 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
           endif
 #ifdef TEMPEVOLUTION
           call read_array(xmass,xmass_label,got_xmass,ik,i1,i2,noffset,idisk1,tag,match,ierr)
-#else
+#endif
           if (maxalpha==maxp) call read_array(alphaind(1,:),'alpha',got_alpha,ik,i1,i2,noffset,idisk1,tag,match,ierr)
 
           !
