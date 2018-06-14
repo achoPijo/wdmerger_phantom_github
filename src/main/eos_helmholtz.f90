@@ -33,7 +33,8 @@ module eos_helmholtz
 
  public  :: init_eos_helmholtz, get_eos_press_sound_cv_dPdT_helmholtz, helmholtz_energytemperature_switch
  public  :: tmaxhelmeos, tminhelmeos, cgsrhomaxhelmeos, cgsrhominhelmeos
- public  :: speciesmax,speciesname,xmass,abar,zbar,eos_helmholtz_calc_AbarZbar
+ public  :: speciesmax,speciesname,xmass,abar,zbar,eos_helmholtz_calc_AbarZbar,xmass_label
+ public  :: nuc_burn !TODO REMEMBER TO TRANSFER TO NUCLEARBURNING
  private
 
  ! these set the mixture of species
@@ -45,6 +46,10 @@ module eos_helmholtz
  real :: Aion(speciesmax)  ! number of nucleons
  real :: Zion(speciesmax)  ! number of protons
  real :: abar(maxp), zbar(maxp)
+ logical :: nuc_burn = .false.
+ character(len=*) :: xmass_label(speciesmax)=(/'hydrogen ','helium    ','carbon   ','oxygen   ',&
+  'neon     ','magnesium','silicon  ','sulphur  ','argon    ','calcium  ','titanium ','chromium ',&
+  'iron     ','nickel   ','zinc     ' /) !TODO find a way to make it automatic
 
 contains
 

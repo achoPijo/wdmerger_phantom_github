@@ -318,7 +318,7 @@ subroutine write_fulldump(t,dumpfile,ntotal,iorder,sphNG)
  use part, only:ionfrac_eta,ionfrac_eta_label
 #endif
 #ifdef TEMPEVOLUTION
- use eos_helmholtz,  only:nuc_burn,xmass,speciesmax,xmass_label
+ use eos_helmholtz,  only:xmass,speciesmax,xmass_label
 #endif 
  real,             intent(in) :: t
  character(len=*), intent(in) :: dumpfile
@@ -440,7 +440,7 @@ subroutine write_fulldump(t,dumpfile,ntotal,iorder,sphNG)
        if (use_dust)     call write_array(1,dustfrac,'dustfrac',npart,k,ipass,idump,nums,ierrs(5))
        if (use_dustfrac) call write_array(1,deltav,deltav_label,3,npart,k,ipass,idump,nums,ierrs(6))
 #ifdef TEMPEVOLUTION
-       if (nuc_burn)     call write_array(1,xmass,xmass_label,speciesmax,npart,k,ipass,idump,nums,ierrs(15))
+       call write_array(1,xmass,xmass_label,speciesmax,npart,k,ipass,idump,nums,ierrs(15))
 #endif 
 
        ! write pressure to file
@@ -1089,7 +1089,7 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  use part,       only:dt_in
 #endif
 #ifdef TEMPEVOLUTION
- use eos_helmholtz,  only:nuc_burn,xmass,speciesmax,xmass_label
+ use eos_helmholtz,  only:xmass,speciesmax,xmass_label
 #endif 
  integer, intent(in)   :: i1,i2,noffset,narraylengths,nums(:,:),npartread,npartoftype(:),idisk1,iprint
  real,    intent(in)   :: massoftype(:)
@@ -1149,7 +1149,9 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
           if (h2chemistry) then
              call read_array(abundance,abundance_label,got_abund,ik,i1,i2,noffset,idisk1,tag,match,ierr)
           endif
-          if (nuc_burn) call read_array(xmass,xmass_label,got_xmass,ik,i1,i2,noffset,idisk1,tag,match,ierr)
+#ifdef TEMPEVOLUTION
+          call read_array(xmass,xmass_label,got_xmass,ik,i1,i2,noffset,idisk1,tag,match,ierr)
+#else
           if (maxalpha==maxp) call read_array(alphaind(1,:),'alpha',got_alpha,ik,i1,i2,noffset,idisk1,tag,match,ierr)
 
           !
@@ -1368,7 +1370,7 @@ subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,mass
     return
  endif
 
- if (nuc_burn .and. .not.all(got_xmass)) then
+ if (maxvxyzu==5 .and. .not.all(got_xmass)) then
     write(*,*) 'error in rdump: using nuclear burning, but abundances not found in dump file'
     ierr = 15
     return
