@@ -47,7 +47,7 @@ module eos_helmholtz
  real :: Zion(speciesmax)  ! number of protons
  real :: abar(maxp), zbar(maxp)
  logical :: nuc_burn = .false.
- character(len=*) :: xmass_label(speciesmax)=(/'hydrogen ','helium    ','carbon   ','oxygen   ',&
+ character(len=*), parameter  :: xmass_label(speciesmax)=(/'hydrogen ','helium    ','carbon   ','oxygen   ',&
   'neon     ','magnesium','silicon  ','sulphur  ','argon    ','calcium  ','titanium ','chromium ',&
   'iron     ','nickel   ','zinc     ' /) !TODO find a way to make it automatic
 
@@ -157,7 +157,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !--I/O variables
 !
  real,             intent(inout):: temp, ener
- real,             intent(in)   :: den, xmassi !REVISE abar,zbar set manually for now until burn is implemented
+ real,             intent(in)   :: den, xmassi(:) !REVISE abar,zbar set manually for now until burn is implemented
  integer,          intent(in)   :: relflag
 !
 !--Local variables
