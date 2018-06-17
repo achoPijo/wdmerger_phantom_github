@@ -44,7 +44,7 @@ module eos_helmholtz
  real :: abar(maxp), zbar(maxp)
  character(len=*), parameter  :: xmass_label(speciesmax)=(/'hydrogen ','helium    ','carbon   ','oxygen   ',&
   'neon     ','magnesium','silicon  ','sulphur  ','argon    ','calcium  ','titanium ','chromium ',&
-  'iron     ','nickel   ','zinc     ' /) !TODO find a way to make it automatic
+  'iron     ','nickel   ','zinc     ','photons' /) !TODO find a way to make it automatic
 
 contains
 
@@ -75,7 +75,7 @@ subroutine init_eos_helmholtz(ierr)
  speciesname(13) = "iron"
  speciesname(14) = "nickel"
  speciesname(15) = "zinc"
- speciesname(16) = "heavier"
+ speciesname(16) = "photons"
 
 
  Aion(1) = 1.0    ;  Zion(1) = 1.0   ! hydrogen
@@ -93,7 +93,7 @@ subroutine init_eos_helmholtz(ierr)
  Aion(13) = 52.0  ;  Zion(13) = 26.0  ! iron
  Aion(14) = 56.0  ;  Zion(14) = 28.0  ! nickel
  Aion(15) = 60.0  ;  Zion(15) = 30.0  ! zinc
- Aion(16) = 999.0 ;  Zion(16) = 99.0  ! heavier
+ Aion(16) = 999.0 ;  Zion(16) = 99.0  ! photons (not real aion,zion just structurally neccesary)
 
 end subroutine init_eos_helmholtz
 

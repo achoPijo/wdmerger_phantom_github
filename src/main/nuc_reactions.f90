@@ -3,6 +3,7 @@ module nuc_reactions
 
    public :: nuclear_burning, nuc_burn
    public :: write_options_nuc_burning, read_options_nuc_burning
+   public :: init_nuc_burning
 
    private
 
@@ -249,6 +250,21 @@ module nuc_reactions
       IF (rank.EQ.MASTER) PRINT*,'burn: max. num. iteraciones:',itermax
 !
       END SUBROUTINE nuclear_burning
+
+!-----------------------------------------------------------------------
+!+
+!  initialise equation of state (read tables etc.)
+!+
+!-----------------------------------------------------------------------
+subroutine init_nuc_burning(ierr)
+ use io,            only:error
+ integer, intent(out) :: ierr
+ !
+ ierr = 0
+ !
+ call RNETWORK
+
+end subroutine init_nuc_burning
 
 !-----------------------------------------------------------------------
 !+

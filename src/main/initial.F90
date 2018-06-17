@@ -199,6 +199,9 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
 #endif
  use writeheader,      only:write_codeinfo,write_header
  use eos,              only:gamma,polyk,ieos,init_eos
+#ifdef TEMPEVOLUTION
+ use nuc_burning,      only:init_nuc_burning
+#endif
  use part,             only:hfact,h2chemistry
  use setup,            only:setpart
  use checksetup,       only:check_setup
@@ -300,6 +303,11 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
 !
  call init_eos(ieos,ierr)
  if (ierr /= 0) call fatal('initial','error initialising equation of state')
+!
+!--initialise the nuclear burning 
+!
+ call init_nuc_burning(ieos,ierr)
+ if (ierr /= 0) call fatal('initial','error initialising nuclear burning')
 !
 !--Initialise values for summary array
  call summary_initialise

@@ -26,7 +26,6 @@ module setup
  use extern_gwinspiral, only: Nstar
  use part,              only: maxvxyzu
  use units,             only: utime
- use nuc_reactions,     only: nuc_burn
  implicit none
 
  real(kind=8)       :: udist,umass
@@ -49,7 +48,7 @@ contains
 subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,time,fileprefix)
  use centreofmass,only: reset_centreofmass 
  use eos,         only: ieos, equationofstate, init_eos,finish_eos,relflag
- use eos_helmholtz, only: tmaxhelmeos,tminhelmeos,xmass
+ use eos_helmholtz, only: tmaxhelmeos,tminhelmeos,xmass,speciesmax
  use dim,         only: maxp
  use io,          only: master
  use kernel,      only: hfact_default
@@ -61,6 +60,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  use units,       only: set_units, select_unit, unit_pressure, unit_density
  use white_dwarf, only: set_wd
  use io,          only: warning
+ use nuc_reactions, only: nuc_burn
 
  integer,           intent(in)    :: id
  integer,           intent(inout) :: npart
@@ -239,7 +239,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  enddo
 
  do i=1,npart
-    if (sum(xmass(:,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
+    if (sum(xmass(1:spe,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
       call warning('eos_helmholtz', 'mass fractions total != 1')
       ierr = 1
       return
