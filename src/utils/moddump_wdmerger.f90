@@ -56,6 +56,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  use externalforces,          only: iext_corotate
  use extern_corotate,         only: omega_corotate,dynfac
  use extern_gwinspiral,       only: Nstar
+ use nuc_reactions,           only: nuc_burn
  integer, intent(inout)    :: npart
  integer, intent(inout)    :: npartoftype(:)
  real,    intent(inout)    :: massoftype(:)
@@ -219,6 +220,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  !damp           =    0.
  nfulldump      =    1
  relflag        =    2
+ nuc_burn       =    0
 
 
  return

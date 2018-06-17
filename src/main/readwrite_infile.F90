@@ -109,6 +109,9 @@ subroutine write_infile(infile,logfile,evfile,dumpfile,iwritein,iprint)
  use cooling,         only:write_options_cooling
  use dim,             only:maxvxyzu,maxptmass,gravity
  use part,            only:h2chemistry,maxp,mhd,maxalpha,nptmass
+#ifdef TEMPEVOLUTION
+ use nuc_reactions,   only:write_options_nuc_burning
+#endif
  character(len=*), intent(in) :: infile,logfile,evfile,dumpfile
  integer,          intent(in) :: iwritein,iprint
  integer                      :: ierr
@@ -205,6 +208,10 @@ subroutine write_infile(infile,logfile,evfile,dumpfile,iwritein,iprint)
     endif
  endif
 
+#ifdef TEMPEVOLUTION
+ call write_options_nuc_burning(iwritein)
+#endif
+
  if (maxvxyzu >= 4) call write_options_cooling(iwritein)
 
  ! only write sink options if they are used, or if self-gravity is on
@@ -275,6 +282,9 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
  use part,          only:mhd,nptmass
  use cooling,       only:read_options_cooling
  use ptmass,        only:read_options_ptmass
+#ifdef TEMPEVOLUTION
+ use nuc_reactions, only:read_options_nuc_burning
+#endif
  character(len=*), parameter   :: label = 'read_infile'
  character(len=*), intent(in)  :: infile
  character(len=*), intent(out) :: logfile,evfile,dumpfile
@@ -286,6 +296,7 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
  logical :: imatch,igotallrequired,igotallturb,igotalllink,igotloops
  logical :: igotallbowen,igotallcooling,igotalldust,igotallextern,igotallinject
  logical :: igotallionise,igotallnonideal,igotalleos,igotallptmass,igotallphoto
+ logical :: igotallnuc
  integer, parameter :: nrequired = 1
 
  ireaderr = 0
@@ -418,6 +429,9 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
        if (.not.imatch) call read_options_nicil(name,valstring,imatch,igotallnonideal,ierr)
 #endif
        if (.not.imatch) call read_options_eos(name,valstring,imatch,igotalleos,ierr)
+#ifdef TEMPEVOLUTION
+       if (.not.imatch) call read_options_nuc_burning(name,valstring,imatch,igotallnuc,ierr)
+#endif     
        if (.not.imatch) call read_options_cooling(name,valstring,imatch,igotallcooling,ierr)
        if (maxptmass > 0) then
           if (.not.imatch) call read_options_ptmass(name,valstring,imatch,igotallptmass,ierr)
@@ -441,7 +455,7 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
  igotallrequired = (ngot  >=  nrequired) .and. igotalllink .and. igotallbowen .and. igotalldust &
                    .and. igotalleos .and. igotallcooling .and. igotallextern .and. igotallturb &
                    .and. igotallptmass .and. igotallinject .and. igotallionise .and. igotallnonideal &
-                   .and. igotallphoto
+                   .and. igotallphoto .and. igotallnuc
 
  if (ierr /= 0 .or. ireaderr > 0 .or. .not.igotallrequired) then
     ierr = 1
@@ -453,6 +467,7 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
        else
           call error('read_infile','input file '//trim(infile)//' is incomplete for current compilation')
           if (.not.igotalleos) write(*,*) 'missing equation of state options'
+          if (.not.igotallnuc) write(*,*) 'missing nuclear burning options'          
           if (.not.igotallcooling) write(*,*) 'missing cooling options'
           if (.not.igotalllink) write(*,*) 'missing link options'
           if (.not.igotallbowen) write(*,*) 'missing Bowen dust options'

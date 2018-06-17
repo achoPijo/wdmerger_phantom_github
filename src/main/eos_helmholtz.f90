@@ -36,7 +36,7 @@ module eos_helmholtz
  public  :: speciesmax,speciesname,xmass,abar,zbar,eos_helmholtz_calc_AbarZbar,xmass_label
  private
 
- integer, parameter :: speciesmax = 15
+ integer, parameter :: speciesmax = 16
  character(len=10) :: speciesname(speciesmax)
  real :: xmass(speciesmax,maxp) ! mass fraction of species
  real :: Aion(speciesmax)  ! number of nucleons
@@ -75,6 +75,8 @@ subroutine init_eos_helmholtz(ierr)
  speciesname(13) = "iron"
  speciesname(14) = "nickel"
  speciesname(15) = "zinc"
+ speciesname(16) = "heavier"
+
 
  Aion(1) = 1.0    ;  Zion(1) = 1.0   ! hydrogen
  Aion(2) = 4.0    ;  Zion(2) = 2.0   ! helium
@@ -91,6 +93,7 @@ subroutine init_eos_helmholtz(ierr)
  Aion(13) = 52.0  ;  Zion(13) = 26.0  ! iron
  Aion(14) = 56.0  ;  Zion(14) = 28.0  ! nickel
  Aion(15) = 60.0  ;  Zion(15) = 30.0  ! zinc
+ Aion(16) = 999.0 ;  Zion(16) = 99.0  ! heavier
 
 end subroutine init_eos_helmholtz
 

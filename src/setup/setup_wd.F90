@@ -26,6 +26,7 @@ module setup
  use extern_gwinspiral, only: Nstar
  use part,              only: maxvxyzu
  use units,             only: utime
+ use nuc_reactions,     only: nuc_burn
  implicit none
 
  real(kind=8)       :: udist,umass
@@ -294,6 +295,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  iexternalforce =    0
  alphau         =    0
  relflag        =    1
+ nuc_burn       =    0
 
 end subroutine setpart
 !-----------------------------------------------------------------------

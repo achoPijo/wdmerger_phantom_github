@@ -86,8 +86,9 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
  use eos_helmholtz,  only:tmaxhelmeos,tminhelmeos
  use externalforces, only:iext_corotate
 #ifdef TEMPEVOLUTION
- use eos,            only:relflag
- use eos_helmholtz,  only:helmholtz_energytemperature_switch,xmass
+ use eos,            only: relflag
+ use eos_helmholtz,  only: helmholtz_energytemperature_switch,xmass
+ use nuc_reactions,  only: nuc_burn, nuc_burning
 #endif
  use options,        only:avdecayconst,alpha,ieos,alphamax
  use deriv,          only:derivs
@@ -469,6 +470,13 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !   get new force using updated velocity: no need to recalculate density etc.
 !
     call derivs(2,npart,nactive,xyzh,vpred,fxyzu,fext,divcurlv,divcurlB,Bpred,dBevol,dustfrac,ddustfrac,timei,dtsph,dtnew)
+
+!
+!   compute nuclear burning
+!
+#ifdef TEMPEVOLUTION
+    if (nuc_burn) call nuc_burning(vxyzu,npart,dt,fxyzu)
+#endif
 
  endif
 
