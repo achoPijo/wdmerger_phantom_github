@@ -239,7 +239,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  enddo
 
  do i=1,npart
-    if (sum(xmass(1:spe,i)) > 1.0+tiny(xmass) .or. sum(xmass(:,i)) < 1.0-tiny(xmass)) then
+    if (sum(xmass(1:speciesmax-1,i)) > 1.0+tiny(xmass) .or. sum(xmass(1:speciesmax-1,i)) < 1.0-tiny(xmass)) then
       call warning('eos_helmholtz', 'mass fractions total != 1')
       ierr = 1
       return
