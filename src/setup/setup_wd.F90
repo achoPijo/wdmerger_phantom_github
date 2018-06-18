@@ -46,20 +46,20 @@ contains
 !+
 !----------------------------------------------------------------
 subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,time,fileprefix)
- use centreofmass,only: reset_centreofmass 
- use eos,         only: ieos, equationofstate, init_eos,finish_eos,relflag
+ use centreofmass,  only: reset_centreofmass 
+ use eos,           only: ieos, equationofstate, init_eos,finish_eos,relflag
  use eos_helmholtz, only: tmaxhelmeos,tminhelmeos,xmass,speciesmax
- use dim,         only: maxp
- use io,          only: master
- use kernel,      only: hfact_default
- use options,     only: iexternalforce,nfulldump,damp,alphau
- use part,        only: igas,rhoh
- use physcon,     only: solarm,solarr,pi,planckh,mass_electron_cgs,mass_proton_cgs
- use prompting,   only: prompt
- use timestep,    only: tmax, dtmax
- use units,       only: set_units, select_unit, unit_pressure, unit_density
- use white_dwarf, only: set_wd
- use io,          only: warning
+ use dim,           only: maxp
+ use io,            only: master
+ use kernel,        only: hfact_default
+ use options,       only: iexternalforce,nfulldump,damp,alphau
+ use part,          only: igas,rhoh
+ use physcon,       only: solarm,solarr,pi,planckh,mass_electron_cgs,mass_proton_cgs
+ use prompting,     only: prompt
+ use timestep,      only: tmax, dtmax
+ use units,         only: set_units, select_unit, unit_pressure, unit_density
+ use white_dwarf,   only: set_wd
+ use io,            only: warning
  use nuc_reactions, only: nuc_burn
 
  integer,           intent(in)    :: id
