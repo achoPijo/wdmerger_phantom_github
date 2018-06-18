@@ -255,13 +255,21 @@ module nuc_reactions
 !  initialise equation of state (read tables etc.)
 !+
 !-----------------------------------------------------------------------
-subroutine init_nuc_burning(ierr)
+subroutine init_nuc_burning(ieos,ierr)
  use io,            only:error
+ integer, intent(in)  :: ieos
  integer, intent(out) :: ierr
  !
  ierr = 0
  !
+ if (ieos/=15) then
+    ierr = 1
+    return
+ endif
+
  call RNETWORK
+ 
+ !TODO ATTENTION, NEED TO FIND A WAY TO DETECT PROBLEM IN INITIALIZING 
 
 end subroutine init_nuc_burning
 
