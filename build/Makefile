@@ -1523,12 +1523,12 @@ SOURCES= physcon.f90 ${CONFIG} ${SRCKERNEL} io.F90 units.f90 boundary.f90 mpi_ut
          utils_sort.f90 utils_supertimestep.F90 utils_tables.f90 utils_sphNG.f90 utils_timing.f90 utils_vectors.f90 \
          utils_datafiles.f90 datafiles.f90 ${SRCFASTMATH} random.f90 \
          checkoptions.F90 ${SRCEOS} set_binary.f90 \
-         viscosity.f90 options.f90 centreofmass.f90 ${SRCPOT} \
+         viscosity.f90 options.f90 centreofmass.f90 ${SRCPOT} jjose2.f nuc_reactions.f90\
          set_disc.F90 partinject.F90 \
          utils_filenames.f90 utils_summary.F90 ${SRCCHEM} directsum.f90 ${SRCDUST} readwrite_dumps.F90 quitdump.f90 \
          ${DOMAIN} mpi_derivs.F90 ${LINKLIST} \
          ${SRCTURB} ${SRCNIMHD} ${SRCPHOTO} ${SRCINJECT} \
-         ptmass.F90 readwrite_infile.F90 jjose2.f nuc_reactions.f90 \
+         ptmass.F90 readwrite_infile.F90 \
 	     dens.F90 force.F90 deriv.F90 energies.F90 \
          sort_particles.F90 evwrite.F90 corot_binary_relaxation.f90\
          step_leapfrog.F90 writeheader.F90 writegitinfo.f90 ${SRCAN} step_supertimestep.F90 mf_write.f90 evolve.F90\
