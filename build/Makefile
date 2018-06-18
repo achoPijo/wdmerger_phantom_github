@@ -1613,7 +1613,7 @@ SRCSETUP= utils_omp.F90 utils_sort.f90 utils_timing.f90 utils_filenames.f90 util
           ${SETUPFILE} checksetup.F90 \
           set_Bfield.f90 readwrite_infile.f90
 OBJSETUP1= $(SRCSETUP:.f90=.o)
-OBJSETUP= $(OBJDUMP) $(OBJSETUP1:.F90=.o) phantomsetup.o
+OBJSETUP= $(OBJDUMP) $(OBJECTSF) $(OBJSETUP1:.F90=.o) phantomsetup.o
 
 .PHONY: phantomsetup
 phantomsetup: setup
