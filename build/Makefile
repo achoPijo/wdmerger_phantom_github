@@ -1482,6 +1482,9 @@ OBJDIR=obj
 .SUFFIXES:
 .SUFFIXES: .o .f90 .F90 .c .f
 
+%.o : %.f
+	$(FC) -c $(FFLAGS) $< -o $@
+
 %.o : %.f90
 	$(FC) -c $(FFLAGS) $< -o $@
 
@@ -1490,9 +1493,6 @@ OBJDIR=obj
 
 %.o : %.c
 	$(CC) -c $(CCFLAGS) $< -o $@
-
-%.o : %.f
-	$(FC) -c $(FFLAGS) $< -o $@
 
 # these are the sources common to all compilations
 ifeq (X$(SRCPOTS), X)

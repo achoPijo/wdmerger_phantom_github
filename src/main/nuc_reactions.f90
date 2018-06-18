@@ -54,8 +54,7 @@ module nuc_reactions
 !--Local variables
 !     
       REAL(8), DIMENSION(speciesmax-1) :: xss2                 
-      REAL(8) :: rhopcgs, rhop, temp, cvp, enucp, luminucp, sumAE2, t1, t2, abar,&
-                 zbar, sumdt
+      REAL(8) :: rhopcgs, rhop, temp, cvp, enucp, luminucp, sumAE2, sumdt
       REAL(8), PARAMETER :: rhotiny=5.0d0
       INTEGER :: i, p, JK, k, m, iread, iteration, itermax
       INTEGER, PARAMETER :: iter_max=1000, NIS=speciesmax-2, NSP=NIS+1, NRE=29,&
