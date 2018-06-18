@@ -88,7 +88,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 #ifdef TEMPEVOLUTION
  use eos,            only: relflag
  use eos_helmholtz,  only: helmholtz_energytemperature_switch,xmass
- use nuc_reactions,  only: nuc_burn, nuc_burning
+ use nuc_reactions,  only: nuc_burn, nuclear_burning
 #endif
  use options,        only:avdecayconst,alpha,ieos,alphamax
  use deriv,          only:derivs
@@ -475,7 +475,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !   compute nuclear burning
 !
 #ifdef TEMPEVOLUTION
-    if (nuc_burn) call nuc_burning(vxyzu,npart,dt,fxyzu)
+    if (nuc_burn) call nuclear_burning(xyzh,vxyzu,fxyzu,npart,dtsph)
 #endif
 
  endif
