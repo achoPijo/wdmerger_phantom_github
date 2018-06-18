@@ -33,7 +33,7 @@ module nuc_reactions
 !
       !USE mod_essentials
       USE units,         ONLY : umass, unit_density, utime, unit_energ, unit_ergg
-      USE part,          ONLY : rhoh
+      USE part,          ONLY : rhoh, massoftype, igas
       use eos_helmholtz, only : xmass,speciesmax
       use eos,           only : ieos,equationofstate
 !
@@ -54,7 +54,7 @@ module nuc_reactions
 !--Local variables
 !     
       REAL(8), DIMENSION(speciesmax-1) :: xss2                 
-      REAL(8) :: rhocgs, rhop, temp, cvp, enucp, luminucp, sumAE2, t1, t2, abar,&
+      REAL(8) :: rhopcgs, rhop, temp, cvp, enucp, luminucp, sumAE2, t1, t2, abar,&
                  zbar, sumdt
       REAL(8), PARAMETER :: rhotiny=5.0d0
       INTEGER :: i, p, JK, k, m, iread, iteration, itermax
@@ -77,8 +77,7 @@ module nuc_reactions
       CHARACTER(6),  DIMENSION(NRE) :: z1, z2, z3, z4
       CHARACTER(37), DIMENSION(NRE) :: reaction
       integer                       :: burn_option
-      real                          :: cvp
-      real                          :: dummyr1,dummyr2
+      real                          :: dummyt,dummyr1,dummyr2
 !
       COMMON /cvit/V2,tgrid,aNegrid
       COMMON /cvgrid/vgrid,flag,ndata
@@ -158,7 +157,7 @@ module nuc_reactions
 !
             DTMOLDP = 0.0d0
             SUMYY   = 0.0d0
-            CALL SNUC(tnow,DTMNEWP,rhopcgs,temp,SUMYY,DTMOLDP,1,iread)
+            CALL SNUC(dummyt,DTMNEWP,rhopcgs,temp,SUMYY,DTMOLDP,1,iread)
             IF (iread.EQ.0) iread=1
 !
 !--If nuclear is bigger than SPH time-step, adopt SPH time-step 
@@ -178,7 +177,7 @@ module nuc_reactions
 !--Total nuclear luminosity released. AE2 is in erg g-1 s-1, so 
 !  change to code units
 !
-            sumAE2 = AE2*DTMOLDP*(umass/unit_energ)  
+            sumAE2 = sum(AE2)*DTMOLDP*(umass/unit_energ)  
             enucp  = enucp + sumAE2
 
             ! Three different options
@@ -247,7 +246,7 @@ module nuc_reactions
 !!$OMP END PARALLEL
 !
 !
-      IF (rank.EQ.MASTER) PRINT*,'burn: max. num. iteraciones:',itermax
+      !IF (rank.EQ.MASTER) PRINT*,'burn: max. num. iteraciones:',itermax
 !
       END SUBROUTINE nuclear_burning
 
