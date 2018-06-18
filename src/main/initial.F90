@@ -200,7 +200,7 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
  use writeheader,      only:write_codeinfo,write_header
  use eos,              only:gamma,polyk,ieos,init_eos
 #ifdef TEMPEVOLUTION
- use nuc_burning,      only:init_nuc_burning
+ use nuc_reactions,    only:init_nuc_burning
 #endif
  use part,             only:hfact,h2chemistry
  use setup,            only:setpart
