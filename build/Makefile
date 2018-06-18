@@ -1544,11 +1544,11 @@ SOURCES= physcon.f90 ${CONFIG} ${SRCKERNEL} io.F90 units.f90 boundary.f90 mpi_ut
 SOURCESF = jjose2.f
 OBJECTSF = $(SOURCESF:.f=.o)
 OBJECTS1 = $(SOURCES:.f90=.o)
-OBJECTS = $(OBJECTS1:.F90=.o)
+OBJECTS = $(OBJECTSF) $(OBJECTS1:.F90=.o)
 
 .PHONY: phantom
-phantom: checksystem checkparams $(OBJECTSF) $(OBJECTS) phantom.o
-	$(FC) $(FFLAGS) -o $(BINDIR)/$@ $(OBJECTSF) $(OBJECTS) phantom.o $(LDFLAGS)
+phantom: checksystem checkparams $(OBJECTS) phantom.o
+	$(FC) $(FFLAGS) -o $(BINDIR)/$@ $(OBJECTS) phantom.o $(LDFLAGS)
 ifeq ($(UNAME), Darwin)
 	dsymutil $(BINDIR)/$@
 endif
