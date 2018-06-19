@@ -8,6 +8,7 @@ module nuc_reactions
    private
 
    integer :: nuc_burn = 0
+   integer :: burn_opt = 1
 
    contains
 
@@ -75,7 +76,7 @@ module nuc_reactions
       CHARACTER(5),  DIMENSION(NSP) :: ONC
       CHARACTER(6),  DIMENSION(NRE) :: z1, z2, z3, z4
       CHARACTER(37), DIMENSION(NRE) :: reaction
-      integer                       :: burn_option
+!      integer                       :: burn_opt
       real                          :: dummyt,dummyr1,dummyr2
 !
       COMMON /cvit/V2,tgrid,aNegrid
@@ -96,7 +97,7 @@ module nuc_reactions
 !
       iread   = 0
       itermax = 0 
-      burn_option = 1
+!      burn_opt = 1
 !
 !!$OMP PARALLEL DEFAULT(none) shared(vxyzut,cvs,rho,xss,iread)         &       
 !!$OMP shared(dt,enuc,luminuc,aion,zion,tnow) private(m,rhop,temp,cvp) &
@@ -185,7 +186,7 @@ module nuc_reactions
             ! and only positiove energy contributions are updated to 
             ! luminucp
             ! 3) T is updated every nuclear timestep
-            select case (burn_option)
+            select case (burn_opt)
                case (1)
                   !
                   !--Temperature does not change
@@ -283,6 +284,7 @@ subroutine write_options_nuc_burning(iunit)
 
  write(iunit,"(/,a)") '# options controlling nuclear burning'
  call write_inopt(nuc_burn,'nuc_burn','0=nuclear burning off, 1=nuclear burning on',iunit)
+ call write_inopt(burn_opt,'burn_opt','1=T constant through nuc_timestep, 2=T only updated due to photodisintegration, 3=Temperature updated in nuc_timestep',iunit)
 
 end subroutine write_options_nuc_burning
 
@@ -305,13 +307,17 @@ subroutine read_options_nuc_burning(name,valstring,imatch,igotall,ierr)
     read(valstring,*,iostat=ierr) nuc_burn
     ngot = ngot + 1
     if (nuc_burn < 0 .or. nuc_burn > 1) call fatal(label,'value of nuc_burn must be 0 or 1')
- 
+ case('burn_opt')
+    read(valstring,*,iostat=ierr) burn_opt
+    ngot = ngot + 1
+    if (burn_opt < 1 .or. burn_opt > 3) call fatal(label,'value of burn_opt must be between 1 and 3')
+  
  case default
     imatch = .false.
  end select
 
  !--make sure we have got all compulsory options (otherwise, rewrite input file)
-    igotall = (ngot == 1)
+    igotall = (ngot == 2)
 
 end subroutine read_options_nuc_burning
 
