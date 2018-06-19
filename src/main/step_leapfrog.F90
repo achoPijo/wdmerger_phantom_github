@@ -471,16 +471,11 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !
     call derivs(2,npart,nactive,xyzh,vpred,fxyzu,fext,divcurlv,divcurlB,Bpred,dBevol,dustfrac,ddustfrac,timei,dtsph,dtnew)
 
-!
-!   compute nuclear burning
-!
-#ifdef TEMPEVOLUTION
-    if (nuc_burn) call nuclear_burning(xyzh,vxyzu,fxyzu,npart,dtsph)
-#endif
-
  endif
 
  enddo iterations
+
+
 
 #ifdef TEMPEVOLUTION
 !$omp parallel default(none)&
@@ -494,6 +489,14 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !$omp end parallel
 #endif
 
+!
+!   compute nuclear burning
+!
+#ifdef TEMPEVOLUTION
+ if (nuc_burn) call nuclear_burning(xyzh,vxyzu,fxyzu,npart,dtsph)
+#endif
+
+
  if (its > 1) call summary_variable('tolv',iosumtvi,0,real(its))
 
  if (maxits > 1 .and. its >= maxits) then
@@ -501,7 +504,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
     call fatal('step','VELOCITY ITERATIONS NOT CONVERGED!!')
  endif
 
- if (iexternalforce == iext_corotate) then
+ if (iexternalforce == iext_corotate) then !NOTE that here nuclear energy is overwritten
     call reduce_separation(xyzh,vxyzu,npart,dtnew)
     call derivs(1,npart,nactive,xyzh,vxyzu,fxyzu,fext,divcurlv,divcurlB,Bpred,dBevol,dustfrac,ddustfrac,timei,dtsph,dtnew)
     call compute_omega(xyzh,vxyzu,fxyzu(:,:),npart)

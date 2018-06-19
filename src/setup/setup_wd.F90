@@ -23,17 +23,16 @@
 !+
 !--------------------------------------------------------------------------
 module setup
- use extern_gwinspiral, only: Nstar
  use part,              only: maxvxyzu
  use units,             only: utime
  implicit none
 
+ integer            :: Nstar(2) = 0  ! give default value in case dump header not read
  real(kind=8)       :: udist,umass
  character(len=20)  :: dist_unit,mass_unit
  logical            :: use_prompt, iexist, binary
  integer            :: np
  real               :: mstar, mstar2 = 0.d0, Tin
-
  public :: setpart
 
  private
@@ -232,11 +231,13 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  ! set the mass weightings of each species
  ! currently hard-coded to 50/50 carbon-oxygen
  ! TODO: update this to be set by user at runtime
- do i=1,npart
-    xmass(:,i) = 0.0
-    xmass(3,i) = 0.5
-    xmass(4,i) = 0.5
- enddo
+ if (binary) then 
+    call get_composition(xmass(1:Nstar(1)),Nstar(1),mstar)
+    call get_composition(xmass(Nstar(1)+1:npart),Nstar(2),mstar2)
+ else
+    call get_composition(xmass(1:Nstar(1)),Nstar(1),mstar)
+    
+ endif
 
  do i=1,npart
     if (sum(xmass(1:speciesmax-1,i)) > 1.0+tiny(xmass) .or. sum(xmass(1:speciesmax-1,i)) < 1.0-tiny(xmass)) then
@@ -427,6 +428,39 @@ subroutine read_setupfile(filename,ierr)
  call close_db(db)
 
 end subroutine read_setupfile
+!-----------------------------------------------------------------------
+!+
+!  Return star composition based on star mass
+!+
+!-----------------------------------------------------------------------
+subroutine star_comp(composition,nstar,massstar)
+ real, intent(inout) :: composition(:,:)
+ integer, intent(in) :: nstar
+ real,    intent(in) :: massstar
+
+    if (massstar <= 0.45) then
+       do i=1,nstar
+          composition(:,i) = 0.0
+          composition(2,i) = 1.0
+       enddo
+    else if (massstar > 0.45 .and. massstar <= 1.1 )
+       do i=1,nstar
+          composition(:,i) = 0.0
+          composition(3,i) = 0.4
+          composition(4,i) = 0.6
+       enddo
+    else
+       do i=1,nstar
+          composition(:,i) = 0.0
+          composition(4,i) = 0.8
+          composition(5,i) = 0.2
+       enddo
+    endif
+ 
+
+end subroutine star_comp
+
+
 
 
 end module setup

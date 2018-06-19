@@ -37,6 +37,7 @@ module nuc_reactions
       USE part,          ONLY : rhoh, massoftype, igas
       use eos_helmholtz, only : xmass,speciesmax
       use eos,           only : ieos,equationofstate
+      use fileutils,        only:numfromfile
 !
 !--Force to declare EVERYTHING
 !
@@ -77,7 +78,7 @@ module nuc_reactions
       CHARACTER(6),  DIMENSION(NRE) :: z1, z2, z3, z4
       CHARACTER(37), DIMENSION(NRE) :: reaction
 !      integer                       :: burn_opt
-      real                          :: dummyt,dummyr1,dummyr2
+      real                          :: dummyt,dummyr1,dummyr2,enuctot
 !
       COMMON /cvit/V2,tgrid,aNegrid
       COMMON /cvgrid/vgrid,flag,ndata
@@ -97,6 +98,8 @@ module nuc_reactions
 !
       iread   = 0
       itermax = 0 
+      ICO     = 0 !This is an integer number that should be related to the timestep number or dumpfile number
+      enuctot = 0.0
 !      burn_opt = 1
 !
 !!$OMP PARALLEL DEFAULT(none) shared(vxyzut,cvs,rho,xss,iread)         &       
@@ -240,11 +243,20 @@ module nuc_reactions
          DO k=1,speciesmax-1
             xmass(k+1,p) = xss2(k)
          END DO
+!
+!--Accumulate total energy released
+!
+         enuctot = enuctot + enucp
+
 45       CONTINUE
 40    ENDDO ! finish particle iteration
 !!$OMP END DO 
 !!$OMP END PARALLEL
 !
+      print *, "----------------------------------"
+      print *, "Cumulative nuclear energy released"
+      print *, enuctot
+      print *, "----------------------------------"      
 !
       !IF (rank.EQ.MASTER) PRINT*,'burn: max. num. iteraciones:',itermax
 !
