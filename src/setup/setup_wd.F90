@@ -232,10 +232,10 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  ! currently depends on the star's mass
  ! TODO: update this to be set by user at runtime
  if (binary) then 
-    call get_composition(xmass(:,1:Nstar(1)),Nstar(1),mstar)
-    call get_composition(xmass(:,Nstar(1)+1:npart),Nstar(2),mstar2)
+    call star_comp(xmass(:,1:Nstar(1)),Nstar(1),mstar)
+    call star_comp(xmass(:,Nstar(1)+1:npart),Nstar(2),mstar2)
  else
-    call get_composition(xmass(:,1:Nstar(1)),Nstar(1),mstar)
+    call star_comp(xmass(:,1:Nstar(1)),Nstar(1),mstar)
     
  endif
 
