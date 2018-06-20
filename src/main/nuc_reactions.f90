@@ -254,7 +254,7 @@ module nuc_reactions
 !
       print *, "----------------------------------"
       print *, "Cumulative nuclear energy released"
-      print *, enuctot
+      print *, enuctot*unit_ergg
       print *, "----------------------------------"      
 !
       !IF (rank.EQ.MASTER) PRINT*,'burn: max. num. iteraciones:',itermax
