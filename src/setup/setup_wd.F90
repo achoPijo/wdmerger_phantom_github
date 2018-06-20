@@ -232,10 +232,10 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  ! currently depends on the star's mass
  ! TODO: update this to be set by user at runtime
  if (binary) then 
-    call get_composition(xmass(1:Nstar(1)),Nstar(1),mstar)
-    call get_composition(xmass(Nstar(1)+1:npart),Nstar(2),mstar2)
+    call get_composition(xmass(:,1:Nstar(1)),Nstar(1),mstar)
+    call get_composition(xmass(:,Nstar(1)+1:npart),Nstar(2),mstar2)
  else
-    call get_composition(xmass(1:Nstar(1)),Nstar(1),mstar)
+    call get_composition(xmass(:,1:Nstar(1)),Nstar(1),mstar)
     
  endif
 
@@ -437,13 +437,14 @@ subroutine star_comp(composition,nstar,massstar)
  real, intent(inout) :: composition(:,:)
  integer, intent(in) :: nstar
  real,    intent(in) :: massstar
+ integer             :: i
 
     if (massstar <= 0.45) then
        do i=1,nstar
           composition(:,i) = 0.0
           composition(2,i) = 1.0
        enddo
-    else if (massstar > 0.45 .and. massstar <= 1.1 )
+    else if (massstar > 0.45 .and. massstar <= 1.1 ) then
        do i=1,nstar
           composition(:,i) = 0.0
           composition(3,i) = 0.4
