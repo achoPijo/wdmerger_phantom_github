@@ -229,7 +229,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  call init_eos(ieos,ierr)
 
  ! set the mass weightings of each species
- ! currently hard-coded to 50/50 carbon-oxygen
+ ! currently depends on the star's mass
  ! TODO: update this to be set by user at runtime
  if (binary) then 
     call get_composition(xmass(1:Nstar(1)),Nstar(1),mstar)

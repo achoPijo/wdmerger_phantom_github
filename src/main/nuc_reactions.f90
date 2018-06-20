@@ -37,7 +37,6 @@ module nuc_reactions
       USE part,          ONLY : rhoh, massoftype, igas
       use eos_helmholtz, only : xmass,speciesmax
       use eos,           only : ieos,equationofstate
-      use fileutils,        only:numfromfile
 !
 !--Force to declare EVERYTHING
 !
