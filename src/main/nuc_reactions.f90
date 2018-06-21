@@ -100,10 +100,6 @@ module nuc_reactions
       itermax = 0 
       ICO     = 0 !This is an integer number that should be related to the timestep number or dumpfile number
 
-      print *, "----------------------------------"
-      print *, "Cumulative nuclear energy released"
-      print *, enuctot*unit_ergg
-
 !
 !!$OMP PARALLEL DEFAULT(none) shared(vxyzut,cvs,rho,xss,iread)         &       
 !!$OMP shared(dt,enuc,luminuc,aion,zion,tnow) private(m,rhop,temp,cvp) &
