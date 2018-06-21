@@ -78,7 +78,7 @@ module nuc_reactions
       CHARACTER(6),  DIMENSION(NRE) :: z1, z2, z3, z4
       CHARACTER(37), DIMENSION(NRE) :: reaction
 !      integer                       :: burn_opt
-      real                          :: dummyt,dummyr1,dummyr2,enuctot
+      real                          :: dummyt,dummyr1,dummyr2
 !
       COMMON /cvit/V2,tgrid,aNegrid
       COMMON /cvgrid/vgrid,flag,ndata
