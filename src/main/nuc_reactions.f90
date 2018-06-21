@@ -297,7 +297,9 @@ subroutine init_nuc_burning(ieos,ierr)
     return
  endif
 
+ call RPARAM
  call RNETWORK
+
  
  !TODO ATTENTION, NEED TO FIND A WAY TO DETECT PROBLEM IN INITIALIZING 
 
