@@ -9,7 +9,7 @@ module nuc_reactions
 
    integer :: nuc_burn = 0
    integer :: burn_opt = 2
-   real    :: enuctot  = 0.0
+   real    :: enuctot
 
    contains
 
@@ -286,6 +286,8 @@ subroutine init_nuc_burning(ieos,ierr)
 
  call RPARAM
  call RNETWORK
+
+ enuctot = 0.
 
  
  !TODO ATTENTION, NEED TO FIND A WAY TO DETECT PROBLEM IN INITIALIZING 
