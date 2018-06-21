@@ -184,6 +184,7 @@ module nuc_reactions
             print *, "--"
             print *, sumAE2
             print *, enucp
+            print *, xss2(2)
             print *, "--"
             ! Three different options
             ! 1) T is not evolved during the nuclear burning
