@@ -45,7 +45,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in)    :: particlemass,time
 
  integer                      :: i,iloc
- real                         :: rTmax,mtot,r,v
+ real                         :: rTmax,mtot,mescaped,r,v
  logical                      :: iexist
  character(len=120)           :: fileprefix,fileout
 
@@ -58,15 +58,12 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  !--------------
  mtot = particlemass * npart
- rTmax = 0.
- Tmax  = 0.
+ mescape = 0.0
  do i=1,npart
     r = sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)
     v = sqrt(vxyzu(1,i)**2+vxyzu(2,i)**2+vxyzu(3,i)**2)
-    if ()mtot = mtot + particlemass
-    Tmax = max(Tmax,vxyzu(5,i))
-    if (Tmax == vxyzu(5,i)) then 
-       rTmax = r
+    if (v > sqrt(2*mtot/r)) then
+        mescaped = mescaped + particlemass
     endif
  enddo
  
@@ -81,22 +78,20 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     fileprefix = trim(dumpfile)
  endif
  
- fileout = trim(fileprefix)//'maxTemperature.dat'
+ fileout = trim(fileprefix)//'escapedmass.dat'
  inquire(file=trim(fileout),exist=iexist)
  if (iexist) then
     open(iunit,file=fileout,status='old',position='append')
     
-    write(iunit,'(3(1pe18.10,1x))') time,Tmax,rTmax
+    write(iunit,'(1(1pe18.10,1x))') mescaped
 
     close(iunit)
  else
     open(iunit,file=fileout,status='new')
-    write(iunit,"('#',3(1x,'[',i2.2,1x,a11,']',2x))") &
-        1,'r',    &
-        2,'Tmax', &
-        3,'rTmax'
+    write(iunit,"('#',1(1x,'[',i2.2,1x,a11,']',2x))") &
+        1,'m_escaped'
     
-    write(iunit,'(3(1pe18.10,1x))') time,Tmax,rTmax
+    write(iunit,'(1(1pe18.10,1x))') mescaped
 
      close(iunit)
  endif
