@@ -151,6 +151,7 @@ module nuc_reactions
             print *, xmass(3,p)
             print *, xss2(2)
             print *, XXTOT(2,1)
+            print *, K1(1)
 !
 !--Avoid excessively small time steps
 !
@@ -159,6 +160,7 @@ module nuc_reactions
             ELSE
                DTMNEWP = MIN(DTMNEWP,dt*utime-sumdt)
             ENDIF
+            print *, DTMNEWP
 !
 !--Abundances calculation
 !
@@ -191,6 +193,9 @@ module nuc_reactions
             print *, sumAE2
             print *, enucp
             print *, xss2(2)
+            print *, DTMNEWP
+            print *, DTMOLDP
+            print *, K1(1)
             print *, "--"
             ! Three different options
             ! 1) T is not evolved during the nuclear burning
