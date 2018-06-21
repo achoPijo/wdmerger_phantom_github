@@ -146,6 +146,11 @@ module nuc_reactions
             DO 50 k=1,NSP
                XXTOT(k,1) = xss2(k)
 50          ENDDO
+
+            print *, "--"
+            print *, xmass(3,p)
+            print *, xss2(2)
+            print *, XXTOT(2,1)
 !
 !--Avoid excessively small time steps
 !
@@ -181,7 +186,8 @@ module nuc_reactions
 !
             sumAE2 = sum(AE2)*DTMOLDP*(umass/unit_energ)  
             enucp  = enucp + sumAE2
-            print *, "--"
+
+
             print *, sumAE2
             print *, enucp
             print *, xss2(2)
