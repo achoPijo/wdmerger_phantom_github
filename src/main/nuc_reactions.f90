@@ -128,6 +128,7 @@ module nuc_reactions
          sumdt     = 0.0
          enucp     = 0.0
          luminucp  = 0.0
+         dummyt    = 0.0
          DO WHILE(sumdt.LT.dt*utime)
 !
 !--Activate nuclear burning only for T>1.0d7
@@ -152,6 +153,9 @@ module nuc_reactions
             print *, xss2(2)
             print *, XXTOT(2,1)
             print *, K1(1)
+            print *, rhop
+            print *, rhopcgs
+            print *, temp
 !
 !--Avoid excessively small time steps
 !
