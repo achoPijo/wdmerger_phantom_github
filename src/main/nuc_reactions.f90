@@ -181,7 +181,10 @@ module nuc_reactions
 !
             sumAE2 = sum(AE2)*DTMOLDP*(umass/unit_energ)  
             enucp  = enucp + sumAE2
-
+            print *, "--"
+            print *, sumAE2
+            print *, enucp
+            print *, "--"
             ! Three different options
             ! 1) T is not evolved during the nuclear burning
             ! 2) T is only updated due to photodesintegration,
