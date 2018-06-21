@@ -9,6 +9,7 @@ module nuc_reactions
 
    integer :: nuc_burn = 0
    integer :: burn_opt = 1
+   real    :: enuctot  = 0.0
 
    contains
 
@@ -98,7 +99,6 @@ module nuc_reactions
       iread   = 0
       itermax = 0 
       ICO     = 0 !This is an integer number that should be related to the timestep number or dumpfile number
-      enuctot = 0.0
 !      burn_opt = 1
 !
 !!$OMP PARALLEL DEFAULT(none) shared(vxyzut,cvs,rho,xss,iread)         &       

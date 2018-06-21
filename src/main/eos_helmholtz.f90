@@ -278,8 +278,8 @@ subroutine eos_helmholtz_calc_AbarZbar(xmassi,abari,zbari)
  real,  intent(in):: xmassi(:)
  real, intent(out):: abari,zbari
 
-    abari = 1.0 / sum(xmassi(:) / aion(:))
-    zbari = abari * sum(xmassi(:) * zion(:) / aion(:))
+    abari = 1.0 / sum(xmassi(1:speciesmax-1) / aion(1:speciesmax-1))
+    zbari = abari * sum(xmassi(1:speciesmax-1) * zion(1:speciesmax-1) / aion(1:speciesmax-1))
 
 end subroutine eos_helmholtz_calc_AbarZbar
 

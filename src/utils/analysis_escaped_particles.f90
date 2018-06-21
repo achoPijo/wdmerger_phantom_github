@@ -45,7 +45,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in)    :: particlemass,time
 
  integer                      :: i,iloc
- real                         :: rTmax,mtot,r
+ real                         :: rTmax,mtot,r,v
  logical                      :: iexist
  character(len=120)           :: fileprefix,fileout
 
@@ -62,7 +62,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  Tmax  = 0.
  do i=1,npart
     r = sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)
-    mtot = mtot + 
+    v = sqrt(vxyzu(1,i)**2+vxyzu(2,i)**2+vxyzu(3,i)**2)
+    if ()mtot = mtot + particlemass
     Tmax = max(Tmax,vxyzu(5,i))
     if (Tmax == vxyzu(5,i)) then 
        rTmax = r
