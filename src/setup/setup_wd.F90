@@ -447,8 +447,8 @@ subroutine star_comp(composition,nstar,massstar)
     else if (massstar > 0.45 .and. massstar <= 1.1 ) then
        do i=1,nstar
           composition(:,i) = 0.0
-          composition(3,i) = 0.5
-          composition(4,i) = 0.5
+          composition(3,i) = 0.4
+          composition(4,i) = 0.6
        enddo
     else
        do i=1,nstar
