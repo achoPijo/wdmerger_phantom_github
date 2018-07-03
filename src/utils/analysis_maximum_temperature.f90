@@ -128,10 +128,12 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     endif
  enddo
 
- mej     = mej         * umass
- Tejm    = Tejm/nej
- rhoejm  = rhoejm/nej  * unit_density
- vejinfm = vejinfm/nej * unit_velocity
+ if (nej/=0) then
+     mej     = mej
+     Tejm    = Tejm/nej
+     rhoejm  = rhoejm/nej  * unit_density
+     vejinfm = vejinfm/nej * unit_velocity
+ endif
 
  !
  !-- Dump information to file
@@ -148,11 +150,11 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  else
     open(iunit,file=fileout,status='new')
     write(iunit,"('#',5(1x,'[',i2.2,1x,a11,']',2x))") &
-        1,'time',    &
-        2,'mej', &
-        3,'Tejm', &
-        4,'rhoejm', &
-        5,'vejinfm'
+        1,'time[code units]',    &
+        2,'mej[Msun]', &
+        3,'Tejm[K]', &
+        4,'rhoejm[g/cm3]', &
+        5,'vejinfm[cm/s]'
     
     write(iunit,'(5(1pe18.10,1x))') time,mej,Tejm,rhoejm,vejinfm
 

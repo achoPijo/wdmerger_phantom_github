@@ -38,6 +38,7 @@ module nuc_reactions
       USE part,          ONLY : rhoh, massoftype, igas
       use eos_helmholtz, only : xmass,speciesmax
       use eos,           only : ieos,equationofstate
+      use timestep,      only:time
 !
 !--Force to declare EVERYTHING
 !
@@ -78,7 +79,9 @@ module nuc_reactions
       CHARACTER(6),  DIMENSION(NRE) :: z1, z2, z3, z4
       CHARACTER(37), DIMENSION(NRE) :: reaction
 !      integer                       :: burn_opt
-      real                          :: dummyt,dummyr1,dummyr2
+      real                          :: dummyt,dummyr1,dummyr2,enuctimestep
+      integer                       :: iloc
+      character(len=120)           :: fileprefix,fileout
 !
       COMMON /cvit/V2,tgrid,aNegrid
       COMMON /cvgrid/vgrid,flag,ndata
@@ -99,7 +102,7 @@ module nuc_reactions
       iread   = 0
       itermax = 0 
       ICO     = 0 !This is an integer number that should be related to the timestep number or dumpfile number
-
+      enuctimestep = 0.
 !
 !!$OMP PARALLEL DEFAULT(none) shared(vxyzut,cvs,rho,xss,iread)         &       
 !!$OMP shared(dt,enuc,luminuc,aion,zion,tnow) private(m,rhop,temp,cvp) &
@@ -247,6 +250,7 @@ module nuc_reactions
 !
 !--Accumulate total energy released
 !
+         enuctimestep = enuctimestep + enucp
          enuctot = enuctot + enucp
 
 45       CONTINUE
@@ -254,9 +258,39 @@ module nuc_reactions
 !!$OMP END DO 
 !!$OMP END PARALLEL
 !
+       !
+ !-- Dump information to file
+ !
+      iloc = index(dumpfile,'_')
+      if (iloc > 1) then
+         fileprefix = trim(dumpfile(1:iloc-1))
+      else
+         fileprefix = trim(dumpfile)
+      endif
+      
+      fileout = trim(fileprefix)//'nuclearburning.dat'
+      inquire(file=trim(fileout),exist=iexist)
+      if (iexist) then
+         open(iunit,file=fileout,status='old',position='append')
+         
+         write(iunit,'(3(1pe18.10,1x))') time,enuctimestep*unit_energ*massoftype(igas),enuctot*unit_energ*massoftype(igas)
+     
+         close(iunit)
+      else
+         open(iunit,file=fileout,status='new')
+         write(iunit,"('#',3(1x,'[',i2.2,1x,a11,']',2x))") &
+             1,'time[code units]', &
+             2,'enuc timestep[ergs]', &
+             3,'enuc total[ergs]'
+         
+         write(iunit,'(3(1pe18.10,1x))') time,enuctimestep*unit_energ*massoftype(igas),enuctot*unit_energ*massoftype(igas)
+
+         close(iunit)
+      endif
+
       print *, "----------------------------------"
-      print *, "Cumulative nuclear energy released"
-      print *, enuctot*unit_ergg
+      print *, "Cumulative nuclear energy released [ergs]"
+      print *, enuctot*unit_energ
       print *, "----------------------------------"      
 !
       !IF (rank.EQ.MASTER) PRINT*,'burn: max. num. iteraciones:',itermax
