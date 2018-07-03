@@ -261,14 +261,7 @@ module nuc_reactions
        !
  !-- Dump information to file
  !
-      iloc = index(dumpfile,'_')
-      if (iloc > 1) then
-         fileprefix = trim(dumpfile(1:iloc-1))
-      else
-         fileprefix = trim(dumpfile)
-      endif
-      
-      fileout = trim(fileprefix)//'nuclearburning.dat'
+      fileout = 'nuclearburning.dat'
       inquire(file=trim(fileout),exist=iexist)
       if (iexist) then
          open(iunit,file=fileout,status='old',position='append')
