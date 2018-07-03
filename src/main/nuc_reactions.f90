@@ -82,6 +82,9 @@ module nuc_reactions
       real                          :: dummyt,dummyr1,dummyr2,enuctimestep
       integer                       :: iloc
       character(len=120)           :: fileprefix,fileout
+      logical                      :: iexist
+      integer                      :: iunit = 9
+
 !
       COMMON /cvit/V2,tgrid,aNegrid
       COMMON /cvgrid/vgrid,flag,ndata
