@@ -40,6 +40,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  use setbinary,    only: L1_point
  use units,        only: umass,udist,utime,unit_density,unit_pressure
  use vectorutils,  only: cross_product3D
+ use eos_helmholtz,only: xmass,speciesmax
  character(len=*), intent(in)    :: dumpfile
  integer,          intent(in)    :: num,npart,iunit
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:) !due to reset center of mass
@@ -50,17 +51,19 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real                         :: rmax,rTmax,Tmax,dr,mtot,r
  real                         :: rtab(nrpoints),Ttab(nrpoints),rhotab(nrpoints)
  real                         :: omegatab(nrpoints),keplertab(nrpoints)
+ real                         :: compAverage(speciesmax-1,nrpoints)
  real                         :: vec(3)
  character(len=200)           :: fileout
 
  !
  !-- Initialization
  !
- rtab(:)      = 0.
- Ttab(:)      = 0.
- rhotab(:)    = 0.
- omegatab(:)  = 0.
- keplertab(:) = 0.
+ rtab(:)          = 0.
+ Ttab(:)          = 0.
+ rhotab(:)        = 0.
+ omegatab(:)      = 0.
+ keplertab(:)     = 0.
+ compAverage(:,:) = 0.
 
  mtot         = npart*particlemass
  !--------------
@@ -79,7 +82,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        rTmax = r
     endif
  enddo
- 
+
  dr = rmax/nrpoints
  rtab(1)=dr
  do i=2,nrpoints
@@ -99,7 +102,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
           Ttab(i)      = Ttab(i) + vxyzu(5,i)
           call cross_product3D(xyzh(1:3,i),vxyzu(1:3),vec(:))
           omegatab(i)  = omegatab(i) + vec(3)
-          
+          compAverage(:,i) = compAverage(:,i) + xmass(1:15,j)
+
           ncount = ncount + 1
        endif
     enddo
@@ -108,6 +112,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        rhotab(i)   = rhotab(i)/ncount
        Ttab(i)     = Ttab(i)/ncount
        omegatab(i) = omegatab(i)/ncount
+       compAverage(:,i) =compAverage(:,i)/ncount
     endif
  enddo
 
@@ -122,9 +127,10 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         2,'Temperature',   &
         3,'Density', &
         4,'Omega',   &
-        5,'Kepler V'
+        5,'Kepler V',&
+        6,'Composition 15 columns'
  do j=1,nrpoints
-      write(iunit,'(5(1pe18.10,1x))') rtab(j),Ttab(j),rhotab(j),omegatab(j),keplertab(j)
+      write(iunit,'(20(1pe18.10,1x))') rtab(j),Ttab(j),rhotab(j),omegatab(j),keplertab(j),compAverage(:,j)
  enddo
  close(iunit)
 

@@ -37,7 +37,6 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  use centreofmass, only: reset_centreofmass,get_centreofmass
  use part,         only: igas,iamtype,iphase,maxphase,rhoh
  use prompting,    only: prompt
- use setbinary,    only: L1_point
  use units,        only: umass,udist,utime,unit_density,unit_velocity,unit_pressure
  character(len=*), intent(in)    :: dumpfile
  integer,          intent(in)    :: num,npart,iunit
@@ -94,77 +93,10 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         2,'Tmax', &
         3,'rTmax'
     
-    write(iunit,'(3(1pe18.10,1x))') time,Tmax,rTmax
+    write(iunit,'(3(1pe18.10,1x))') time,Tmax,rTmax,
 
      close(iunit)
  endif
-
- !
- !-- Mass Ejecta Analysis
-
- !--------------
-
- nej = 0
- mej = 0.
- rhoejm  = 0.
- Tejm    = 0.
- vejinfm = 0.
- do i=1,npart
-    ri = sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)
-    phi= 0.
-    do j=1,npart
-       if (j /= i) then 
-          rj = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
-          phi= phi - particlemass/(abs(ri-rj)) !remember units chosen so that G=1
-       endif
-    enddo
-    bi = phi + 0.5*(sqrt(vxyzu(1,i)**2 + vxyzu(1,i)**2 + vxyzu(1,i)**2)**2) !specific orbital energy
-    if (bi > 0.) then
-       nej = nej + 1
-       mej = mej + particlemass
-       Tejm      = Tejm + vxyzu(5,i)
-       rhoejm    = rhoejm + rhoh(xyzh(4,i),particlemass)
-       vejinfm   = vejinfm + sqrt(2*bi)
-    endif
- enddo
-
- if (nej/=0) then
-     mej     = mej
-     Tejm    = Tejm/nej
-     rhoejm  = rhoejm/nej  * unit_density
-     vejinfm = vejinfm/nej * unit_velocity
- endif
-
- !
- !-- Dump information to file
- !
- 
- fileout = trim(fileprefix)//'ejecta.dat'
- inquire(file=trim(fileout),exist=iexist)
- if (iexist) then
-    open(iunit,file=fileout,status='old',position='append')
-    
-    write(iunit,'(5(1pe18.10,1x))') time,mej,Tejm,rhoejm,vejinfm
-
-    close(iunit)
- else
-    open(iunit,file=fileout,status='new')
-    write(iunit,"('#',5(1x,'[',i2.2,1x,a11,']',2x))") &
-        1,'time[code units]',    &
-        2,'mej[Msun]', &
-        3,'Tejm[K]', &
-        4,'rhoejm[g/cm3]', &
-        5,'vejinfm[cm/s]'
-    
-    write(iunit,'(5(1pe18.10,1x))') time,mej,Tejm,rhoejm,vejinfm
-
-
-    close(iunit)
- endif
-
-
-
-
 
 
 end subroutine do_analysis
