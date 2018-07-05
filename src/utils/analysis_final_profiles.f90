@@ -100,7 +100,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
           rhotab(i)    = rhotab(i) + rhoh(xyzh(4,j),particlemass)
           Ttab(i)      = Ttab(i) + vxyzu(5,i)
-          call cross_product3D(xyzh(1:3,i),vxyzu(1:3),vec(:))
+          call cross_product3D(xyzh(1:3,i),vxyzu(1:3,i),vec(:))
           omegatab(i)  = omegatab(i) + vec(3)
           compAverage(:,i) = compAverage(:,i) + xmass(1:15,j)
 
