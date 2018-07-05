@@ -46,14 +46,14 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:) !due to reset center of mass
  real,             intent(in)    :: particlemass,time
 
- integer                      :: i,j,ierr,ncount
- integer                      :: nrpoints = 10000
- real                         :: rmax,rTmax,Tmax,dr,mtot,r
- real                         :: rtab(nrpoints),Ttab(nrpoints),rhotab(nrpoints)
- real                         :: omegatab(nrpoints),keplertab(nrpoints)
- real                         :: compAverage(speciesmax-1,nrpoints)
- real                         :: vec(3)
- character(len=200)           :: fileout
+ integer, parameter  :: nrpoints = 10000
+ integer             :: i,j,ierr,ncount
+ real                :: rmax,rTmax,Tmax,dr,mtot,r
+ real                :: rtab(nrpoints),Ttab(nrpoints),rhotab(nrpoints)
+ real                :: omegatab(nrpoints),keplertab(nrpoints)
+ real                :: compAverage(speciesmax-1,nrpoints)
+ real                :: vec(3)
+ character(len=200)  :: fileout
 
  !
  !-- Initialization
@@ -72,14 +72,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  
  !-- Loop over all particles to obtain Radius of star (POSSIBLE PROBLEM EJECTED PARTICLES)
  rmax  = 0.
- rTmax = 0.
- Tmax  = 0.
  do i=1,npart
     r = sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)
     rmax = max(rmax,r)
-    Tmax = max(Tmax,vxyzu(5,i))
-    if (Tmax == vxyzu(5,i)) then 
-       rTmax = r
     endif
  enddo
 
@@ -89,7 +84,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     rtab(i)      = rtab(i-r)+dr
     keplertab(i) = sqrt(mtot/rtab(i))
  enddo
- T = 0
+
  do i=1,nrpoints
     ncount = 0
 
