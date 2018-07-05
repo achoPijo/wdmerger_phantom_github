@@ -108,7 +108,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        endif
     enddo
     
-    if (ncount =/ 0) then
+    if (ncount /= 0) then
        rhotab(i)   = rhotab(i)/ncount
        Ttab(i)     = Ttab(i)/ncount
        omegatab(i) = omegatab(i)/ncount
