@@ -75,7 +75,6 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  do i=1,npart
     r = sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)
     rmax = max(rmax,r)
-    endif
  enddo
 
  dr = rmax/nrpoints
