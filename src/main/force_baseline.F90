@@ -93,7 +93,7 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
  use eos,          only:use_entropy,gamma,equationofstate,get_temperature_from_ponrho
 #ifdef TEMPEVOLUTION
  use eos,          only:relflag
- use eos_helmholtz,only:helmholtz_energytemperature_switch,abar,zbar
+ use eos_helmholtz,only:helmholtz_energytemperature_switch,xmass
 #endif
  use io,           only:iprint,fatal,iverbose,id,master,real4,warning,error
  use linklist,     only:ncells,ifirstincell,get_neighbour_list
@@ -326,11 +326,11 @@ endif
 
 #ifdef TEMPEVOLUTION
 !$omp parallel default(none)&
-!$omp shared(xyzh,vxyzu,massoftype,npart,abar,zbar,relflag) &
+!$omp shared(xyzh,vxyzu,massoftype,npart,xmass,relflag) &
 !$omp private(i)
 !$omp do schedule(runtime)
  do i=1,npart
-    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),abar(i),zbar(i),relflag)
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),xmass(:,i),relflag)
  enddo
 !$omp enddo
 !$omp end parallel
@@ -371,7 +371,7 @@ endif
 !$omp private(rhomax_thread,ipart_rhomax_thread,use_part,j) &
 #endif
 #ifdef TEMPEVOLUTION
-!$omp shared(abar,zbar,relflag) &
+!$omp shared(xmass,relflag) &
 #endif
 #ifdef MPI
 !$omp shared(id,ireqrecv,ireqsend,xrecvbuf,xsendbuf,nprocs,have_sent) &
@@ -529,7 +529,7 @@ endif
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                      visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
-                     xpartveci(itempi),abar(i),zbar(i),cvi,dPdTi)
+                     xpartveci(itempi),xmass(:,i),cvi,dPdTi)
           else
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
@@ -1234,7 +1234,7 @@ end subroutine force
   use options,     only:overcleanfac
   use units,       only:unit_density
 #ifdef TEMPEVOLUTION
- use eos_helmholtz,  only:abar,zbar
+ use eos_helmholtz,  only:xmass
 #endif
   integer,         intent(in)  :: i
   logical,         intent(in)  :: iamgasi,iamdusti
@@ -1603,7 +1603,7 @@ end subroutine force
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
-                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,abar(j),zbar(j))!,cvj,dPdTj) !USEJCHANGE
+                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,xmass(:,j))!,cvj,dPdTj) !USEJCHANGE
               else
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
@@ -1959,7 +1959,7 @@ end subroutine compute_forces
 subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
                  ponrhoi,pro2i,pri,spsoundi,vwavei, &
                  sxxi,sxyi,sxzi,syyi,syzi,szzi,visctermiso,visctermaniso, &
-                 realviscosity,divvi,bulkvisc,strain,stressmax,tempi,abari,zbari,cvi,dPdTi) 
+                 realviscosity,divvi,bulkvisc,strain,stressmax,tempi,xmassi,cvi,dPdTi) 
 
   use dim,       only:maxvxyzu,maxstrain,maxp
   use part,      only:mhd
@@ -1976,7 +1976,7 @@ subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
   real,    intent(in)    :: strain(6)
   real,    intent(inout) :: eni
   real,    intent(inout),  optional :: tempi
-  real,    intent(in),  optional :: abari,zbari
+  real,    intent(in),  optional :: xmassi(:)
   real,    intent(out), optional :: cvi,dPdTi 
 
   real :: Bro2i,Brhoxi,Brhoyi,Brhozi,rhogasi,gasfrac
@@ -1989,7 +1989,7 @@ subroutine get_P(rhoi,rho1i,xi,yi,zi,pmassi,eni,Bxi,Byi,Bzi,dustfraci, &
   rhogasi = rhoi*gasfrac       ! rhogas = (1-eps)*rho
   if (maxvxyzu >= 4) then
      if (maxvxyzu == 5) then
-        call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni,tempi,abari,zbari,cvi,dPdTi)
+        call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni,tempi,xmassi,cvi,dPdTi)
      else
         call equationofstate(ieos,p_on_rhogas,spsoundi,rhogasi,xi,yi,zi,eni)
      endif
