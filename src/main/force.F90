@@ -1308,18 +1308,10 @@ end subroutine force
   logical                      :: iexist
   character(len=120)           :: fileout
   !------------------------
-  !Onlybalsara
-  real    ::fi,fj
   !sound speed monitoring
   maxprojvi = 0.
   maxvsigavi = 0.
   !-----------------------
-
-  !-----------------------
-  !Onlybalsara
-  fi = sqrt(divcurlv(1,i)**2)/(sqrt(divcurlv(2,i)**2+divcurlv(3,i)**2+divcurlv(4,i)**2)+sqrt(divcurlv(1,i)**2))
-  !---------------------------------------------
-
 
   fsum(:) = 0.
   vsigmax = 0.
@@ -1386,10 +1378,6 @@ end subroutine force
   visctermanisoj = 0.
   cvj = 0.
   dPdTj = 0.
-  !Onlybalsara
-  fj=0.
-  !----------------------------------------------------------
-
 
   loop_over_neighbours2: do n = 1,nneigh
 
@@ -1557,7 +1545,7 @@ end subroutine force
         if (iamgasi .and. iamgasj) then
            !--work out vsig for timestepping and av
            vsigi   = max(vwavei - beta*projv,0.)
-           vsigavi = max(alphai*(vwavei - beta*projv*hi/((1./rij1) + 0.1*hi)),0.)!CHECK
+           vsigavi = max(alphai*vwavei - beta*projv,0.)!CHECK
            !sound speed monitoring
            if (i==printparticlei) then
               maxvsigavi=max(maxvsigavi,vsigavi)
@@ -1626,12 +1614,8 @@ end subroutine force
               autermj  = mrhoj5*alphau
               avBtermj = mrhoj5*alphaB*rho1j
 
-              !Monaghan 1992 and Rosswog 2008 descrption of Artificial viscosity
-              fj = sqrt(divcurlv(1,j)**2)/(sqrt(divcurlv(2,j)**2+divcurlv(3,j)**2+divcurlv(4,j)**2)+sqrt(divcurlv(1,j)**2))
-              !---------------------------------------------
-
               vsigj = max(vwavej - beta*projv,0.)
-              vsigavj = max(alphaj*(vwavej - beta*projv*hj/((1./rij1) + 0.1*hj)),0.)!CHECK
+              vsigavj = max(alphaj*vwavej - beta*projv,0.)!CHECK
               if (vsigj > vsigmax) vsigmax = vsigj
            else
               vsigj = max(-projv,0.)
@@ -1680,11 +1664,11 @@ ifgas: if (iamgasi .and. iamgasj) then
 #else
         if (projv < 0.) then
            !--add av term to pressure
-                     gradpi = pmassj*(pro2i - 0.5*fi*rho1i*vsigavi*projv*hi/((1./rij1) + 0.1*hi))*grkerni
-           if (usej) gradpj = pmassj*(pro2j - 0.5*fj*rho1j*vsigavj*projv*hj/((1./rij1) + 0.1*hj))*grkernj
+                     gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv)*grkerni
+           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
 
            !--energy conservation from artificial viscosity (don't need j term)
-           dudtdissi = -0.5*pmassj*fi*rho1i*vsigavi*projv**2*hi/((1./rij1) + 0.1*hi)*grkerni !CHECK
+           dudtdissi = -0.5*pmassj*rho1i*vsigavi*projv**2*grkerni !CHECK
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj
