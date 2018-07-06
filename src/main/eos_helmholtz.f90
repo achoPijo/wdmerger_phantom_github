@@ -237,7 +237,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !--If the Newton-Rapshon fails to find a valid temperature, keep it 
 !  constant. Check also if temperature and the temperature predicted
 !  from the internal energy differe more than a 5%
- rel = dabs(temp_iter-temp)/temp
+ rel = abs(temp_iter-temp)/temp
  if (relflag == 1) then
     eosflag = 2
  else if (relflag == 2) then
