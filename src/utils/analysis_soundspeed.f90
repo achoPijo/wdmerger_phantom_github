@@ -64,9 +64,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  rTmax = 0.
  Tmax  = 0.
  
- i1 = 
+ i1 = 7695
  rhoi1 = rhoh(xyzh(4,i1),particlemass)
- i2 = 
+ i2 = 38828
  rhoi2 = rhoh(xyzh(4,i2),particlemass)
 
  call equationofstate(ieos,ponrhoi1,spsoundi1,rhoi1,xyzh(1,i1),xyzh(2,i1),xyzh(3,i1), &
