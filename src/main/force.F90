@@ -1232,7 +1232,7 @@ end subroutine force
 #endif
   use timestep,    only:bignumber,time !sound speed monitoring added time
   use options,     only:overcleanfac
-  use units,       only:unit_density,unit_velocity
+  use units,       only:unit_density,unit_velocity,unit_pressure
 #ifdef TEMPEVOLUTION
  use eos_helmholtz,  only:xmass
 #endif
