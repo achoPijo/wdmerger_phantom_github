@@ -1922,7 +1922,7 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(ponrhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
+        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
     
         close(iunit)
      else
@@ -1941,7 +1941,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            11,'vsigavi[cm/s]',   &
            12,'gradkerni'
         
-        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(ponrhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
+        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
     
         close(iunit)
      endif

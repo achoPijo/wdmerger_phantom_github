@@ -23,7 +23,7 @@
 !--------------------------------------------------------------------------
 module analysis
  implicit none
- character(len=20), parameter, public :: analysistype = 'Soundspeed'
+ character(len=20), parameter, public :: analysistype = 'SoundspeedcreateSample'
  logical :: firstcall = .true.
 
  public  :: do_analysis
