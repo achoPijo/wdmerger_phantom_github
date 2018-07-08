@@ -156,6 +156,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     !   call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
     !endif
     Tin = 10000000.
+    call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
     
     call prompt('Set up a binary system?',binary)
     !binary = .false.
