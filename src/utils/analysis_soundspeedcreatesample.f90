@@ -44,7 +44,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:) !due to reset center of mass
  real,             intent(in)    :: particlemass,time
 
- integer                      :: i,iloc,j,nej
+ integer                      :: i,iloc,j,nej,i1,i2
  real                         :: rTmax,Tmax,r, ri,rj,mej,rhoejm,Tejm,vejinfm,phi,bi
  real                         :: rhoi1,rhoi2,ponrhoi1,spsoundi1,ponrhoi2,spsoundi2
  logical                      :: iexist

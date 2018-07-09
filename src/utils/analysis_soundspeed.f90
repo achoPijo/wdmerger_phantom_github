@@ -37,7 +37,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  use part,         only: igas,iamtype,iphase,maxphase,rhoh
  use prompting,    only: prompt
  use units,        only: umass,udist,utime,unit_density,unit_velocity,unit_pressure
- use eos,          only: equationofstate,ieos
+ use eos,          only: equationofstate,ieos,init_eos
  use eos_helmholtz,only: xmass
  character(len=*), intent(in)    :: dumpfile
  integer,          intent(in)    :: num,npart,iunit
@@ -61,6 +61,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !--------------
 
 ! INITIAlIZE EOS
+ call init_eos(ieos)
+
  rTmax = 0.
  Tmax  = 0.
  
