@@ -62,9 +62,6 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 ! INITIAlIZE EOS
  call init_eos(ieos,ierr)
-
- rTmax = 0.
- Tmax  = 0.
  
  i1 = 7695
  rhoi1 = rhoh(xyzh(4,i1),particlemass)
