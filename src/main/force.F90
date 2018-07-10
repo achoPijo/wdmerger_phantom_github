@@ -1664,11 +1664,11 @@ ifgas: if (iamgasi .and. iamgasj) then
 #else
         if (projv < 0.) then
            !--add av term to pressure
-                     gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv*hi*rij1)*grkerni
-           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv*hj*rij1)*grkernj
+                     gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv)*grkerni
+           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
 
            !--energy conservation from artificial viscosity (don't need j term)
-           dudtdissi = -0.5*pmassj*rho1i*vsigavi*projv**2*hi*rij1*grkerni !CHECK
+           dudtdissi = -0.5*pmassj*rho1i*vsigavi*projv**2*grkerni !CHECK
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj

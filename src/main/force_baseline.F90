@@ -1232,7 +1232,7 @@ end subroutine force
 #endif
   use timestep,    only:bignumber,time !sound speed monitoring added time
   use options,     only:overcleanfac
-  use units,       only:unit_density
+  use units,       only:unit_density,unit_velocity,unit_pressure
 #ifdef TEMPEVOLUTION
  use eos_helmholtz,  only:xmass
 #endif
@@ -1922,25 +1922,26 @@ ifgas: if (iamgasi .and. iamgasj) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(pro2i*rhoi**2),maxprojvi,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi,grkerni
+        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
     
         close(iunit)
      else
         open(iunit,file=fileout,status='new')
-        write(iunit,"('#',11(1x,'[',i2.2,1x,a11,']',2x))") &
+        write(iunit,"('#',12(1x,'[',i2.2,1x,a11,']',2x))") &
             1,'time',      &
             2,'alphai',    &
-            3,'spsoundi',  &
-            4,'Pi',    &
-            5,'maxprojvi', &
-            6,'tempi',     &
-            7,'hi',        &
-            8,'rho1i',     &
-            9,'dudtdissi', &
-           10,'vsigavi', &
-           11,'gradkerni'
+            3,'spsoundi[cm/s]',  &
+            4,'cs_polytrope[cm/s]', &
+            5,'Pi[dyne/cm2]',        &
+            6,'maxprojvi[cm/s]', &
+            7,'tempi',     &
+            8,'hi',        &
+            9,'rhoi[g/cm3]',     &
+           10,'dudtdissi', &
+           11,'vsigavi[cm/s]',   &
+           12,'gradkerni'
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(pro2i*rhoi**2),maxprojvi,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi,grkerni
+        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
     
         close(iunit)
      endif
