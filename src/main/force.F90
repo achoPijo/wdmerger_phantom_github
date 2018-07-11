@@ -698,13 +698,8 @@ isgas: if (iamgasi) then
                 fxyz4 = fxyz4 + fac*dudtnonideal
              endif
              !--add conductivity and resistive heating
-             if (maxvxyzu == 4) then
-                fxyz4 = fxyz4 + fac*fsum(idendtdissi)
-             endif
-             if (maxvxyzu ==5) then
-                fxyz4 = fxyz4 + fac*fsum(idendtdissi)*cvi
-                fxyz5 = fxyz5 + fac*fsum(idendtdissi)
-             endif
+             fxyz4 = fxyz4 + fac*fsum(idendtdissi)
+             fxyz5 = fxyz5 + fac*fsum(idendtdissi)/cvi
              if (icooling > 0) then
                 if (h2chemistry) then
                    idudtcool = 1
@@ -1274,7 +1269,7 @@ end subroutine force
   integer         :: j,n,iamtypej,ierr
   logical         :: iactivej,iamgasj,iamdustj
   real :: rij2,q2i,qi,xj,yj,zj,dx,dy,dz,runix,runiy,runiz,rij1,hfacgrkern
-  real :: grkerni,grgrkerni,dvx,dvy,dvz,projv,denij,dtempij,vsigi,vsigu,dudtdissi
+  real :: grkerni,grgrkerni,dvx,dvy,dvz,projv,denij,vsigi,vsigu,dudtdissi
   real :: projBi,projBj,dBx,dBy,dBz,dB2,projdB
   real :: dendissterm,dBdissterm,dudtresist,dpsiterm,pmassonrhoi
   real :: gradpi,projsxi,projsyi,projszi
@@ -1543,10 +1538,7 @@ end subroutine force
         if (iamgasj .and. maxvxyzu >= 4) then
            enj   = vxyzu(4,j)
            denij = xpartveci(ieni) - enj
-           if (maxvxyzu == 5) then
-              tempj = vxyzu(5,j)
-              dtempij = xpartveci(itempi) - tempj
-           endif
+           if (maxvxyzu == 5) tempj = vxyzu(5,j)
         else
            denij = 0.
         endif
@@ -1691,10 +1683,7 @@ ifgas: if (iamgasi .and. iamgasj) then
               rhoav1 = 2./(rhoi + rhoj)
               vsigu = sqrt(abs(pri - prj)*rhoav1)  !abs(projv) !sqrt(abs(denij))
            endif
-           if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
-           if (maxvxyzu == 5) then
-              dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
-           endif
+           dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
         endif
 
         if (mhd) then
