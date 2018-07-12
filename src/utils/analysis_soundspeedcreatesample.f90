@@ -108,7 +108,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     Tin=Tmin+deltaT*(i-1)
 
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
-                           0.,Tin,xmass(:,1))
+                           0.,Tin,xmass(:,1),cvi)
 
     write(iunit,'(3(1pe18.10,1x))') Tin,spsoundi1*unit_velocity,cvi*unit_ergg
 
