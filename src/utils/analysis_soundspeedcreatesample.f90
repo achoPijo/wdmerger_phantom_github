@@ -39,6 +39,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  use units,        only: umass,udist,utime,unit_density,unit_velocity,unit_pressure,unit_ergg
  use eos,          only: equationofstate,ieos,init_eos
  use eos_helmholtz,only: xmass
+ use prompting,     only: prompt
  character(len=*), intent(in)    :: dumpfile
  integer,          intent(in)    :: num,npart,iunit
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:) !due to reset center of mass
@@ -54,7 +55,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 
  nsteps = 100000
- rhomax = 1/unit_density
+ rhomax = 10000/unit_density
  rhomin = 0.0011/unit_density
  deltarho = (rhomax-rhomin)/nsteps
  Tmax   = 10000000000
@@ -71,6 +72,13 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 
  Tin=100000000
+ print *,'cosntant temperature helmholtz data'
+ call prompt('Maximum rho? [cgs]',rhomax)
+ call prompt('Minimum rho? [cgs]',rhomin)
+ call prompt('Temperature? [K]',Tin)
+ rhomax = rhomax/unit_density
+ rhomin = rhomin/unit_density
+ deltarho = (rhomax-rhomin)/nsteps
 
  fileout = 'soundspeedconstantT1e8K.dat'
  open(iunit,file=fileout,status='new')
@@ -96,6 +104,12 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 
  rhoin = 0.0015/unit_density
+ print *,'cosntant density helmholtz data'
+ call prompt('Maximum Temperature [K]',Tmax)
+ call prompt('Minimum Temperature [K]',Tmin)
+ call prompt('Density? [cgs]',rhoin)
+ rhoin = rhoin/unit_density
+ deltaT = (Tmax-Tmin)/nsteps
 
  fileout = 'soundspeedconstantrho.dat'
  open(iunit,file=fileout,status='new')
