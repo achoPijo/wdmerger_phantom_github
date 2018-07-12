@@ -45,7 +45,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in)    :: particlemass,time
 
  integer                      :: i,iloc,j,nej,i1,i2,nsteps,ierr
- real                         :: rTmax,Tmax,Tmin,r, ri,rj,mej,rhoejm,Tejm,vejinfm,phi,bi,deltaT
+ real                         :: rTmax,Tmax,Tmin,r, ri,rj,mej,rhoejm,Tejm,vejinfm,phi,bi,deltaT,cvi
  real                         :: rhoi1,rhoi2,ponrhoi1,spsoundi1,ponrhoi2,spsoundi2,rhomax,rhomin,Tin,rhoin,deltarho
  logical                      :: iexist
  character(len=120)           :: fileprefix,fileout
@@ -76,16 +76,17 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  open(iunit,file=fileout,status='new')
  write(iunit,"('#',2(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'rho[g/cm3]',    &
-        2,'soundspeed[cm/s]'
+        2,'soundspeed[cm/s]',  &
+        3,'cvi'
 
 
  do i=1,nsteps
     rhoin=rhomin+deltarho*(i-1)
 
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
-                           0.,Tin,xmass(:,1))
+                           0.,Tin,xmass(:,1),cvi)
 
-    write(iunit,'(2(1pe18.10,1x))') rhoin*unit_density,spsoundi1*unit_velocity
+    write(iunit,'(2(1pe18.10,1x))') rhoin*unit_density,spsoundi1*unit_velocity,cvi*unit_ergg
 
  enddo
 
@@ -99,7 +100,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  open(iunit,file=fileout,status='new')
  write(iunit,"('#',2(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'T[K]',    &
-        2,'soundspeed[cm/s]'
+        2,'soundspeed[cm/s]', &
+        3,'cvi'
 
 
  do i=1,nsteps
@@ -108,7 +110,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
                            0.,Tin,xmass(:,1))
 
-    write(iunit,'(2(1pe18.10,1x))') Tin,spsoundi1*unit_velocity
+    write(iunit,'(2(1pe18.10,1x))') Tin,spsoundi1*unit_velocity,cvi*unit_ergg
 
  enddo
 
