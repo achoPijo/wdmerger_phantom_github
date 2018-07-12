@@ -1309,7 +1309,7 @@ end subroutine force
   logical :: usej
   !sound speed monitoring
   integer :: printparticlei,iunit
-  real    :: maxprojvi,maxvsigavi
+  real    :: maxprojvi,maxvsigavi,spsoundij
   logical                      :: iexist
   character(len=120)           :: fileout
   !------------------------
@@ -1693,8 +1693,8 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
-              rhoav1 = 2./(rhoi + rhoj)
-              vsigu = sqrt(abs(pri - prj)*rhoav1)
+              spsoundij = (spsoundi + spsoundj)/2
+              vsigu = min(abs(projv),spsoundij)
               dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
            endif
         endif
