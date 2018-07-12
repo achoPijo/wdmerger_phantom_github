@@ -53,9 +53,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 
 
- nsteps = 1000
+ nsteps = 100000
  rhomax = 110000/unit_density
- rhomin = 1000/unit_density
+ rhomin = 0.1/unit_density
  deltarho = (rhomax-rhomin)/nsteps
  Tmax   = 10000000000
  Tmin   = 100000
