@@ -74,7 +74,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  fileout = 'soundspeedconstantT1e7K.dat'
  open(iunit,file=fileout,status='new')
- write(iunit,"('#',3(1x,'[',i2.2,1x,a11,']',2x))") &
+ write(iunit,"('#',4(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'rho[g/cm3]',    &
         2,'soundspeed[cm/s]',  &
         3,'cvi', &
@@ -87,7 +87,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
                            0.,Tin,xmass(:,1),cvi)
 
-    write(iunit,'(3(1pe18.10,1x))') rhoin*unit_density,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
+    write(iunit,'(4(1pe18.10,1x))') rhoin*unit_density,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
 
  enddo
 
@@ -97,9 +97,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  rhoin = 0.0015/unit_density
 
- fileout = 'soundspeedconstantrho9e4gcm3.dat'
+ fileout = 'soundspeedconstantrho.dat'
  open(iunit,file=fileout,status='new')
- write(iunit,"('#',3(1x,'[',i2.2,1x,a11,']',2x))") &
+ write(iunit,"('#',4(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'T[K]',    &
         2,'soundspeed[cm/s]', &
         3,'cvi' , &
@@ -111,7 +111,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
                            0.,Tin,xmass(:,1),cvi)
 
-    write(iunit,'(3(1pe18.10,1x))') Tin,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
+    write(iunit,'(4(1pe18.10,1x))') Tin,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
 
  enddo
 
