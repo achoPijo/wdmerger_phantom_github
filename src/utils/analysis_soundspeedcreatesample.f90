@@ -54,8 +54,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 
  nsteps = 100000
- rhomax = 110000/unit_density
- rhomin = 0.1/unit_density
+ rhomax = 1/unit_density
+ rhomin = 0.0011/unit_density
  deltarho = (rhomax-rhomin)/nsteps
  Tmax   = 10000000000
  Tmin   = 100000
@@ -77,7 +77,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  write(iunit,"('#',3(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'rho[g/cm3]',    &
         2,'soundspeed[cm/s]',  &
-        3,'cvi'
+        3,'cvi', &
+        4,'dvaterm'
 
 
  do i=1,nsteps
@@ -86,7 +87,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
                            0.,Tin,xmass(:,1),cvi)
 
-    write(iunit,'(3(1pe18.10,1x))') rhoin*unit_density,spsoundi1*unit_velocity,cvi*unit_ergg
+    write(iunit,'(3(1pe18.10,1x))') rhoin*unit_density,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
 
  enddo
 
@@ -94,15 +95,15 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 
 
- rhoin = 90000/unit_density
+ rhoin = 0.0015/unit_density
 
  fileout = 'soundspeedconstantrho9e4gcm3.dat'
  open(iunit,file=fileout,status='new')
  write(iunit,"('#',3(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'T[K]',    &
         2,'soundspeed[cm/s]', &
-        3,'cvi'
-
+        3,'cvi' , &
+        4,'dvaterm'
 
  do i=1,nsteps
     Tin=Tmin+deltaT*(i-1)
@@ -110,7 +111,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
                            0.,Tin,xmass(:,1),cvi)
 
-    write(iunit,'(3(1pe18.10,1x))') Tin,spsoundi1*unit_velocity,cvi*unit_ergg
+    write(iunit,'(3(1pe18.10,1x))') Tin,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
 
  enddo
 
