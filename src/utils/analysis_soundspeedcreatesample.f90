@@ -36,7 +36,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  use centreofmass, only: reset_centreofmass,get_centreofmass
  use part,         only: igas,iamtype,iphase,maxphase,rhoh
  use prompting,    only: prompt
- use units,        only: umass,udist,utime,unit_density,unit_velocity,unit_pressure
+ use units,        only: umass,udist,utime,unit_density,unit_velocity,unit_pressure,unit_ergg
  use eos,          only: equationofstate,ieos,init_eos
  use eos_helmholtz,only: xmass
  character(len=*), intent(in)    :: dumpfile
