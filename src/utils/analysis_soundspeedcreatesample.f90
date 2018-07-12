@@ -70,9 +70,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 
 
- Tin=10000000
+ Tin=100000000
 
- fileout = 'soundspeedconstantT1e7K.dat'
+ fileout = 'soundspeedconstantT1e8K.dat'
  open(iunit,file=fileout,status='new')
  write(iunit,"('#',4(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'rho[g/cm3]',    &
