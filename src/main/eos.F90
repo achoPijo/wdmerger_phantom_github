@@ -647,7 +647,7 @@ subroutine read_options_eos(name,valstring,imatch,igotall,ierr)
  case('relflag')
     read(valstring,*,iostat=ierr) relflag
     ngot = ngot + 1
-    if (relflag /= 1 .and. relflag /= 2 .and. relflag /= 3) call fatal(label,'relaxation flag not valid, must be an integer value from 1 to 3')
+    if (relflag /= 1 .and. relflag /= 2 .and. relflag /= 3 .and. relflag /=4) call fatal(label,'relaxation flag not valid, must be an integer value from 1 to 3')
 
  case('drhocrit')
     read(valstring,*,iostat=ierr) drhocrit0

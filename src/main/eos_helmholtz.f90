@@ -249,6 +249,8 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
     end if
  else if (relflag == 3) then
     eosflag = 1
+ else if (relflag == 4) then
+    eosflag = 2
  endif
 !
 !--If eosflag=1 we store temp_iter, whereas for eosflag=2 we store 
