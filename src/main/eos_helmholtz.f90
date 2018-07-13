@@ -160,8 +160,8 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
 !
 !--Local variables
 !
- integer, parameter :: max_newton=100 !50
- real(8), parameter :: eos_tol=1.0d-10 !1.0d-8
+ integer, parameter :: max_newton=50 !50
+ real(8), parameter :: eos_tol=1.0d-8 !1.0d-8
  real(8)  :: ewant, temp_iter, ener_iter, tnew, errorp, rel, denerdt!, asum,zsum,abar,zbar
  integer  :: k, newton, eosflag, ierr
  real     :: rho,abari,zbari
@@ -233,7 +233,7 @@ end subroutine get_eos_press_sound_cv_dPdT_helmholtz
           errorp    = 0.1d0*eos_tol
       endif
    enddo    ! End Newton-Raphson loop
-   if (newton >= max_newton) print *,'energy temperature iteration did not converge'
+!   if (newton >= max_newton) print *,'energy temperature iteration did not converge'
 !
 !--If the Newton-Rapshon fails to find a valid temperature, keep it 
 !  constant. Check also if temperature and the temperature predicted
