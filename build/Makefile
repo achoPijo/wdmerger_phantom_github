@@ -127,7 +127,7 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
     SETUPFILE= setup_wd.f90 
     KNOWN_SETUP=yes
     ANALYSIS= density_profiles.o analysis_soundspeedcreatesample.f90  
-    MODFILE= moddump_wdmerger.f90
+    MODFILE= moddump_resetCoM.f90
     #MORRIS_MONAGHAN= yes
 
 endif
