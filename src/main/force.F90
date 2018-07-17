@@ -702,8 +702,8 @@ isgas: if (iamgasi) then
                 fxyz4 = fxyz4 + fac*fsum(idendtdissi)
              endif
              if (maxvxyzu ==5) then
-                fxyz4 = fxyz4 + fac*fsum(idendtdissi)*cvi
-                fxyz5 = fxyz5 + fac*fsum(idendtdissi)
+                fxyz4 = fxyz4 + fac*fsum(idendtdissi)
+                fxyz5 = fxyz5 + fac*fsum(idendtdissi)/cvi
              endif
              if (icooling > 0) then
                 if (h2chemistry) then
@@ -1693,7 +1693,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
-              dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
+              dendissterm = vsigu*(dtempij/(10**9))*(auterm*grkerni + autermj*grkernj)
            endif
         endif
 
