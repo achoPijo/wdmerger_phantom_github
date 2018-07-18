@@ -219,7 +219,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  
  !damp           =    0.
  nfulldump      =    1
- relflag        =    2
+ relflag        =    4
  nuc_burn       =    0
 
 
