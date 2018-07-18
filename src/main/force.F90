@@ -1693,7 +1693,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
-              dendissterm = ((alphai + alphaj)/2)*vsigu*(dtempij/(10**9))*(auterm*grkerni + autermj*grkernj)
+              dendissterm = rij1**3*vsigu*dtempij*((cvi+cvj)/2)*(auterm*grkerni + autermj*grkernj)
            endif
         endif
 
