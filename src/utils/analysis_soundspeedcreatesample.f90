@@ -98,7 +98,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
                            0.,Tin,xmass(:,1),cvi)
     call helmholtz_energytemperature_switch(Tin,ener,rhoin,xmassi,4)
 
-    write(iunit,'(6(1pe18.10,1x))') rhoin*unit_density,Tin,ener*unit_ergg,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
+    write(iunit,'(6(1pe18.10,1x))') rhoin*unit_density,Tin,ener*unit_ergg,spsoundi1*unit_velocity,cvi,ponrhoi1/rhoin
 
  enddo
 
@@ -131,7 +131,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
                            0.,Tin,xmass(:,1),cvi)
     call helmholtz_energytemperature_switch(Tin,ener,rhoin,xmassi,4)
 
-    write(iunit,'(6(1pe18.10,1x))') rhoin*unit_density,Tin,ener*unit_ergg,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
+    write(iunit,'(6(1pe18.10,1x))') rhoin*unit_density,Tin,ener*unit_ergg,spsoundi1*unit_velocity,cvi,ponrhoi1/rhoin
 
  enddo
 
