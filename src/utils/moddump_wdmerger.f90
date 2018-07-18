@@ -191,8 +191,8 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
        enddo
        !
        !--Set new runtime parameters
-       tmax           =   50.*2.*pi/omega   !50 orbits large enough for RLO to occur
-       dtmax          =   2.*pi/omega/50.   !50 timesteps per  orbit
+       tmax           =  1.000 !50.*2.*pi/omega   !50 orbits large enough for RLO to occur
+       dtmax          =  0.001 !2.*pi/omega/50.   !50 timesteps per  orbit
        
        iexternalforce = 0
        damp           = 0.

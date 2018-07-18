@@ -50,7 +50,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real                         :: rhoi1,rhoi2,ponrhoi1,spsoundi1,ponrhoi2,spsoundi2,rhomax,rhomin,Tin,rhoin,deltarho
  logical                      :: iexist
  character(len=120)           :: fileprefix,fileout
- real                         :: dummyr1,dummyr2,dummyr3
+ real                         :: dummyr1,dummyr2,dummyr3,ener
 
 
 
@@ -82,11 +82,13 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  fileout = 'soundspeedconstantT1e8K.dat'
  open(iunit,file=fileout,status='new')
- write(iunit,"('#',4(1x,'[',i2.2,1x,a11,']',2x))") &
+ write(iunit,"('#',6(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'rho[g/cm3]',    &
-        2,'soundspeed[cm/s]',  &
-        3,'cvi', &
-        4,'dvaterm'
+        2,'Temperature[K]',  &
+        3,'specific energy[erg/g]',  &        
+        4,'soundspeed[cm/s]',  &
+        5,'cvi', &
+        6,'dvaterm'
 
 
  do i=1,nsteps
@@ -94,8 +96,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
                            0.,Tin,xmass(:,1),cvi)
+    call helmholtz_energytemperature_switch(Tin,ener,rhoin,xmassi,4)
 
-    write(iunit,'(4(1pe18.10,1x))') rhoin*unit_density,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
+    write(iunit,'(6(1pe18.10,1x))') rhoin*unit_density,Tin,ener*unit_ergg,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
 
  enddo
 
@@ -113,19 +116,22 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  fileout = 'soundspeedconstantrho.dat'
  open(iunit,file=fileout,status='new')
- write(iunit,"('#',4(1x,'[',i2.2,1x,a11,']',2x))") &
-        1,'T[K]',    &
-        2,'soundspeed[cm/s]', &
-        3,'cvi' , &
-        4,'dvaterm'
+ write(iunit,"('#',6(1x,'[',i2.2,1x,a11,']',2x))") &
+        1,'rho[g/cm3]',    &
+        2,'Temperature[K]',  &
+        3,'specific energy[erg/g]',  &  
+        4,'soundspeed[cm/s]', &
+        5,'cvi' , &
+        6,'dvaterm'
 
  do i=1,nsteps
     Tin=Tmin+deltaT*(i-1)
 
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
                            0.,Tin,xmass(:,1),cvi)
+    call helmholtz_energytemperature_switch(Tin,ener,rhoin,xmassi,4)
 
-    write(iunit,'(4(1pe18.10,1x))') Tin,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
+    write(iunit,'(6(1pe18.10,1x))') rhoin*unit_density,Tin,ener*unit_ergg,spsoundi1*unit_velocity,cvi*unit_ergg,ponrhoi1/rhoin
 
  enddo
 
