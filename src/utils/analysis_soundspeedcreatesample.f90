@@ -129,7 +129,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
     call equationofstate(ieos,ponrhoi1,spsoundi1,rhoin,0.,0.,0., &
                            0.,Tin,xmass(:,1),cvi)
-    call helmholtz_energytemperature_switch(Tin,ener,rhoin,xmassi,4)
+    call helmholtz_energytemperature_switch(Tin,ener,rhoin,xmass(:,1),4)
 
     write(iunit,'(6(1pe18.10,1x))') rhoin*unit_density,Tin,ener*unit_ergg,spsoundi1*unit_velocity,cvi,ponrhoi1/rhoin
 
