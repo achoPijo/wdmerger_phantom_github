@@ -31,11 +31,11 @@ module moddump
  logical, parameter :: use_defaults = .false.  ! if .true. will automatically use default values
                                                ! if .false., will ask user to prompt new values
  !--The default values
- real,    private   :: separation           = 0.05
- logical, private   :: use_irr_init         = .false.
- logical, private   :: use_corotating_frame = .true.
+ real,    private   :: separation           = 0.033
+ logical, private   :: use_irr_init         = .true.
+ logical, private   :: use_corotating_frame = .false.
  logical, private   :: binary               = .true.
- logical, private   :: use_relocation       = .false.
+ logical, private   :: use_relocation       = .true.
 
  public             :: modify_dump
  private
@@ -47,7 +47,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  use eos,                     only: relflag
  use io,                      only: iprint,fatal
  use prompting,               only: prompt
- use options,                 only: iexternalforce,nfulldump,damp
+ use options,                 only: iexternalforce,nfulldump,damp,alphau
  use part,                    only: igas
  use units,                   only: unit_velocity,utime
  use physcon,                 only: c,pi
@@ -218,6 +218,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  endif
  
  !damp           =    0.
+ call prompt('Alpha u',alphau)
  nfulldump      =    1
  relflag        =    4
  nuc_burn       =    0
