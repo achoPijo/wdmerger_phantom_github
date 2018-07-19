@@ -107,14 +107,6 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
           Ttabz(i)     = Ttabz(i) + vxyzu(5,i)
           ncountz = ncountz + 1
        endif
-       if (r < rtab(i) + dr/2 .and. r > rtab(i) - dr/2) then
-
-          rhotab(i)    = rhotab(i) + rhoh(xyzh(4,j),particlemass)
-          Ttab(i)      = Ttab(i) + vxyzu(5,i)
-
-
-          ncount = ncount + 1
-       endif
     enddo
     
     if (ncountx /= 0) then
@@ -140,7 +132,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         2,'Temperature x [K]',   &
         3,'Density x [g/cm3]', &
         4,'Temperature z [K]',   &
-        5,'Density z [g/cm3]'
+        5,'Density z [g/cm3]',  &
         6,'omegatab',   &
         7,'keplertab'
 
