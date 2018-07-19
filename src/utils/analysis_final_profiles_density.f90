@@ -104,12 +104,12 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     enddo
     
     if (ncountx /= 0) then
-       rhotabx(i)   = rhotabx(i)/ncount
-       Ttabx(i)     = Ttabx(i)/ncount
+       rhotabx(i)   = rhotabx(i)/ncountx
+       Ttabx(i)     = Ttabx(i)/ncountx
     endif
     if (ncountz /= 0) then
-       rhotabz(i)   = rhotabz(i)/ncount
-       Ttabz(i)     = Ttabz(i)/ncount
+       rhotabz(i)   = rhotabz(i)/ncountz
+       Ttabz(i)     = Ttabz(i)/ncountz
     endif
  enddo
 
