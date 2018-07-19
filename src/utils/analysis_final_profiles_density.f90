@@ -89,13 +89,13 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     do j=1,npart
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
 
-       if (r < rtab(i) + dr/2 .and. r > rtab(i) - dr/2 .and. (xyzh(3,j)**2 + xyzh(2,j)**2) < rsample) then
+       if (xyzh(1,j) < rtab(i) + dr/2 .and. r > xyzh(1,j) - dr/2 .and. (xyzh(3,j)**2 + xyzh(2,j)**2) < rsample) then
 
           rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
           Ttabx(i)      = Ttabx(i) + vxyzu(5,i)
           ncountx = ncountx + 1
        endif
-       if (r < rtab(i) + dr/2 .and. r > rtab(i) - dr/2 .and. (xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
+       if (xyzh(3,j) < rtab(i) + dr/2 .and. xyzh(3,j) > rtab(i) - dr/2 .and. (xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
 
           rhotabz(i)   = rhotabz(i) + rhoh(xyzh(4,j),particlemass)
           Ttabz(i)     = Ttabz(i) + vxyzu(5,i)
