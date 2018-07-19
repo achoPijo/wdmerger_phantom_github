@@ -47,11 +47,10 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in)    :: particlemass,time
 
  integer, parameter  :: nrpoints = 2000
- integer             :: i,j,ierr,ncount
+ integer             :: i,j,ierr,ncountx,ncountz
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
  real                :: omegatab(nrpoints),keplertab(nrpoints)
- real                :: compAverage(speciesmax-1,nrpoints)
  real                :: vec(3)
  character(len=200)  :: fileout
 
