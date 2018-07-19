@@ -50,7 +50,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  integer             :: i,j,ierr,ncountx,ncountz
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
- real                :: omegatab(nrpoints),keplertab(nrpoints)
+ real                :: omegatab(nrpoints),keplertab(nrpoints),rsample
  real                :: vec(3)
  character(len=200)  :: fileout
 
@@ -62,7 +62,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  rhotabx(:)        = 0.
  Ttabz(:)          = 0.
  rhotabz(:)        = 0.
-
+ rsample = 0.001
  mtot         = npart*particlemass
  !--------------
 
@@ -74,7 +74,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     r = sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)
     rmax = max(rmax,r)
  enddo
- 
+
  rmax = 0.1
  dr = rmax/nrpoints
  rtab(1)=dr
@@ -89,16 +89,16 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     do j=1,npart
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
 
-       if (r < rtab(i) + dr/2 .and. r > rtab(i) - dr/2 .and. xyzh(3,j)**2 + xyzh(2,j)**2 < 0.002) then
+       if (r < rtab(i) + dr/2 .and. r > rtab(i) - dr/2 .and. (xyzh(3,j)**2 + xyzh(2,j)**2) < rsample) then
 
           rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
           Ttabx(i)      = Ttabx(i) + vxyzu(5,i)
           ncountx = ncountx + 1
        endif
-       if (r < rtab(i) + dr/2 .and. r > rtab(i) - dr/2 .and. xyzh(1,j)**2 + xyzh(2,j)**2 < 0.002) then
+       if (r < rtab(i) + dr/2 .and. r > rtab(i) - dr/2 .and. (xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
 
           rhotabz(i)   = rhotabz(i) + rhoh(xyzh(4,j),particlemass)
-          Ttabz(i)      = Ttabz(i) + vxyzu(5,i)
+          Ttabz(i)     = Ttabz(i) + vxyzu(5,i)
           ncountz = ncountz + 1
        endif
     enddo
