@@ -62,7 +62,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  rhotabx(:)        = 0.
  Ttabz(:)          = 0.
  rhotabz(:)        = 0.
- rsample = 0.001
+ rsample = 0.0005
  mtot         = npart*particlemass
  !--------------
 
