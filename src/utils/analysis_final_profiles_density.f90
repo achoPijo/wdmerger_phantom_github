@@ -59,11 +59,10 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !-- Initialization
  !
  rtab(:)          = 0.
- Ttab(:)          = 0.
- rhotab(:)        = 0.
- omegatab(:)      = 0.
- keplertab(:)     = 0.
- compAverage(:,:) = 0.
+ Ttabx(:)          = 0.
+ rhotabx(:)        = 0.
+ Ttabz(:)          = 0.
+ rhotabz(:)        = 0.
 
  mtot         = npart*particlemass
  !--------------
@@ -127,7 +126,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         3,'Density x [g/cm3]', &
         4,'Temperature z [K]',   &
         5,'Density z [g/cm3]'
-        
+
  do j=1,nrpoints
       write(iunit,'(5(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density
  enddo
