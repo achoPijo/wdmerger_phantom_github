@@ -122,11 +122,12 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  fileout = trim(dumpfile)//'_radialprofiles.dat'
  open(iunit,file=fileout,status='replace')
  write(iunit,"('#',5(1x,'[',i2.2,1x,a11,']',2x))") &
-        1,'r',&
+        1,'r',  &
         2,'Temperature x [K]',   &
         3,'Density x [g/cm3]', &
         4,'Temperature z [K]',   &
-        5,'Density z [g/cm3]', &
+        5,'Density z [g/cm3]'
+        
  do j=1,nrpoints
       write(iunit,'(5(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density
  enddo
