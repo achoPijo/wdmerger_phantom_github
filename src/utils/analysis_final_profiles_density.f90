@@ -51,7 +51,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
  real                :: omegatab(nrpoints),keplertab(nrpoints),rsample
- real                :: vec(3)
+ real                :: vec(3),xcom(3),vcom(3)
  character(len=200)  :: fileout
 
  !
@@ -68,9 +68,13 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  call prompt('rsample in code units?',rsample)
  mtot         = npart*particlemass
  !--------------
-
- call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
  
+ !call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
+ call get_centreofmass(xcom,vcom,40000,xyzh(1:40000,:),vxyzu(1:40000,:))
+ do i=1,npart
+    xyzh(1:3,i)  = xyzh(1:3,i)  - xcom(1:3)
+    vxyzu(1:3,i) = vxyzu(1:3,i) - vcom(1:3)
+ enddo
  !-- Loop over all particles to obtain Radius of star (POSSIBLE PROBLEM EJECTED PARTICLES)
  rmax  = 0.
  do i=1,npart
