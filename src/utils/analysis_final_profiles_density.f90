@@ -46,9 +46,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:) !due to reset center of mass
  real,             intent(in)    :: particlemass,time
 
- integer, parameter  :: nrpoints = 200000
+ integer, parameter  :: nrpoints = 500
  integer             :: i,j,ierr,ncountx,ncountz
- real                :: rmax,rTmax,Tmax,dr,mtot,r
+ real                :: rmax,rTmax,Tmax,dr,mtot,r,rmin
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
  real                :: omegatab(nrpoints),keplertab(nrpoints),rsample
  real                :: vec(3)
@@ -64,25 +64,26 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  rhotabz(:)        = 0.
  omegatab(:)      = 0.
  keplertab(:)     = 0.
- rsample = 0.00001
- call prompt('rsample in code units?',rsample)
+ !rsample = 
+ !call prompt('rsample in code units?',rsample)
  mtot         = npart*particlemass
  !--------------
 
  call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
  
  !-- Loop over all particles to obtain Radius of star (POSSIBLE PROBLEM EJECTED PARTICLES)
- rmax  = 0.
+ rmax  = 0.1
  do i=1,npart
     r = sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)
     rmax = max(rmax,r)
  enddo
 
  rmax = 0.1
- dr = rmax/nrpoints
- rtab(1)=dr
- do i=2,nrpoints
-    rtab(i)      = rtab(i-r)+dr
+ rmin = 0.000001
+ dr = (log10(rmax) - log10(rmin))/nrpoints
+! rtab(1)=1
+ do i=1,nrpoints
+    rtab(i)      = rmin*10**(dr*(i-1))
     keplertab(i) = sqrt(mtot/rtab(i))
  enddo
 
@@ -93,15 +94,15 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     do j=1,npart
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
 
-       if (xyzh(1,j) < rtab(i) + dr/2 .and. xyzh(1,j) > rtab(i) - dr/2 .and. (xyzh(3,j)**2 + xyzh(2,j)**2) < rsample) then
+       if (xyzh(1,j) < rtab(i)*10**(dr/2)   .and. xyzh(1,j) > rtab(i)*10**(-dr/2) .and. (xyzh(3,j)**2 + xyzh(2,j)**2) < rsample) then
 
           rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
-          Ttabx(i)      = Ttabx(i) + vxyzu(5,i)
+          Ttabx(i)     = Ttabx(i) + vxyzu(5,i)
           call cross_product3D(xyzh(1:3,i),vxyzu(1:3,i),vec(:))
           omegatab(i)  = omegatab(i) + vec(3)
           ncountx = ncountx + 1
        endif
-       if (xyzh(3,j) < rtab(i) + dr/2 .and. xyzh(3,j) > rtab(i) - dr/2 .and. (xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
+       if (xyzh(3,j) < rtab(i)*10**(dr/2) .and. xyzh(3,j) > rtab(i)*10**(-dr/2)  .and. (xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
 
           rhotabz(i)   = rhotabz(i) + rhoh(xyzh(4,j),particlemass)
           Ttabz(i)     = Ttabz(i) + vxyzu(5,i)
