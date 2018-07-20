@@ -90,7 +90,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  do i=1,nrpoints
     ncountx = 0
     ncountz = 0
-    rtab(i) = rin
+    rtab(i) = 10**rin
     keplertab(i) = sqrt(mtot/rtab(i))
     do j=1,npart
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
