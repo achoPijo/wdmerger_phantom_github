@@ -80,7 +80,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  rmax = 0.1
  rmin = 0.000001
- dr = (log10(rmax) - log10(rmin))/nrpoints
+ dr = (log10(rmin) - log10(rmax))/nrpoints
 ! rtab(1)=1
  do i=1,nrpoints
     rtab(i)      = rmin+10**(dr*(i-1))
