@@ -68,8 +68,12 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  character(len=120)        :: setupfile
 
  !--Reset centre of mass location 
- call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
-
+ !call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
+ call get_centreofmass(xcom,vcom,40000,xyzh(1:40000,:),vxyzu(1:40000,:))
+ do i=1,npart
+    xyzh(1:3,i)  = xyzh(1:3,i)  - xcom(1:3)
+    vxyzu(1:3,i) = vxyzu(1:3,i) - vcom(1:3)
+ enddo
  return
 end subroutine modify_dump
 !-----------------------------------------------------------------------

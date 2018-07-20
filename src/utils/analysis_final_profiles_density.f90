@@ -46,7 +46,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:) !due to reset center of mass
  real,             intent(in)    :: particlemass,time
 
- integer, parameter  :: nrpoints = 500
+ integer, parameter  :: nrpoints = 2000
  integer             :: i,j,ierr,ncountx,ncountz
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
