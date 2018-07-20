@@ -83,7 +83,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  dr = (log10(rmax) - log10(rmin))/nrpoints
 ! rtab(1)=1
  do i=1,nrpoints
-    rtab(i)      = rmin*10**(dr*(i-1))
+    rtab(i)      = rmin+10**(dr*(i-1))
     keplertab(i) = sqrt(mtot/rtab(i))
  enddo
 
