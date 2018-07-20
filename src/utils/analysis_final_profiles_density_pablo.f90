@@ -82,14 +82,6 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     rmax = max(rmax,r)
  enddo
 
- rmax = 0.1
- dr = rmax/nrpoints
- rtab(1)=dr
- do i=2,nrpoints
-    rtab(i)      = rtab(i-r)+dr
-    keplertab(i) = sqrt(mtot/rtab(i))
- enddo
-
  rmax = log10(0.4)
  rin  = log10(1e-7)
  dr   = (rmax-rin)/nrpoints
@@ -98,7 +90,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  do i=1,nrpoints
     ncountx = 0
     ncountz = 0
-
+    rtab(i) = rin
+    keplertab(i) = sqrt(mtot/rtab(i))
     do j=1,npart
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
 
