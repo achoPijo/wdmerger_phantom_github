@@ -95,7 +95,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     do j=1,npart
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
 
-       if (log10(xyzh(1,j)) > rin .and. log10(xyzh(1,j)) <= rout .and. abs(xyzh(3,j)) < rsample) then !(xyzh(3,j)**2 + xyzh(2,j)**2)
+       if (log10(r) > rin .and. log10(r) <= rout .and. abs(xyzh(3,j)) < rsample) then !(xyzh(3,j)**2 + xyzh(2,j)**2)
 
           rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
           Ttabx(i)     = Ttabx(i) + vxyzu(5,i)
