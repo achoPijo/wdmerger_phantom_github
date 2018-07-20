@@ -64,7 +64,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  integer                   :: i,ierr
  real                      :: xcom1(3),xcom2(3),vcom1(3),vcom2(3)
  real                      :: rad1,rad2,mstar1,mstar2,mtotal, omega, omega2    !CHNGCODE added omega
- real                      :: xcm1,xcm2,ycm1,ycm2,r1,r2
+ real                      :: xcm1,xcm2,ycm1,ycm2,r1,r2,xcom(3),vcom(3)
  character(len=120)        :: setupfile
 
  !--Reset centre of mass location 
