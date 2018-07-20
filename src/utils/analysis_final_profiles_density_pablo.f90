@@ -92,7 +92,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  rmax = log10(0.4)
  rin  = log10(1e-7)
- dr   = (rmax-rin)/n
+ dr   = (rmax-rin)/nrpoints
  rout = rin + dr
 
  do i=1,nrpoints
