@@ -586,7 +586,20 @@ endif
 !
 !--loop over current particle's neighbours (includes self)
 !
-       call compute_forces(i,iamgasi,iamdusti,xpartveci,hi,hi1,hi21,hi41,gradhi,gradsofti,&
+       if (maxvxyzu==5) then
+          call compute_forces(i,iamgasi,iamdusti,xpartveci,hi,hi1,hi21,hi41,gradhi,gradsofti,&
+                        pro2i,pri,spsoundi,vwavei,beta, &
+                        visctermiso,visctermaniso,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
+                        pmassi,rhoi,rho1i,listneigh,nneigh,xyzcache,fsum,vsigmax, &
+                        ifilledcellcache,realviscosity,useresistiveheat, &
+                        xyzh,vxyzu,Bevol,iphase,massoftype, &
+                        etaohmi,etahalli,etaambii,jcbcbi,jcbi,divcurlB,n_R,n_electronT, &
+                        dustfrac,gradh,divcurlv,alphaind, &
+                        alphai,alphau,alphaB,bulkvisc,stressmax,npart,&
+                        ndrag,nstokes,nsuper,dtdrag,ibin_wake,ibin_neigh,cvi)
+
+       else 
+          call compute_forces(i,iamgasi,iamdusti,xpartveci,hi,hi1,hi21,hi41,gradhi,gradsofti,&
                         pro2i,pri,spsoundi,vwavei,beta, &
                         visctermiso,visctermaniso,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                         pmassi,rhoi,rho1i,listneigh,nneigh,xyzcache,fsum,vsigmax, &
@@ -596,6 +609,7 @@ endif
                         dustfrac,gradh,divcurlv,alphaind, &
                         alphai,alphau,alphaB,bulkvisc,stressmax,npart,&
                         ndrag,nstokes,nsuper,dtdrag,ibin_wake,ibin_neigh)
+       endif
 
 #ifdef GRAVITY
        !--add self-contribution
@@ -702,8 +716,8 @@ isgas: if (iamgasi) then
                 fxyz4 = fxyz4 + fac*fsum(idendtdissi)
              endif
              if (maxvxyzu ==5) then
-                fxyz4 = fxyz4 + fac*fsum(idendtdissi)*cvi
-                fxyz5 = fxyz5 + fac*fsum(idendtdissi)
+                fxyz4 = fxyz4 + fac*fsum(idendtdissi)
+                fxyz5 = fxyz5 + fac*fsum(idendtdissi)/cvi
              endif
              if (icooling > 0) then
                 if (h2chemistry) then
@@ -1209,7 +1223,7 @@ end subroutine force
                            etaohmi,etahalli,etaambii,jcbcbi,jcbi,divcurlB,n_R,n_electronT, &
                            dustfrac,gradh,divcurlv,alphaind, &
                            alphai,alphau,alphaB,bulkvisc,stressmax,npart,&
-                           ndrag,nstokes,nsuper,ts_min,ibin_wake,ibin_neigh)
+                           ndrag,nstokes,nsuper,ts_min,ibin_wake,ibin_neigh,cvi)
 #ifdef FINVSQRT
   use fastmath,    only:finvsqrt
 #endif
@@ -1271,6 +1285,7 @@ end subroutine force
   integer, intent(inout) :: ndrag,nstokes,nsuper
   real,            intent(out) :: ts_min
   integer(kind=1), intent(out) :: ibin_wake(:),ibin_neigh
+  real,            intent(in), optional :: cvi
   integer         :: j,n,iamtypej,ierr
   logical         :: iactivej,iamgasj,iamdustj
   real :: rij2,q2i,qi,xj,yj,zj,dx,dy,dz,runix,runiy,runiz,rij1,hfacgrkern
@@ -1611,7 +1626,7 @@ end subroutine force
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
-                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,xmass(:,j))!,cvj,dPdTj) !USEJCHANGE
+                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,xmass(:,j),cvj)!,dPdTj) !USEJCHANGE
               else
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
@@ -1693,7 +1708,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
-              dendissterm = (pmassi + pmassj)*rij1**3*vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
+              dendissterm = (pmassi + pmassj)*rij1**3*vsigu*dtempij*((cvi+cvj)/2)*(auterm*grkerni + autermj*grkernj)
            endif
         endif
 
