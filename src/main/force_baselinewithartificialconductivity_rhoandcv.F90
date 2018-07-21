@@ -1708,6 +1708,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
+              hj = 1./hj1
               rhoj = rhoh(hj,pmassj)
               dendissterm = (rhoi/2+rhoj/2)*vsigu*dtempij*((cvi+cvj)/2)*(auterm*grkerni + autermj*grkernj)
            endif
