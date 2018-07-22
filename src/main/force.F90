@@ -1709,7 +1709,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
               hj = 1./hj1
-              if (hi > 0.005 .or. hj > 0.005) then
+              if (hi > 0.001 .or. hj > 0.001) then
                  dendissterm = 0
               else
                  dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
