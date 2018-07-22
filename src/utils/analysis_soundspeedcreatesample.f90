@@ -80,7 +80,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  rhomin = rhomin/unit_density
  deltarho = (rhomax-rhomin)/nsteps
 
- fileout = 'soundspeedconstantT1e8K.dat'
+ fileout = 'soundspeedconstantT.dat'
  open(iunit,file=fileout,status='new')
  write(iunit,"('#',6(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'rho[g/cm3]',    &
