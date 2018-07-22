@@ -716,8 +716,8 @@ isgas: if (iamgasi) then
                 fxyz4 = fxyz4 + fac*fsum(idendtdissi)
              endif
              if (maxvxyzu ==5) then
-                fxyz4 = fxyz4 + fac*fsum(idendtdissi)
-                fxyz5 = fxyz5 + fac*fsum(idendtdissi)/cvi
+                fxyz4 = fxyz4 + fac*fsum(idendtdissi)*cvi
+                fxyz5 = fxyz5 + fac*fsum(idendtdissi)
              endif
              if (icooling > 0) then
                 if (h2chemistry) then
@@ -1365,7 +1365,7 @@ end subroutine force
   rho21i = rho1i*rho1i
   mrhoi5  = 0.5*pmassi*rho1i
   !avterm  = mrhoi5*alphai       !  artificial viscosity parameter
-  auterm  = mrhoi5*alphau*cvi*rhoi       !  artificial thermal conductivity parameter
+  auterm  = mrhoi5*alphau       !  artificial thermal conductivity parameter
   avBterm = mrhoi5*alphaB*rho1i
 !
 !--initialise the following to zero for the case
@@ -1634,7 +1634,7 @@ end subroutine force
                          realviscosity,divvj,bulkvisc,strainj,stressmax)
               endif
               mrhoj5   = 0.5*pmassj*rho1j
-              autermj  = mrhoj5*alphau*cvj*rhoj
+              autermj  = mrhoj5*alphau
               avBtermj = mrhoj5*alphaB*rho1j
 
               vsigj = max(vwavej - beta*projv,0.)
@@ -1708,7 +1708,12 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
-              dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
+              hj = 1./hj1
+              if (hi > 0.005 .or. hj > 0.005) then
+                 dendissterm = 0
+              else
+                 dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
+              endif
            endif
         endif
 
