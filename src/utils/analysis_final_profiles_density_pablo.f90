@@ -46,7 +46,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:) !due to reset center of mass
  real,             intent(in)    :: particlemass,time
 
- integer, parameter  :: nrpoints = 500
+ integer, parameter  :: nrpoints = 1000000
  integer             :: i,j,ierr,ncountx,ncountz
  real                :: rmax,rTmax,Tmax,dr,mtot,r,rin,rout
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
@@ -66,6 +66,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  keplertab(:)     = 0.
  rsample = 0.0005
  call prompt('rsample in code units?',rsample)
+ nrpoints = 500
+ call prompt('number of points', nrpoints)
  mtot         = npart*particlemass
  !--------------
  
