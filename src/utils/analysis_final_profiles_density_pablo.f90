@@ -69,12 +69,12 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  mtot         = npart*particlemass
  !--------------
  
- !call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
- call get_centreofmass(xcom,vcom,40000,xyzh(1:40000,:),vxyzu(1:40000,:))
- do i=1,npart
-    xyzh(1:3,i)  = xyzh(1:3,i)  - xcom(1:3)
-    vxyzu(1:3,i) = vxyzu(1:3,i) - vcom(1:3)
- enddo
+ call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
+ !call get_centreofmass(xcom,vcom,40000,xyzh(1:40000,:),vxyzu(1:40000,:))
+ !do i=1,npart
+ !   xyzh(1:3,i)  = xyzh(1:3,i)  - xcom(1:3)
+ !   vxyzu(1:3,i) = vxyzu(1:3,i) - vcom(1:3)
+ !enddo
  !-- Loop over all particles to obtain Radius of star (POSSIBLE PROBLEM EJECTED PARTICLES)
  rmax  = 0.
  do i=1,npart
@@ -82,7 +82,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     rmax = max(rmax,r)
  enddo
 
- rmax = log10(0.1)
+ rmax = log10(rmax)
  rin  = log10(1e-7)
  dr   = (rmax-rin)/nrpoints
  rout = rin + dr
@@ -93,7 +93,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     rtab(i) = 10**rin
     keplertab(i) = sqrt(mtot/rtab(i))
     do j=1,npart
-       r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
+       r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2)
 
        if (log10(r) > rin .and. log10(r) <= rout .and. abs(xyzh(3,j)) < rsample) then !(xyzh(3,j)**2 + xyzh(2,j)**2)
 
@@ -103,7 +103,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
           omegatab(i)  = omegatab(i) + vec(3)
           ncountx = ncountx + 1
        endif
-       if (log10(xyzh(3,j)) > rin .and. xyzh(3,j) < rout .and. (xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
+       if (log10(xyzh(3,j)) > rin .and. log10(xyzh(3,j)) < rout .and. (xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
 
           rhotabz(i)   = rhotabz(i) + rhoh(xyzh(4,j),particlemass)
           Ttabz(i)     = Ttabz(i) + vxyzu(5,i)
@@ -114,7 +114,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     if (ncountx /= 0) then
        rhotabx(i)   = rhotabx(i)/ncountx
        Ttabx(i)     = Ttabx(i)/ncountx
-       omegatab(i) = omegatab(i)/ncountx
+       omegatab(i)  = omegatab(i)/ncountx
     endif
     if (ncountz /= 0) then
        rhotabz(i)   = rhotabz(i)/ncountz
