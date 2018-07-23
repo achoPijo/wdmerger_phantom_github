@@ -47,7 +47,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in)    :: particlemass,time
 
  integer, parameter  :: nrpoints = 1000000
- integer             :: i,j,ierr,ncountx,ncountz
+ integer             :: i,j,ierr,ncountx,ncountz,npoints
  real                :: rmax,rTmax,Tmax,dr,mtot,r,rin,rout
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
  real                :: omegatab(nrpoints),keplertab(nrpoints),rsample
@@ -66,8 +66,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  keplertab(:)     = 0.
  rsample = 0.0005
  call prompt('rsample in code units?',rsample)
- nrpoints = 500
- call prompt('number of points', nrpoints)
+ npoints = 500
+ call prompt('number of points', npoints)
  mtot         = npart*particlemass
  !--------------
  
@@ -86,10 +86,10 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  rmax = log10(rmax)
  rin  = log10(1e-7)
- dr   = (rmax-rin)/nrpoints
+ dr   = (rmax-rin)/npoints
  rout = rin + dr
 
- do i=1,nrpoints
+ do i=1,npoints
     ncountx = 0
     ncountz = 0
     rtab(i) = 10**rin
@@ -144,7 +144,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         6,'omegatab',   &
         7,'keplertab'
 
- do j=1,nrpoints
+ do j=1,npoints
       write(iunit,'(7(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j),keplertab(j)
  enddo
  close(iunit)
