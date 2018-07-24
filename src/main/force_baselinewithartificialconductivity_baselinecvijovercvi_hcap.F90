@@ -1708,7 +1708,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
-              if (sqrt(rij2) < 0.005)
+              if (sqrt(rij2) < 0.005) then
                  dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
               else
                  dendissterm = 0.
