@@ -47,9 +47,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in)    :: particlemass,time
 
  integer, parameter  :: nrpoints = 1000000
- integer             :: i,j,ierr,ncountx,ncountz,npoints
+ integer             :: i,j,ierr,ncountx,ncounty,ncountz,npoints
  real                :: rmax,rTmax,Tmax,dr,mtot,r,rin,rout
- real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
+ real                :: rtab(nrpoints),Ttabx(nrpoints),Ttaby(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotaby(nrpoints),rhotabz(nrpoints)
  real                :: omegatab(nrpoints),keplertab(nrpoints),rsample
  real                :: vec(3),xcom(3),vcom(3),v
  character(len=200)  :: fileout
@@ -91,6 +91,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  do i=1,npoints
     ncountx = 0
+    ncounty = 0
     ncountz = 0
     rtab(i) = 10**rin
     keplertab(i) = sqrt(mtot/rtab(i))
@@ -98,13 +99,25 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2)
        v = sqrt(vxyzu(1,j)**2 + vxyzu(2,j)**2)
 
-       if (log10(r) > rin .and. log10(r) <= rout .and. abs(xyzh(3,j)) < rsample) then !(xyzh(3,j)**2 + xyzh(2,j)**2)
+       !if (log10(r) > rin .and. log10(r) <= rout .and. abs(xyzh(3,j)) < rsample) then !(xyzh(3,j)**2 + xyzh(2,j)**2)
+       !
+       !   rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
+       !   Ttabx(i)     = Ttabx(i) + vxyzu(5,i)
+       !   call cross_product3D(xyzh(1:3,i),vxyzu(1:3,i),vec(:))
+       !   omegatab(i)  = omegatab(i) + v!vec(3)
+       !   ncountx = ncountx + 1
+       !endif
+       if (log10(xyzh(1,j)) > rin .and. log10(xyzh(1,j)) < rout .and. (xyzh(2,j)**2 + xyzh(3,j)**2) < rsample) then
 
           rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
           Ttabx(i)     = Ttabx(i) + vxyzu(5,i)
-          call cross_product3D(xyzh(1:3,i),vxyzu(1:3,i),vec(:))
-          omegatab(i)  = omegatab(i) + v!vec(3)
           ncountx = ncountx + 1
+       endif       
+       if (log10(xyzh(2,j)) > rin .and. log10(xyzh(2,j)) < rout .and. (xyzh(1,j)**2 + xyzh(3,j)**2) < rsample) then
+
+          rhotaby(i)   = rhotabz(i) + rhoh(xyzh(4,j),particlemass)
+          Ttabz(i)     = Ttabz(i) + vxyzu(5,i)
+          ncountz = ncountz + 1
        endif
        if (log10(xyzh(3,j)) > rin .and. log10(xyzh(3,j)) < rout .and. (xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
 
