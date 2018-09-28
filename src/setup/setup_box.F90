@@ -124,7 +124,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
 
  ! RETRIEVE lattice
 
- open(10,file='Grid3DBCC',status='old')
+ open(10,file='Grid3DBCC.dat')
  do i=1,10
     read(10,*) inMatrix(i,:)
     print *, inMatrix(i,:)
