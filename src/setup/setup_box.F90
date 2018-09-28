@@ -70,16 +70,14 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  real,              parameter     :: mue=2.0d0
  real                             :: inMatrix(128000,10)
  real                             :: xboundmin,xboundmax,yboundmin,yboundmax,zboundmin,zboundmax,xbound,ybound,zbound
- character(len=120)               :: setupfile,inname
- logical                          :: write_setup
- integer                          :: i, ierr
+ integer                          :: i
  real                             :: rhozero,presszero,mtotal
 
 
  !
  ! Set default units
  !
- call set_units(dist='cm',mass='g',time='s')
+ call set_units(1.,1.,1.)
  
  npartoftype(:) = 0
  massoftype(:)  = 0.d0
