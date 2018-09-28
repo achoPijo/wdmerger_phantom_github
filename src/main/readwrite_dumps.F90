@@ -1100,8 +1100,8 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  logical               :: got_dustfrac,match
  logical               :: got_iphase,got_xyzh(4),got_abund(nabundances),got_alpha,got_poten
  logical               :: got_sink_data(nsinkproperties),got_sink_vels(3),got_Bevol(maxBevol)
- logical               :: got_xmass(speciesmax)
 #ifdef TEMPEVOLUTION
+ logical               :: got_xmass(speciesmax)
  logical               :: got_vxyzu(5)
 #else
  logical               :: got_vxyzu(4)
