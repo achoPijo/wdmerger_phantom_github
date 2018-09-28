@@ -1183,10 +1183,17 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  !
  ! check for errors
  !
+#ifdef TEMPEVOLUTION
  call check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,massoftype,&
                    alphafile,tfile,phantomdump,got_iphase,got_xyzh,got_vxyzu,got_alpha, &
-                   got_abund,got_xmass,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
+                   got_abund,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
+                   iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr,got_xmass)
+#else
+ call check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,massoftype,&
+                   alphafile,tfile,phantomdump,got_iphase,got_xyzh,got_vxyzu,got_alpha, &
+                   got_abund,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
                    iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr)
+#endif
 
  return
 100 continue
@@ -1277,8 +1284,8 @@ end subroutine check_block_header
 !---------------------------------------------------------------
 subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,massoftype,&
                         alphafile,tfile,phantomdump,got_iphase,got_xyzh,got_vxyzu,got_alpha, &
-                        got_abund,got_xmass,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
-                        iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr)
+                        got_abund,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
+                        iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr,got_xmass)
  use dim,  only:maxp,maxvxyzu,maxalpha,maxBevol,mhd,use_dustfrac,h2chemistry
  use eos,  only:polyk,gamma
  use part, only:maxphase,isetphase,set_particle_type,igas,ihacc,ihsoft,imacc,&
@@ -1289,13 +1296,14 @@ subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,mass
  integer,         intent(in)    :: i1,i2,npartoftype(:),npartread,nptmass,nsinkproperties
  real,            intent(in)    :: massoftype(:),alphafile,tfile
  logical,         intent(in)    :: phantomdump,got_iphase,got_xyzh(:),got_vxyzu(:),got_alpha
- logical,         intent(in)    :: got_abund(:),got_xmass(:),got_dustfrac,got_sink_data(:),got_sink_vels(:),got_Bevol(:)
+ logical,         intent(in)    :: got_abund(:),got_dustfrac,got_sink_data(:),got_sink_vels(:),got_Bevol(:)
  integer(kind=1), intent(inout) :: iphase(:)
  real,            intent(inout) :: vxyzu(:,:)
  real(kind=4),    intent(inout) :: alphaind(:,:), Bevol(:,:)
  real,            intent(inout) :: xyzh(:,:),xyzmh_ptmass(:,:)
  integer,         intent(in)    :: iprint
  integer,         intent(out)   :: ierr
+ logical, intent(in), optional  :: got_xmass(:)
  logical :: use_gas
  integer :: i,itype,nread
  !
@@ -1372,11 +1380,13 @@ subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,mass
     return
  endif
 
+#ifdef TEMPEVOLUTION
  if (maxvxyzu==5 .and. .not.all(got_xmass)) then
     write(*,*) 'error in rdump: using nuclear burning, but abundances not found in dump file'
     ierr = 15
     return
  endif
+#endif
 
  if (maxalpha==maxp) then
     if (got_alpha) then
