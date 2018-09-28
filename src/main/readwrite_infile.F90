@@ -296,7 +296,9 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
  logical :: imatch,igotallrequired,igotallturb,igotalllink,igotloops
  logical :: igotallbowen,igotallcooling,igotalldust,igotallextern,igotallinject
  logical :: igotallionise,igotallnonideal,igotalleos,igotallptmass,igotallphoto
+#ifdef TEMPEVOLUTION
  logical :: igotallnuc
+#endif
  integer, parameter :: nrequired = 1
 
  ireaderr = 0
@@ -452,10 +454,17 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
  enddo
  close(unit=ireadin)
 
+#ifdef TEMPEVOLUTION
  igotallrequired = (ngot  >=  nrequired) .and. igotalllink .and. igotallbowen .and. igotalldust &
                    .and. igotalleos .and. igotallcooling .and. igotallextern .and. igotallturb &
                    .and. igotallptmass .and. igotallinject .and. igotallionise .and. igotallnonideal &
                    .and. igotallphoto .and. igotallnuc
+#else
+ igotallrequired = (ngot  >=  nrequired) .and. igotalllink .and. igotallbowen .and. igotalldust &
+                   .and. igotalleos .and. igotallcooling .and. igotallextern .and. igotallturb &
+                   .and. igotallptmass .and. igotallinject .and. igotallionise .and. igotallnonideal &
+                   .and. igotallphoto
+#endif
 
  if (ierr /= 0 .or. ireaderr > 0 .or. .not.igotallrequired) then
     ierr = 1
@@ -467,7 +476,9 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
        else
           call error('read_infile','input file '//trim(infile)//' is incomplete for current compilation')
           if (.not.igotalleos) write(*,*) 'missing equation of state options'
-          if (.not.igotallnuc) write(*,*) 'missing nuclear burning options'          
+#ifdef TEMPEVOLUTION
+          if (.not.igotallnuc) write(*,*) 'missing nuclear burning options'  
+#endif      
           if (.not.igotallcooling) write(*,*) 'missing cooling options'
           if (.not.igotalllink) write(*,*) 'missing link options'
           if (.not.igotallbowen) write(*,*) 'missing Bowen dust options'
