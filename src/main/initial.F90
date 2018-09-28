@@ -306,8 +306,10 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
 !
 !--initialise the nuclear burning 
 !
+#ifdef TEMPEVOLUTION
  call init_nuc_burning(ieos,ierr)
  if (ierr /= 0) call fatal('initial','error initialising nuclear burning')
+#endif
 !
 !--Initialise values for summary array
  call summary_initialise
