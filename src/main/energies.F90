@@ -301,9 +301,9 @@ subroutine compute_energies(t)
           if (maxvxyzu >= 4) then
              etherm = etherm + pmassi*utherm(vxyzu(4,i),rhoi)*gasfrac
              if (maxvxyzu == 4) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i))
-  #ifdef TEMPEVOLUTION
+#ifdef TEMPEVOLUTION
              if (maxvxyzu == 5) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i),vxyzu(5,i),xmass(:,i))
-  #endif
+#endif
           else
              call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi)
              if (ieos==2 .and. gamma > 1.001) then
