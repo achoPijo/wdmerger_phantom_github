@@ -1121,7 +1121,9 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  got_sink_data = .false.
  got_sink_vels = .false.
  got_Bevol     = .false.
+#ifdef TEMPEVOLUTION
  got_xmass     =.false.
+#endif 
 
 
  over_arraylengths: do iarr=1,narraylengths
