@@ -132,6 +132,14 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
 
 endif
 
+ifeq ($(SETUP), box)
+#   box simulation
+    KNOWN_SETUP=yes
+    SETUPFILE= setup_box.F90
+    FPPFLAGS= -DPERIODIC
+    IND_TIMESTEPS=no
+endif
+
 ifeq ($(SETUP), turbdrive)
 #   driven turbulence
     ifeq ($(IND_TIMESTEPS), yes)
