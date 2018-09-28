@@ -508,8 +508,10 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
        write(iprint,*) 'v_x,v_y,v_z = ',vxyzu(1:3,i)
        if (maxvxyzu >= 4) write(iprint,*) 'u = ',vxyzu(4,i)
        if (maxvxyzu == 5) then
+#ifdef TEMPEVOLUTION
           write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),xmass(:,i))
           write(iprint,*) 'temperature = ',vxyzu(5,i)
+#endif
        else
           write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
           write(iprint,*) 'temperature = ',get_temperature(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
