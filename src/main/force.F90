@@ -1805,7 +1805,7 @@ ifgas: if (iamgasi .and. iamgasj) then
         endif
 
         !--terms used in force
-        gradp = gradpi + gradpj
+        gradp = gradpi + gradpj + gradpAV
         projsx = projsxi + projsxj
         projsy = projsyi + projsyj
         projsz = projszi + projszj
