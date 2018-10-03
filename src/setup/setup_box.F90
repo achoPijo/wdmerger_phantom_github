@@ -120,7 +120,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
 
  xyzh(4,:)    = hfact*((massoftype(igas)/rhozero)**(1./3.))
  vxyzu(1:3,:) = 0.
- vxyzu(4,i)   = rhozero*(gamma-1)/presszero
+ vxyzu(4,i)   = presszero/(rhozero*(gamma-1))
 
  ! RETRIEVE lattice
 
