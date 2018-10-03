@@ -47,7 +47,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  use boundary,      only: set_boundary
  use centreofmass,  only: reset_centreofmass 
  use eos,           only: ieos, equationofstate, init_eos,finish_eos
- use dim,           only: maxp
+ use dim,           only: maxp,maxvxyzu
  use io,            only: master
  use kernel,        only: hfact_default
  use options,       only: iexternalforce,nfulldump,damp,alphau
@@ -122,6 +122,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  vxyzu(1:3,:) = 0.
  vxyzu(4,i)   = presszero/(rhozero*(gamma-1))
 
+ print *, maxvxyzu
+ print *, vxyzu(4,1)
  ! RETRIEVE lattice
 
  open(10,file='Grid3DBCC.dat')
