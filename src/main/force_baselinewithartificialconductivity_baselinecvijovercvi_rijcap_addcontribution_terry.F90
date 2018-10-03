@@ -1296,6 +1296,7 @@ end subroutine force
   real :: gradp,projsx,projsy,projsz,Bxj,Byj,Bzj,Bj,Bj1,psij
   real :: dpsitermj,grkernj,grgrkernj,autermj,avBtermj,vsigj,spsoundj
   real :: gradpj,pro2j,projsxj,projsyj,projszj,sxxj,sxyj,sxzj,syyj,syzj,szzj,psitermj,dBrhoterm
+  real :: gradpAV
   real :: visctermisoj,visctermanisoj,enj,hj,mrhoj5,alphaj,pmassj,rho1j
   real :: rhoj,ponrhoj,prj,rhoav1,tempj,cvj,dPdTj
   real :: hj1,hj21,q2j,qj,vwavej,divvj
@@ -1378,6 +1379,7 @@ end subroutine force
   rho1j     = 0.
   mrhoj5    = 0.
   gradpj    = 0.
+  gradpAV   = 0.
   projsxj   = 0.
   projsyj   = 0.
   projszj   = 0.
@@ -1660,6 +1662,7 @@ end subroutine force
            avBtermj  = 0.
 
            gradpj    = 0.
+           gradpAV   = 0.
            projsxj   = 0.
            projsyj   = 0.
            projszj   = 0.
@@ -1692,11 +1695,14 @@ ifgas: if (iamgasi .and. iamgasj) then
 #else
         if (projv < 0.) then
            !--add av term to pressure
-                     gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv)*grkerni
-           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
+           gradpi = pmassj*(pro2i)*grkerni  !gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv)*grkerni
+           if (usej) then 
+              gradpj  = pmassj*(pro2j)*grkernj   !if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
+              gradpAV = -projv*(pmassi*vsigavi*grkerni+pmassj*vsigavj*grkernj)/(rhoi+rhoj)
+           endif          
 
-           !--energy conservation from artificial viscosity (don't need j term)
-           dudtdissi = -0.5*pmassj*rho1i*vsigavi*projv**2*grkerni !CHECK
+           !--energy conservation from artificial viscosity 
+           dudtdissi = -projv**2*(pmassi*vsigavi*grkerni+pmassj*vsigavj*grkernj)/(rhoi+rhoj) !CHECK
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj
