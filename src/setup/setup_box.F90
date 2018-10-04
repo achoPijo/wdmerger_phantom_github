@@ -123,13 +123,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  !do i=1,npart
   !  vxyzu(4,i)   = presszero/(rhozero*(gamma-1))
  !enddo
- do i=1,npart
-    if ((xyzh(1,i)-0.5)**2+(xyzh(2,i)-0.5)**2+(xyzh(3,i)-0.5)**2 < 0.05**2) then
-       vxyzu(4,i) = presszero/(rhozero*(gamma-1))
-    else
-       vxyzu(4,i) = 1./(rhozero*(gamma-1))
-    endif
- enddo
+
 
  !print *, maxvxyzu
  !print *, vxyzu(4,1)
@@ -145,6 +139,15 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     xyzh(2,i)=inMatrix(i,2)
     xyzh(3,i)=inMatrix(i,3)
  enddo
+
+ do i=1,npart
+    if ((xyzh(1,i)-0.5)**2+(xyzh(2,i)-0.5)**2+(xyzh(3,i)-0.5)**2 < 0.05**2) then
+       vxyzu(4,i) = presszero/(rhozero*(gamma-1))
+    else
+       vxyzu(4,i) = 1./(rhozero*(gamma-1))
+    endif
+ enddo
+
  close(10)
 
  !
