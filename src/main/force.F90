@@ -588,20 +588,7 @@ endif
 !
 !--loop over current particle's neighbours (includes self)
 !
-       if (maxvxyzu==5) then
-          call compute_forces(i,iamgasi,iamdusti,xpartveci,hi,hi1,hi21,hi41,gradhi,gradsofti,&
-                        pro2i,pri,spsoundi,vwavei,beta, &
-                        visctermiso,visctermaniso,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
-                        pmassi,rhoi,rho1i,listneigh,nneigh,xyzcache,fsum,vsigmax, &
-                        ifilledcellcache,realviscosity,useresistiveheat, &
-                        xyzh,vxyzu,Bevol,iphase,massoftype, &
-                        etaohmi,etahalli,etaambii,jcbcbi,jcbi,divcurlB,n_R,n_electronT, &
-                        dustfrac,gradh,divcurlv,alphaind, &
-                        alphai,alphau,alphaB,bulkvisc,stressmax,npart,&
-                        ndrag,nstokes,nsuper,dtdrag,ibin_wake,ibin_neigh,cvi)
-
-       else 
-          call compute_forces(i,iamgasi,iamdusti,xpartveci,hi,hi1,hi21,hi41,gradhi,gradsofti,&
+       call compute_forces(i,iamgasi,iamdusti,xpartveci,hi,hi1,hi21,hi41,gradhi,gradsofti,&
                         pro2i,pri,spsoundi,vwavei,beta, &
                         visctermiso,visctermaniso,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                         pmassi,rhoi,rho1i,listneigh,nneigh,xyzcache,fsum,vsigmax, &
@@ -611,7 +598,6 @@ endif
                         dustfrac,gradh,divcurlv,alphaind, &
                         alphai,alphau,alphaB,bulkvisc,stressmax,npart,&
                         ndrag,nstokes,nsuper,dtdrag,ibin_wake,ibin_neigh)
-       endif
 
 #ifdef GRAVITY
        !--add self-contribution
@@ -714,13 +700,8 @@ isgas: if (iamgasi) then
                 fxyz4 = fxyz4 + fac*dudtnonideal
              endif
              !--add conductivity and resistive heating
-             if (maxvxyzu == 4) then
-                fxyz4 = fxyz4 + fac*fsum(idendtdissi)
-             endif
-             if (maxvxyzu ==5) then
-                fxyz4 = fxyz4 + fac*fsum(idendtdissi)
-                fxyz5 = fxyz5 + fac*fsum(idendtdissi)/cvi
-             endif
+             fxyz4 = fxyz4 + fac*fsum(idendtdissi)
+             fxyz5 = fxyz5 + fac*fsum(idendtdissi)/cvi
              if (icooling > 0) then
                 if (h2chemistry) then
                    idudtcool = 1
@@ -737,7 +718,7 @@ isgas: if (iamgasi) then
              endif
           endif
           if (maxvxyzu >= 4) fxyzu(4,i) = fxyz4 !REVISE This is a check on temperature and energy evolution
-#ifdef TEMPEVOLUTION          
+#ifdef TEMPEVOLUTION
           if (maxvxyzu == 5) then 
              if (relflag == 1) then
                 fxyzu(4,i) = 0.
@@ -745,8 +726,8 @@ isgas: if (iamgasi) then
              else 
                 fxyzu(5,i) = fxyz5
              endif
-          endif
-#endif 
+          endif 
+#endif
        endif
 
        dtclean = bignumber
@@ -1227,7 +1208,7 @@ end subroutine force
                            etaohmi,etahalli,etaambii,jcbcbi,jcbi,divcurlB,n_R,n_electronT, &
                            dustfrac,gradh,divcurlv,alphaind, &
                            alphai,alphau,alphaB,bulkvisc,stressmax,npart,&
-                           ndrag,nstokes,nsuper,ts_min,ibin_wake,ibin_neigh,cvi)
+                           ndrag,nstokes,nsuper,ts_min,ibin_wake,ibin_neigh)
 #ifdef FINVSQRT
   use fastmath,    only:finvsqrt
 #endif
@@ -1289,11 +1270,10 @@ end subroutine force
   integer, intent(inout) :: ndrag,nstokes,nsuper
   real,            intent(out) :: ts_min
   integer(kind=1), intent(out) :: ibin_wake(:),ibin_neigh
-  real,            intent(in), optional :: cvi
   integer         :: j,n,iamtypej,ierr
   logical         :: iactivej,iamgasj,iamdustj
   real :: rij2,q2i,qi,xj,yj,zj,dx,dy,dz,runix,runiy,runiz,rij1,hfacgrkern
-  real :: grkerni,grgrkerni,dvx,dvy,dvz,projv,denij,dtempij,vsigi,vsigu,dudtdissi
+  real :: grkerni,grgrkerni,dvx,dvy,dvz,projv,denij,vsigi,vsigu,dudtdissi
   real :: projBi,projBj,dBx,dBy,dBz,dB2,projdB
   real :: dendissterm,dBdissterm,dudtresist,dpsiterm,pmassonrhoi
   real :: gradpi,projsxi,projsyi,projszi
@@ -1369,7 +1349,7 @@ end subroutine force
   rho21i = rho1i*rho1i
   mrhoi5  = 0.5*pmassi*rho1i
   !avterm  = mrhoi5*alphai       !  artificial viscosity parameter
-  auterm  = mrhoi5*alphau*cvi       !  artificial thermal conductivity parameter
+  auterm  = mrhoi5*alphau       !  artificial thermal conductivity parameter
   avBterm = mrhoi5*alphaB*rho1i
 !
 !--initialise the following to zero for the case
@@ -1462,13 +1442,6 @@ end subroutine force
            endif
            k = k + 1
         enddo
-#endif
-        ! Determing if particle j is far enough from i that it should not add its hydrodynamic 
-        ! contribution (problem dependent)
-#ifdef TEMPEVOLUTION        
-        if (sqrt(rij2) > 0.05) then !0.05 is five wd radii
-           add_contribution = .false.
-        endif
 #endif
 
         if (rij2 > epsilon(rij2)) then
@@ -1569,10 +1542,7 @@ end subroutine force
         if (iamgasj .and. maxvxyzu >= 4) then
            enj   = vxyzu(4,j)
            denij = xpartveci(ieni) - enj
-           if (maxvxyzu == 5) then
-              tempj = vxyzu(5,j)
-              dtempij = xpartveci(itempi) - tempj
-           endif
+           if (maxvxyzu == 5) tempj = vxyzu(5,j)
         else
            denij = 0.
         endif
@@ -1638,8 +1608,8 @@ end subroutine force
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
-                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,xmass(:,j),cvj)!,dPdTj) !USEJCHANGE
-#endif              
+                         realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,xmass(:,j))!,cvj,dPdTj) !USEJCHANGE
+#endif
               else
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
@@ -1647,7 +1617,7 @@ end subroutine force
                          realviscosity,divvj,bulkvisc,strainj,stressmax)
               endif
               mrhoj5   = 0.5*pmassj*rho1j
-              autermj  = mrhoj5*alphau*cvj
+              autermj  = mrhoj5*alphau
               avBtermj = mrhoj5*alphaB*rho1j
 
               vsigj = max(vwavej - beta*projv,0.)
@@ -1719,10 +1689,7 @@ ifgas: if (iamgasi .and. iamgasj) then
               rhoav1 = 2./(rhoi + rhoj)
               vsigu = sqrt(abs(pri - prj)*rhoav1)  !abs(projv) !sqrt(abs(denij))
            endif
-           if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
-           if (maxvxyzu == 5) then
-                 dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
-           endif
+           dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
         endif
 
         if (mhd) then
