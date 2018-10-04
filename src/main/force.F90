@@ -525,11 +525,13 @@ endif
           ! calculate terms required in the force evaluation
           !
           if (maxvxyzu == 5) then
+#ifdef TEMPEVOLUTION
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                      visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
                      xpartveci(itempi),xmass(:,i),cvi,dPdTi)
+#endif
           else
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
@@ -735,6 +737,7 @@ isgas: if (iamgasi) then
              endif
           endif
           if (maxvxyzu >= 4) fxyzu(4,i) = fxyz4 !REVISE This is a check on temperature and energy evolution
+#ifdef TEMPEVOLUTION          
           if (maxvxyzu == 5) then 
              if (relflag == 1) then
                 fxyzu(4,i) = 0.
@@ -742,7 +745,8 @@ isgas: if (iamgasi) then
              else 
                 fxyzu(5,i) = fxyz5
              endif
-          endif 
+          endif
+#endif 
        endif
 
        dtclean = bignumber
@@ -1296,7 +1300,6 @@ end subroutine force
   real :: gradp,projsx,projsy,projsz,Bxj,Byj,Bzj,Bj,Bj1,psij
   real :: dpsitermj,grkernj,grgrkernj,autermj,avBtermj,vsigj,spsoundj
   real :: gradpj,pro2j,projsxj,projsyj,projszj,sxxj,sxyj,sxzj,syyj,syzj,szzj,psitermj,dBrhoterm
-  real :: gradpAV
   real :: visctermisoj,visctermanisoj,enj,hj,mrhoj5,alphaj,pmassj,rho1j
   real :: rhoj,ponrhoj,prj,rhoav1,tempj,cvj,dPdTj
   real :: hj1,hj21,q2j,qj,vwavej,divvj
@@ -1379,7 +1382,6 @@ end subroutine force
   rho1j     = 0.
   mrhoj5    = 0.
   gradpj    = 0.
-  gradpAV   = 0.
   projsxj   = 0.
   projsyj   = 0.
   projszj   = 0.
@@ -1524,7 +1526,7 @@ end subroutine force
         if (mhd) usej = .true.
         if (use_dust .or. use_dustfrac) usej = .true.
         if (maxvxyzu >= 4 .and. .not.gravity) usej = .true.
-        if (maxvxyzu == 5) usej = .true. !USEJCHANGE 
+        !if (maxvxyzu == 5) usej = .true. !USEJCHANGE 
 
         !--get individual timestep/ multiphase information (querying iphase)
         if (maxphase==maxp) then
@@ -1630,10 +1632,12 @@ end subroutine force
               !--calculate j terms (which were precalculated outside loop for i)
               !
               if (maxvxyzu == 5) then
+#ifdef TEMPEVOLUTION
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
                          realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,xmass(:,j),cvj)!,dPdTj) !USEJCHANGE
+#endif              
               else
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
@@ -1662,7 +1666,6 @@ end subroutine force
            avBtermj  = 0.
 
            gradpj    = 0.
-           gradpAV   = 0.
            projsxj   = 0.
            projsyj   = 0.
            projszj   = 0.
@@ -1695,14 +1698,11 @@ ifgas: if (iamgasi .and. iamgasj) then
 #else
         if (projv < 0.) then
            !--add av term to pressure
-           gradpi = pmassj*(pro2i)*grkerni  !gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv)*grkerni
-           if (usej) then 
-              gradpj  = pmassj*(pro2j)*grkernj   !if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
-              gradpAV = -projv*(pmassi*vsigavi*grkerni+pmassj*vsigavj*grkernj)/(rhoi+rhoj)
-           endif          
+                     gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv)*grkerni
+           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
 
-           !--energy conservation from artificial viscosity 
-           dudtdissi = -projv**2*(pmassi*vsigavi*grkerni+pmassj*vsigavj*grkernj)/(rhoi+rhoj) !CHECK
+           !--energy conservation from artificial viscosity (don't need j term)
+           dudtdissi = -0.5*pmassj*rho1i*vsigavi*projv**2*grkerni !CHECK
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj
@@ -1805,7 +1805,7 @@ ifgas: if (iamgasi .and. iamgasj) then
         endif
 
         !--terms used in force
-        gradp = gradpi + gradpj + gradpAV
+        gradp = gradpi + gradpj
         projsx = projsxi + projsxj
         projsy = projsyi + projsyj
         projsz = projszi + projszj

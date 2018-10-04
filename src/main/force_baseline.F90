@@ -525,11 +525,13 @@ endif
           ! calculate terms required in the force evaluation
           !
           if (maxvxyzu == 5) then
+#ifdef TEMPEVOLUTION
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                      visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
                      xpartveci(itempi),xmass(:,i),cvi,dPdTi)
+#endif
           else
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
@@ -716,6 +718,7 @@ isgas: if (iamgasi) then
              endif
           endif
           if (maxvxyzu >= 4) fxyzu(4,i) = fxyz4 !REVISE This is a check on temperature and energy evolution
+#ifdef TEMPEVOLUTION
           if (maxvxyzu == 5) then 
              if (relflag == 1) then
                 fxyzu(4,i) = 0.
@@ -724,6 +727,7 @@ isgas: if (iamgasi) then
                 fxyzu(5,i) = fxyz5
              endif
           endif 
+#endif
        endif
 
        dtclean = bignumber
@@ -1600,10 +1604,12 @@ end subroutine force
               !--calculate j terms (which were precalculated outside loop for i)
               !
               if (maxvxyzu == 5) then
+#ifdef TEMPEVOLUTION
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
                          realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,xmass(:,j))!,cvj,dPdTj) !USEJCHANGE
+#endif
               else
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
