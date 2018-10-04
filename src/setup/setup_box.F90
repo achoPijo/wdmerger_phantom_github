@@ -120,12 +120,20 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
 
  xyzh(4,:)    = hfact*((massoftype(igas)/rhozero)**(1./3.))
  vxyzu(1:3,:) = 0.
+ !do i=1,npart
+  !  vxyzu(4,i)   = presszero/(rhozero*(gamma-1))
+ !enddo
  do i=1,npart
-    vxyzu(4,i)   = presszero/(rhozero*(gamma-1))
+    if (xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2 < 0.05**2) then
+       vxyzu(4,i) = presszero/(rhozero*(gamma-1))
+    else
+       vxyzu(4,i) = 1./(rhozero*(gamma-1))
+    endif
+
  enddo
 
- print *, maxvxyzu
- print *, vxyzu(4,1)
+ !print *, maxvxyzu
+ !print *, vxyzu(4,1)
  ! RETRIEVE lattice
 
  open(10,file='Grid3DBCC.dat')
