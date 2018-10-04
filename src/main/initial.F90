@@ -199,6 +199,9 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
 #endif
  use writeheader,      only:write_codeinfo,write_header
  use eos,              only:gamma,polyk,ieos,init_eos
+#ifdef TEMPEVOLUTION
+ use nuc_reactions,    only:init_nuc_burning
+#endif
  use part,             only:hfact,h2chemistry
  use setup,            only:setpart
  use checksetup,       only:check_setup
@@ -300,6 +303,13 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
 !
  call init_eos(ieos,ierr)
  if (ierr /= 0) call fatal('initial','error initialising equation of state')
+!
+!--initialise the nuclear burning 
+!
+#ifdef TEMPEVOLUTION
+ call init_nuc_burning(ieos,ierr)
+ if (ierr /= 0) call fatal('initial','error initialising nuclear burning')
+#endif
 !
 !--Initialise values for summary array
  call summary_initialise
@@ -508,11 +518,11 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
 !--write second header to logfile/screen
 !
  if (id==master) call write_header(2,infile,evfile,logfile,dumpfile,ntot)
-
  if (calc_erot) call get_erot_com(npart,xyzh,vxyzu,nptmass,xyzmh_ptmass,vxyz_ptmass)
  call init_evfile(ievfile,evfile)
  call write_evfile(time,dt)
  if (id==master) call write_evlog(iprint)
+
 #ifdef MFLOW
  call mflow_init(imflow,evfile,infile) !take evfile in input to create string.mf
  call mflow_write(time, dt)
@@ -527,7 +537,6 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
  call binpos_init(ibinpos,evfile) !take evfile in input to create string.binpos
  call binpos_write(time, dt)
 #endif
-
 
 !
 !--write initial conditions to output file

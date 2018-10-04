@@ -22,7 +22,7 @@
 !
 !  OWNER: Daniel Price
 !
-!  $Id: 77d0f083de65e913ca06190ecd8590d214d65c13 $
+!  $Id: 4eaf53d9168b915e640535dda0efd328669df8d1 $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -34,7 +34,7 @@ module step_lf_global
  use dim, only:maxp,maxvxyzu,maxBevol
  implicit none
  character(len=80), parameter, public :: &  ! module version
-    modid="$Id: 77d0f083de65e913ca06190ecd8590d214d65c13 $"
+    modid="$Id: 4eaf53d9168b915e640535dda0efd328669df8d1 $"
 
  real,            private :: vpred(maxvxyzu,maxp),dustpred(maxp)
  real(kind=4),    private :: Bpred(maxBevol,maxp)
@@ -72,7 +72,8 @@ end subroutine init_step
 !  main timestepping routine
 !+
 !------------------------------------------------------------
-subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
+subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew) 
+ use corot_binary_relaxation, only:reduce_separation,compute_omega
  use dim,            only:maxp,ndivcurlv,maxvxyzu,maxptmass,maxalpha,use_dustfrac,nalpha,h2chemistry
  use io,             only:iprint,fatal,iverbose,id,master,warning
  use options,        only:damp,tolv,iexternalforce,icooling
@@ -82,6 +83,13 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
                           switches_done_in_derivs,iboundary,get_ntypes,npartoftype,&
                           dustfrac,dustevol,ddustfrac,alphaind,maxvecp,nptmass
  use eos,            only:get_spsound
+ use eos_helmholtz,  only:tmaxhelmeos,tminhelmeos
+ use externalforces, only:iext_corotate
+#ifdef TEMPEVOLUTION
+ use eos,            only: relflag
+ use eos_helmholtz,  only: helmholtz_energytemperature_switch,xmass
+ use nuc_reactions,  only: nuc_burn, nuclear_burning
+#endif
  use options,        only:avdecayconst,alpha,ieos,alphamax
  use deriv,          only:derivs
  use timestep,       only:dterr,bignumber
@@ -101,7 +109,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
  real,    intent(out)   :: dtnew
  integer            :: i,its,np,ntypes,itype
  real               :: timei,erri,errmax,v2i,errmaxmean
- real               :: vxi,vyi,vzi,eni,vxoldi,vyoldi,vzoldi,hdtsph,pmassi
+ real               :: vxi,vyi,vzi,eni,vxoldi,vyoldi,vzoldi,hdtsph,pmassi,tempi
  real               :: alphaloci,divvdti,source,tdecay1,hi,rhoi,ddenom,spsoundi
  real               :: v2mean,hdti
 #ifdef IND_TIMESTEPS
@@ -149,6 +157,17 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
        ! predict v and u to the half step with "slow" forces
        !
        vxyzu(:,i) = vxyzu(:,i) + hdti*fxyzu(:,i)
+       if (maxvxyzu == 5) then
+          if (vxyzu(5,i) < tminhelmeos) then
+             vxyzu(4,i) = vxyzu(4,i) - hdti*fxyzu(4,i)
+             vxyzu(5,i) = tminhelmeos
+          endif
+          if (vxyzu(5,i) > tmaxhelmeos) then 
+             vxyzu(4,i) = vxyzu(4,i) - hdti*fxyzu(4,i)
+             vxyzu(5,i) = tmaxhelmeos
+          endif
+       endif
+
        if (itype==igas) then
           if (mhd)          Bevol(:,i)  = Bevol(:,i) + real(hdti,kind=4)*dBevol(:,i)
           if (use_dustfrac) dustevol(i) = abs(dustevol(i) + hdti*ddustfrac(i))
@@ -179,6 +198,9 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !$omp shared(alphaind,ieos,alphamax) &
 #ifdef IND_TIMESTEPS
 !$omp shared(twas,timei) &
+#endif
+#ifdef TEMPEVOLUTION
+!$omp shared(xmass) &
 #endif
 !$omp private(hi,rhoi,tdecay1,source,ddenom,hdti) &
 !$omp private(i,spsoundi,alphaloci,divvdti) &
@@ -212,6 +234,16 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
        hdti = 0.5*dtsph
 #endif
        vpred(:,i) = vxyzu(:,i) + hdti*fxyzu(:,i)
+       if (maxvxyzu == 5) then
+          if (vpred(5,i) < tminhelmeos) then
+             vpred(4,i) = vpred(4,i) - hdti*fxyzu(4,i)
+             vpred(5,i) = tminhelmeos
+          endif
+          if (vpred(5,i) > tmaxhelmeos) then 
+             vpred(4,i) = vpred(4,i) - hdti*fxyzu(4,i)
+             vpred(5,i) = tmaxhelmeos
+          endif
+       endif
        if (itype==igas) then
           if (mhd)          Bpred(:,i)  = Bevol (:,i) + real(hdti,kind=4)*dBevol(:,i)
           if (use_dustfrac) then
@@ -226,7 +258,11 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
        if (maxalpha==maxp) then
           hi   = xyzh(4,i)
           rhoi = rhoh(hi,pmassi)
+#ifdef TEMPEVOLUTION
+          spsoundi = get_spsound(ieos,xyzh(:,i),rhoi,vpred(:,i),xmass(:,i))
+#else
           spsoundi = get_spsound(ieos,xyzh(:,i),rhoi,vpred(:,i))
+#endif
           tdecay1  = avdecayconst*spsoundi/hi
           ddenom   = 1./(1. + dtsph*tdecay1) ! implicit integration for decay term
           if (nalpha >= 2) then
@@ -290,7 +326,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !$omp private(hdti) &
 #endif
 !$omp private(i,vxi,vyi,vzi,vxoldi,vyoldi,vzoldi) &
-!$omp private(erri,v2i,eni) &
+!$omp private(erri,v2i,eni,tempi) &
 !$omp reduction(max:errmax) &
 !$omp reduction(+:np,v2mean) &
 !$omp firstprivate(pmassi,itype)
@@ -310,6 +346,16 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
                 hdti = 0.5*get_dt(dtmaxold,ibinold(i)) + 0.5*get_dt(dtmax,ibin(i))
              endif
              vxyzu(:,i) = vxyzu(:,i) + hdti*fxyzu(:,i)
+             if (maxvxyzu == 5) then
+                if (vxyzu(5,i) < tminhelmeos) then
+                   vxyzu(4,i) = vxyzu(4,i) - hdti*fxyzu(4,i)
+                   vxyzu(5,i) = tminhelmeos
+                endif
+                if (vxyzu(5,i) > tmaxhelmeos) then 
+                   vxyzu(4,i) = vxyzu(4,i) - hdti*fxyzu(4,i)
+                   vxyzu(5,i) = tmaxhelmeos
+                endif
+             endif
              if (itype==igas) then
                 if (mhd)          Bevol(:,i)  = Bevol(:,i) + real(hdti,kind=4)*dBevol(:,i)
                 if (use_dustfrac) dustevol(i) = dustevol(i) + hdti*ddustfrac(i)
@@ -321,7 +367,16 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
           !
           hdti = timei - twas(i)
           vxyzu(:,i) = vxyzu(:,i) + hdti*fxyzu(:,i)
-
+          if (maxvxyzu == 5) then
+             if (vxyzu(5,i) < tminhelmeos) then
+                vxyzu(4,i) = vxyzu(4,i) - hdti*fxyzu(4,i)
+                vxyzu(5,i) = tminhelmeos
+             endif
+             if (vxyzu(5,i) > tmaxhelmeos) then 
+                vxyzu(4,i) = vxyzu(4,i) - hdti*fxyzu(4,i)
+                vxyzu(5,i) = tmaxhelmeos
+             endif
+          endif
           if (itype==igas) then
              if (mhd)          Bevol(:,i)  = Bevol(:,i) + real(hdti,kind=4)*dBevol(:,i)
              if (use_dustfrac) dustevol(i) = dustevol(i) + hdti*ddustfrac(i)
@@ -335,7 +390,8 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
           vxi = vxyzu(1,i) + hdtsph*fxyzu(1,i)
           vyi = vxyzu(2,i) + hdtsph*fxyzu(2,i)
           vzi = vxyzu(3,i) + hdtsph*fxyzu(3,i)
-          if (maxvxyzu >= 4) eni = vxyzu(4,i) + hdtsph*fxyzu(4,i)
+          if (maxvxyzu >= 4) eni = vxyzu(4,i) + hdtsph*fxyzu(4,i)              
+          if (maxvxyzu == 5) tempi = vxyzu(5,i) + hdtsph*fxyzu(5,i)
 
           erri = (vxi - vpred(1,i))**2 + (vyi - vpred(2,i))**2 + (vzi - vpred(3,i))**2
           !if (erri > errmax) print*,id,' errmax = ',erri,' part ',i,vxi,vxoldi,vyi,vyoldi,vzi,vzoldi
@@ -349,8 +405,18 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
           vxyzu(2,i) = vyi
           vxyzu(3,i) = vzi
           !--this is the energy equation if non-isothermal
-          if (maxvxyzu >= 4) vxyzu(4,i) = eni
-
+          if (maxvxyzu >= 4) vxyzu(4,i) = eni                                  
+          if (maxvxyzu == 5) then
+             vxyzu(5,i) = tempi
+             if (tempi < tminhelmeos) then
+                vxyzu(4,i) = vxyzu(4,i) - hdtsph*fxyzu(4,i)
+                vxyzu(5,i) = tminhelmeos
+             endif
+             if (tempi > tmaxhelmeos) then 
+                vxyzu(4,i) = vxyzu(4,i) - hdtsph*fxyzu(4,i)
+                vxyzu(5,i) = tmaxhelmeos
+             endif
+          endif
           if (itype==igas) then
              !
              ! corrector step for magnetic field and dust
@@ -381,9 +447,18 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
        if (mhd) Bpred(:,i) = Bevol(:,i)
        if (use_dustfrac) dustpred(i) = dustevol(i)
 !
-! shift v back to the half step
-!
-       vxyzu(:,i) = vxyzu(:,i) - hdtsph*fxyzu(:,i)
+! shift v back to the half step !REVISE PROBLEM HERE! MIGHT BE GOING BACKwARDs OR FORWARDS EEVEN though temperature was cutted
+! CHANGE CHANGE REVISE!!!
+       if (maxvxyzu == 5) then
+          if (vxyzu(5,i)==tminhelmeos .or. vxyzu(5,i)==tmaxhelmeos) then
+             vxyzu(1:3,i) = vxyzu(1:3,i) - hdtsph*fxyzu(1:3,i)
+          else
+             vxyzu(:,i) = vxyzu(:,i) - hdtsph*fxyzu(:,i)
+          endif
+       else
+          vxyzu(:,i) = vxyzu(:,i) - hdtsph*fxyzu(:,i) 
+       endif
+
        if (itype==igas) then
           if (mhd)          Bevol(:,i)  = Bevol(:,i) - real(hdtsph,kind=4)*dBevol(:,i)
           if (use_dustfrac) dustevol(i) = dustevol(i) - hdtsph*ddustfrac(i)
@@ -400,6 +475,28 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 
  enddo iterations
 
+
+
+#ifdef TEMPEVOLUTION
+!$omp parallel default(none)&
+!$omp shared(xyzh,vxyzu,massoftype,npart,xmass,relflag) &
+!$omp private(i)
+!$omp do schedule(runtime)
+ do i=1,npart
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),xmass(:,i),relflag)
+ enddo
+!$omp enddo
+!$omp end parallel
+#endif
+
+!
+!   compute nuclear burning
+!
+#ifdef TEMPEVOLUTION
+ if (nuc_burn) call nuclear_burning(xyzh,vxyzu,fxyzu,npart,dtsph)
+#endif
+
+
  if (its > 1) call summary_variable('tolv',iosumtvi,0,real(its))
 
  if (maxits > 1 .and. its >= maxits) then
@@ -407,6 +504,12 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
     call fatal('step','VELOCITY ITERATIONS NOT CONVERGED!!')
  endif
 
+ if (iexternalforce == iext_corotate) then !NOTE that here nuclear energy is overwritten
+    call reduce_separation(xyzh,vxyzu,npart,dtnew)
+    call derivs(1,npart,nactive,xyzh,vxyzu,fxyzu,fext,divcurlv,divcurlB,Bpred,dBevol,dustfrac,ddustfrac,timei,dtsph,dtnew)
+    call compute_omega(xyzh,vxyzu,fxyzu(:,:),npart)
+ endif
+ 
  return
 end subroutine step
 

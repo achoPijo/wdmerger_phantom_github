@@ -96,6 +96,10 @@ subroutine compute_energies(t)
 #ifdef LIGHTCURVE
  use part,         only:luminosity
 #endif
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:xmass
+#endif
+
  real, intent(in) :: t
  real    :: ev_data_thread(0:inumev)
  real    :: xi,yi,zi,hi,vxi,vyi,vzi,v2i,Bxi,Byi,Bzi,rhoi,angx,angy,angz
@@ -154,6 +158,9 @@ subroutine compute_energies(t)
 !
 !$omp parallel default(none) &
 !$omp shared(xyzh,vxyzu,iexternalforce,npart,t,id) &
+#ifdef TEMPEVOLUTION
+!$omp shared(xmass) &
+#endif
 !$omp shared(alphaind,massoftype,irealvisc) &
 !$omp shared(ieos,gamma,nptmass,xyzmh_ptmass,vxyz_ptmass) &
 !$omp shared(Bxyz,Bevol,divBsymm,divcurlB,alphaB,iphase,poten,dustfrac) &
@@ -197,7 +204,6 @@ subroutine compute_energies(t)
     !OK: skip calculating for particles on other procs
     !Necessary if xyzh not AllReduced, requires sums to be AllReduced
     !if (id  /=  ibelong(xyzh(:,i),id)) cycle
-
     xi = xyzh(1,i)
     yi = xyzh(2,i)
     zi = xyzh(3,i)
@@ -294,7 +300,10 @@ subroutine compute_energies(t)
           ! thermal energy
           if (maxvxyzu >= 4) then
              etherm = etherm + pmassi*utherm(vxyzu(4,i),rhoi)*gasfrac
-             call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i))
+             if (maxvxyzu == 4) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i))
+#ifdef TEMPEVOLUTION
+             if (maxvxyzu == 5) call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi,vxyzu(4,i),vxyzu(5,i),xmass(:,i))
+#endif
           else
              call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xi,yi,zi)
              if (ieos==2 .and. gamma > 1.001) then

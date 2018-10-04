@@ -51,7 +51,11 @@ module part
  real(kind=4) :: Bevol(maxBevol,maxmhd)
  real(kind=4) :: Bxyz(3,maxvecp)
  character(len=*), parameter :: xyzh_label(4) = (/'x','y','z','h'/)
+#ifdef TEMPEVOLUTION
+ character(len=*), parameter :: vxyzu_label(5) = (/'vx','vy','vz','u ','T '/)
+#else
  character(len=*), parameter :: vxyzu_label(4) = (/'vx','vy','vz','u '/)
+#endif
  character(len=*), parameter :: Bevol_label(4) = (/'Bx ','By ','Bz ','psi'/)
 !
 !--storage in divcurlv

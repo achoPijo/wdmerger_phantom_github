@@ -317,6 +317,9 @@ subroutine write_fulldump(t,dumpfile,ntotal,iorder,sphNG)
  use dim,  only:mhd_nonideal
  use part, only:ionfrac_eta,ionfrac_eta_label
 #endif
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:xmass,speciesmax,xmass_label
+#endif 
  real,             intent(in) :: t
  character(len=*), intent(in) :: dumpfile
  integer,          intent(in), optional :: iorder(:)
@@ -436,6 +439,9 @@ subroutine write_fulldump(t,dumpfile,ntotal,iorder,sphNG)
        if (h2chemistry)  call write_array(1,abundance,abundance_label,nabundances,npart,k,ipass,idump,nums,ierrs(4))
        if (use_dust)     call write_array(1,dustfrac,'dustfrac',npart,k,ipass,idump,nums,ierrs(5))
        if (use_dustfrac) call write_array(1,deltav,deltav_label,3,npart,k,ipass,idump,nums,ierrs(6))
+#ifdef TEMPEVOLUTION
+       call write_array(1,xmass,xmass_label,speciesmax,npart,k,ipass,idump,nums,ierrs(15))
+#endif 
 
        ! write pressure to file
        if (ieos==10 .and. k==i_real) then
@@ -1082,6 +1088,9 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
 #ifdef IND_TIMESTEPS
  use part,       only:dt_in
 #endif
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:xmass,speciesmax,xmass_label
+#endif 
  integer, intent(in)   :: i1,i2,noffset,narraylengths,nums(:,:),npartread,npartoftype(:),idisk1,iprint
  real,    intent(in)   :: massoftype(:)
  integer, intent(in)   :: nptmass,nsinkproperties
@@ -1089,8 +1098,14 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  real,    intent(in)   :: tfile,alphafile
  integer, intent(out)  :: ierr
  logical               :: got_dustfrac,match
- logical               :: got_iphase,got_xyzh(4),got_vxyzu(4),got_abund(nabundances),got_alpha,got_poten
+ logical               :: got_iphase,got_xyzh(4),got_abund(nabundances),got_alpha,got_poten
  logical               :: got_sink_data(nsinkproperties),got_sink_vels(3),got_Bevol(maxBevol)
+#ifdef TEMPEVOLUTION
+ logical               :: got_xmass(speciesmax)
+ logical               :: got_vxyzu(5)
+#else
+ logical               :: got_vxyzu(4)
+#endif 
  character(len=lentag) :: tag,tagarr(64)
  integer :: k,i,iarr,ik
 !
@@ -1106,6 +1121,10 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  got_sink_data = .false.
  got_sink_vels = .false.
  got_Bevol     = .false.
+#ifdef TEMPEVOLUTION
+ got_xmass     =.false.
+#endif 
+
 
  over_arraylengths: do iarr=1,narraylengths
 
@@ -1132,6 +1151,9 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
           if (h2chemistry) then
              call read_array(abundance,abundance_label,got_abund,ik,i1,i2,noffset,idisk1,tag,match,ierr)
           endif
+#ifdef TEMPEVOLUTION
+          call read_array(xmass,xmass_label,got_xmass,ik,i1,i2,noffset,idisk1,tag,match,ierr)
+#endif
           if (maxalpha==maxp) call read_array(alphaind(1,:),'alpha',got_alpha,ik,i1,i2,noffset,idisk1,tag,match,ierr)
 
           !
@@ -1161,10 +1183,17 @@ subroutine read_phantom_arrays(i1,i2,noffset,narraylengths,nums,npartread,nparto
  !
  ! check for errors
  !
+#ifdef TEMPEVOLUTION
+ call check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,massoftype,&
+                   alphafile,tfile,phantomdump,got_iphase,got_xyzh,got_vxyzu,got_alpha, &
+                   got_abund,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
+                   iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr,got_xmass)
+#else
  call check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,massoftype,&
                    alphafile,tfile,phantomdump,got_iphase,got_xyzh,got_vxyzu,got_alpha, &
                    got_abund,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
                    iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr)
+#endif
 
  return
 100 continue
@@ -1256,7 +1285,7 @@ end subroutine check_block_header
 subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,massoftype,&
                         alphafile,tfile,phantomdump,got_iphase,got_xyzh,got_vxyzu,got_alpha, &
                         got_abund,got_dustfrac,got_sink_data,got_sink_vels,got_Bevol, &
-                        iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr)
+                        iphase,xyzh,vxyzu,alphaind,xyzmh_ptmass,Bevol,iprint,ierr,got_xmass)
  use dim,  only:maxp,maxvxyzu,maxalpha,maxBevol,mhd,use_dustfrac,h2chemistry
  use eos,  only:polyk,gamma
  use part, only:maxphase,isetphase,set_particle_type,igas,ihacc,ihsoft,imacc,&
@@ -1274,6 +1303,7 @@ subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,mass
  real,            intent(inout) :: xyzh(:,:),xyzmh_ptmass(:,:)
  integer,         intent(in)    :: iprint
  integer,         intent(out)   :: ierr
+ logical, intent(in), optional  :: got_xmass(:)
  logical :: use_gas
  integer :: i,itype,nread
  !
@@ -1333,18 +1363,31 @@ subroutine check_arrays(i1,i2,npartoftype,npartread,nptmass,nsinkproperties,mass
  if (any(.not.got_vxyzu(1:3))) then
     write(*,*) 'ERROR: missing velocity information from file'
  endif
- if (maxvxyzu==4 .and. .not.got_vxyzu(4)) then
+ if (maxvxyzu>=4 .and. .not.got_vxyzu(4)) then
     do i=i1,i2
        vxyzu(4,i) = (1.0/(gamma-1.0))*polyk*rhoh(xyzh(4,i),get_pmass(i,use_gas))**(gamma - 1.)
        !print*,'u = ',vxyzu(4,i)
     enddo
     write(*,*) 'WARNING: u not in file but setting u = (K*rho**(gamma-1))/(gamma-1)'
  endif
+ if (maxvxyzu==5 .and. .not.got_vxyzu(5)) then
+    write(*,*) 'WARNING: T not in file'
+ endif
+
  if (h2chemistry .and. .not.all(got_abund)) then
     write(*,*) 'error in rdump: using H2 chemistry, but abundances not found in dump file'
     ierr = 9
     return
  endif
+
+#ifdef TEMPEVOLUTION
+ if (maxvxyzu==5 .and. .not.all(got_xmass)) then
+    write(*,*) 'error in rdump: using nuclear burning, but abundances not found in dump file'
+    ierr = 15
+    return
+ endif
+#endif
+
  if (maxalpha==maxp) then
     if (got_alpha) then
        if (alphafile < 0.99 .and. tfile > 0.) then

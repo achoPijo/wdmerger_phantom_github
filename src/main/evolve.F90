@@ -106,6 +106,7 @@ use mf_write,          only:vmflow_write
 #ifdef BINPOS
 use mf_write,          only:binpos_write
 #endif
+ use corot_binary_relaxation, only:rlo_flag
 
  character(len=*), intent(in)    :: infile
  character(len=*), intent(inout) :: logfile,evfile,dumpfile
@@ -348,7 +349,7 @@ use mf_write,          only:binpos_write
     dtprint = min(tprint,tmax) - time + epsilon(dtmax)
     if (dtprint <= epsilon(dtmax) .or. dtprint >= (1.0-1e-8)*dtmax ) dtprint = dtmax + epsilon(dtmax)
     dt = min(dtforce,dtcourant,dterr,dtmax+epsilon(dtmax),dtprint)
-!
+!   ATTENTION HERE NEW TIMESTEP IS SET
 !--write log every step (NB: must print after dt has been set in order to identify timestep constraint)
 !
     if (id==master) call print_dtlog(iprint,time,dt,dtforce,dtcourant,dterr,dtmax,dtprint)
@@ -375,7 +376,7 @@ use mf_write,          only:binpos_write
 !--Determine if this is the correct time to write to the data file
 !
     at_dump_time = (time >= tmax).or.((mod(nsteps,nout)==0).and.(nout > 0)) &
-                   .or.((nsteps >= nmax).and.(nmax >= 0))
+                   .or.((nsteps >= nmax).and.(nmax >= 0).or.rlo_flag)
 #ifdef IND_TIMESTEPS
     if (istepfrac==2**nbinmax) at_dump_time = .true.
 #else

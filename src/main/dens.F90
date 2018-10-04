@@ -118,6 +118,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
                      mhd_nonideal,nalpha,use_dust,use_dustfrac
  use boundary,  only:dxbound,dybound,dzbound
  use eos,       only:get_spsound,get_temperature
+ use eos_helmholtz, only: cgsrhomaxhelmeos,cgsrhominhelmeos
  use io,        only:iprint,fatal,iverbose,id,master,real4,warning,error
  use linklist,  only:ncells,ifirstincell,get_neighbour_list,get_hmaxcell,set_hmaxcell
  use options,   only:ieos,tolh,alphaB,alpha,alphamax
@@ -140,8 +141,12 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
  use timestep,  only:rho_dtthresh,mod_dtmax,mod_dtmax_now
  use nicil,     only:nicil_get_ion_n,nicil_translate_error
  use part,      only:ngradh,dustfrac
+ use units,     only:unit_density
  use viscosity, only:irealvisc,bulkvisc,shearparam
  use io_summary,only:summary_variable,iosumhup,iosumhdn
+#ifdef TEMPEVOLUTION
+ use eos_helmholtz,  only:xmass
+#endif
  integer,      intent(in)    :: icall,npart,nactive
  real,         intent(inout) :: xyzh(:,:)
  real,         intent(in)    :: vxyzu(:,:),fxyzu(:,:),fext(:,:)
@@ -195,6 +200,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
  real(kind=4) :: t1,t2,t3
  logical      :: have_sent
 #endif
+
 
  if (iverbose >= 3 .and. id==master) &
     write(iprint,*) ' cell cache =',isizecellcache,' neigh cache = ',isizeneighcache,' icall = ',icall
@@ -258,9 +264,13 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
 !$omp reduction(max:maxneightry,maxneighact) &
 !$omp shared(Bevol) &
 !$omp shared(divcurlB,alphaind,alphaB,alpha,alphamax) &
+!$omp shared(unit_density) &
 !$omp private(psii,Bxi,Byi,Bzi,gradBi,Bi,alphaBi) &
 !$omp private(denom,rmatrix) &
 !$omp reduction(max:stressmax,rhomax) &
+#ifdef TEMPEVOLUTION
+!$omp shared(xmass) &
+#endif
 #ifdef MPI
 !$omp reduction(+:nwarnroundoff) &
 !$omp shared(id,ireqrecv,ireqsend,xrecvbuf,xbuf,nprocs,have_sent) &
@@ -452,6 +462,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
              hnew      = 0.8*hi
           endif
        endif
+       !if (hnew > 0.003) hnew = 0.003
 
        gradhi = 1./omegai
        gradsofti = gradsofti*dhdrhoi
@@ -496,8 +507,15 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
        write(iprint,*) 'x,y,z = ',xyzh(1:3,i)
        write(iprint,*) 'v_x,v_y,v_z = ',vxyzu(1:3,i)
        if (maxvxyzu >= 4) write(iprint,*) 'u = ',vxyzu(4,i)
-       write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
-       write(iprint,*) 'temperature = ',get_temperature(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
+       if (maxvxyzu == 5) then
+#ifdef TEMPEVOLUTION
+          write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),xmass(:,i))
+          write(iprint,*) 'temperature = ',vxyzu(5,i)
+#endif
+       else
+          write(iprint,*) 'c_s         = ',get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
+          write(iprint,*) 'temperature = ',get_temperature(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
+       endif
        call fatal('densityiterate','could not converge in density',i,'error',abs(hnew-hi)/hi_old)
     endif
 !
@@ -536,7 +554,12 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
        ! Cullen & Dehnen (2010) viscosity switch, set alphaloc
        !
        if (nalpha >= 2 .and. iamgasi) then
-          spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))
+#ifdef TEMPEVOLUTION
+          spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),xmass(:,i))    
+#else
+          spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i))        
+#endif        
+
           alphaind(2,i) = real4(get_alphaloc(divcurlvi(5),spsoundi,hi,xi_limiter,alpha,alphamax))
        endif
     else ! we always need div v for h prediction
@@ -1210,13 +1233,14 @@ end subroutine exactlinear
 !  (called from step for decay timescale in alpha switches)
 !+
 !----------------------------------------------------------------
-real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi)
+real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi,xmassi)
  use eos,  only:equationofstate
  use part, only:maxp,mhd,maxvxyzu,rhoh
  real,         intent(in) :: xyzhi(4),pmassi
  real,         intent(in) :: vxyzui(maxvxyzu)
  integer,      intent(in) :: ieos
  real(kind=4), intent(in), optional :: Bxyzi(3)
+ real,         intent(in), optional :: xmassi(:)
  real :: spsoundi,hi,rhoi,ponrhoi,valfven2i
 
  hi = xyzhi(4)
@@ -1224,7 +1248,11 @@ real function vwave(xyzhi,pmassi,ieos,vxyzui,Bxyzi)
  if (maxvxyzu==4) then
     call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3),vxyzui(4))
  else
-    call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3))
+    if (maxvxyzu==5) then
+       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3),vxyzui(4),vxyzui(5),xmassi)
+    else
+       call equationofstate(ieos,ponrhoi,spsoundi,rhoi,xyzhi(1),xyzhi(2),xyzhi(3))
+    endif
  endif
  if (present(Bxyzi)) then
     valfven2i = (Bxyzi(1)**2 + Bxyzi(2)**2 + Bxyzi(3)**2)/rhoi

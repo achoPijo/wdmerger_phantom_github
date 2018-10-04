@@ -36,6 +36,7 @@
 !    dumpfile           -- dump file to start from
 !    etamhd             -- fixed physical resistivity value
 !    hfact              -- h in units of particle spacing [h = hfact(m/rho)^(1/3)]
+!    iexternalforce     -- external forces (0=off, 1=on)
 !    ipdv_heating       -- heating from PdV work (0=off, 1=on)
 !    irealvisc          -- physical viscosity type (0=none,1=const,2=Shakura/Sunyaev)
 !    iresistive_heating -- resistive heating (0=off, 1=on)
@@ -108,6 +109,9 @@ subroutine write_infile(infile,logfile,evfile,dumpfile,iwritein,iprint)
  use cooling,         only:write_options_cooling
  use dim,             only:maxvxyzu,maxptmass,gravity
  use part,            only:h2chemistry,maxp,mhd,maxalpha,nptmass
+#ifdef TEMPEVOLUTION
+ use nuc_reactions,   only:write_options_nuc_burning
+#endif
  character(len=*), intent(in) :: infile,logfile,evfile,dumpfile
  integer,          intent(in) :: iwritein,iprint
  integer                      :: ierr
@@ -196,13 +200,17 @@ subroutine write_infile(infile,logfile,evfile,dumpfile,iwritein,iprint)
  ! thermodynamics
  !
  call write_options_eos(iwritein)
- if (maxvxyzu >= 4 .and. (ieos==2 .or. ieos==10) ) then
+ if (maxvxyzu >= 4 .and. (ieos==2 .or. ieos==10 .or. ieos==15) ) then
     call write_inopt(ipdv_heating,'ipdv_heating','heating from PdV work (0=off, 1=on)',iwritein)
     call write_inopt(ishock_heating,'ishock_heating','shock heating (0=off, 1=on)',iwritein)
     if (mhd) then
        call write_inopt(iresistive_heating,'iresistive_heating','resistive heating (0=off, 1=on)',iwritein)
     endif
  endif
+
+#ifdef TEMPEVOLUTION
+ call write_options_nuc_burning(iwritein)
+#endif
 
  if (maxvxyzu >= 4) call write_options_cooling(iwritein)
 
@@ -274,6 +282,9 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
  use part,          only:mhd,nptmass
  use cooling,       only:read_options_cooling
  use ptmass,        only:read_options_ptmass
+#ifdef TEMPEVOLUTION
+ use nuc_reactions, only:read_options_nuc_burning
+#endif
  character(len=*), parameter   :: label = 'read_infile'
  character(len=*), intent(in)  :: infile
  character(len=*), intent(out) :: logfile,evfile,dumpfile
@@ -285,6 +296,9 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
  logical :: imatch,igotallrequired,igotallturb,igotalllink,igotloops
  logical :: igotallbowen,igotallcooling,igotalldust,igotallextern,igotallinject
  logical :: igotallionise,igotallnonideal,igotalleos,igotallptmass,igotallphoto
+#ifdef TEMPEVOLUTION
+ logical :: igotallnuc
+#endif
  integer, parameter :: nrequired = 1
 
  ireaderr = 0
@@ -417,6 +431,9 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
        if (.not.imatch) call read_options_nicil(name,valstring,imatch,igotallnonideal,ierr)
 #endif
        if (.not.imatch) call read_options_eos(name,valstring,imatch,igotalleos,ierr)
+#ifdef TEMPEVOLUTION
+       if (.not.imatch) call read_options_nuc_burning(name,valstring,imatch,igotallnuc,ierr)
+#endif     
        if (.not.imatch) call read_options_cooling(name,valstring,imatch,igotallcooling,ierr)
        if (maxptmass > 0) then
           if (.not.imatch) call read_options_ptmass(name,valstring,imatch,igotallptmass,ierr)
@@ -437,10 +454,17 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
  enddo
  close(unit=ireadin)
 
+#ifdef TEMPEVOLUTION
+ igotallrequired = (ngot  >=  nrequired) .and. igotalllink .and. igotallbowen .and. igotalldust &
+                   .and. igotalleos .and. igotallcooling .and. igotallextern .and. igotallturb &
+                   .and. igotallptmass .and. igotallinject .and. igotallionise .and. igotallnonideal &
+                   .and. igotallphoto .and. igotallnuc
+#else
  igotallrequired = (ngot  >=  nrequired) .and. igotalllink .and. igotallbowen .and. igotalldust &
                    .and. igotalleos .and. igotallcooling .and. igotallextern .and. igotallturb &
                    .and. igotallptmass .and. igotallinject .and. igotallionise .and. igotallnonideal &
                    .and. igotallphoto
+#endif
 
  if (ierr /= 0 .or. ireaderr > 0 .or. .not.igotallrequired) then
     ierr = 1
@@ -452,6 +476,9 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
        else
           call error('read_infile','input file '//trim(infile)//' is incomplete for current compilation')
           if (.not.igotalleos) write(*,*) 'missing equation of state options'
+#ifdef TEMPEVOLUTION
+          if (.not.igotallnuc) write(*,*) 'missing nuclear burning options'  
+#endif      
           if (.not.igotallcooling) write(*,*) 'missing cooling options'
           if (.not.igotalllink) write(*,*) 'missing link options'
           if (.not.igotallbowen) write(*,*) 'missing Bowen dust options'
@@ -527,7 +554,7 @@ subroutine read_infile(infile,logfile,evfile,dumpfile)
     endif
     if (beta < 0.)     call fatal(label,'beta < 0')
     if (beta > 4.)     call warn(label,'very high beta viscosity set')
-    if (maxvxyzu >= 4 .and. (ieos /= 2 .and. ieos /= 10)) call fatal(label,'only ieos=2 makes sense if storing thermal energy')
+    if (maxvxyzu >= 4 .and. (ieos /= 2 .and. ieos /= 10 .and. ieos /=15)) call fatal(label,'only ieos=2 makes sense if storing thermal energy')
     if (irealvisc < 0 .or. irealvisc > 12)  call fatal(label,'invalid setting for physical viscosity')
     if (shearparam < 0.)                     call fatal(label,'stupid value for shear parameter (< 0)')
     if (irealvisc==2 .and. shearparam > 1) call error(label,'alpha > 1 for shakura-sunyaev viscosity')
