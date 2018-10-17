@@ -29,7 +29,7 @@ module analysis
 
  public  :: do_analysis
 
- private :: read_mstar_from_setup,lanembden,derivs,rk4
+ private :: 
 
 contains
 !--------------------------------------------------------------------------
