@@ -29,8 +29,6 @@ module analysis
 
  public  :: do_analysis
 
- private :: 
-
 contains
 !--------------------------------------------------------------------------
 subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
