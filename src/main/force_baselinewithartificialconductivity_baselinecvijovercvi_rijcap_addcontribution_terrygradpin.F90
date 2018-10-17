@@ -1706,7 +1706,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            gradpi = pmassj*(pro2i)*grkerni  !gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv)*grkerni
            if (usej) then 
               gradpj  = pmassj*(pro2j)*grkernj   !if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
-              gradpAV = -projv*(pmassj*vsigavi*grkerni+pmassj*vsigavj*grkernj)/(rhoi+rhoj)
+              gradpAV = ((pmassj*(pro2i-vsigavi*projv)*grkerni+(pmassj*(pro2j-vsigavj*projv)*grkernj)/(rhoi+rhoj)
            endif          
 
            !--energy conservation from artificial viscosity 
@@ -1714,6 +1714,7 @@ ifgas: if (iamgasi .and. iamgasj) then
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj
+                     gradpAV = ((pmassj*(pro2i)*grkerni-pmassj*vsigavi*projv)*grkerni+(pmassj*(pro2j)*grkernj-pmassj*vsigavj*projv)*grkernj)/(rhoi+rhoj)
            dudtdissi = 0.
         endif
 #endif
@@ -1813,7 +1814,7 @@ ifgas: if (iamgasi .and. iamgasj) then
         endif
 
         !--terms used in force
-        gradp = gradpi + gradpj + gradpAV
+        gradp =  gradpAV !gradpi + gradpj
         projsx = projsxi + projsxj
         projsy = projsyi + projsyj
         projsz = projszi + projszj
