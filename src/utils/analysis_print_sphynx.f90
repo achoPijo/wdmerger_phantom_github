@@ -24,7 +24,7 @@
 !--------------------------------------------------------------------------
 module analysis
  implicit none
- character(len=20), parameter, public :: analysistype = 'wdrelaxation'
+ character(len=20), parameter, public :: analysistype = 'print sphynx format'
  logical :: firstcall = .true.
 
  public  :: do_analysis
