@@ -75,7 +75,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !
  fileout = trim(dumpfile)//'_sphynx.dat'
  open(iunit,file=fileout,status='replace')
- write(iunit,"('#',8(1x,'[',i2.2,1x,a11,']',2x))") &
+ write(iunit,"('#',10(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'mass[cgs]',&
         2,'x[cgs]',&
         3,'y[cgs]',   &
