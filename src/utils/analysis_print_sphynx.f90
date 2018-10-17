@@ -76,18 +76,20 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  fileout = trim(dumpfile)//'_sphynx.dat'
  open(iunit,file=fileout,status='replace')
  write(iunit,"('#',8(1x,'[',i2.2,1x,a11,']',2x))") &
-        1,'x[cgs]',&
-        2,'y[cgs]',   &
-        3,'z[cgs]', &
-        4,'h[cgs]',&
-        5,'x[cgs]',&
-        6,'y[cgs]',   &
-        7,'z[cgs]', &
-        9,'T[K]'
+        1,'mass[cgs]',&
+        2,'x[cgs]',&
+        3,'y[cgs]',   &
+        4,'z[cgs]', &
+        5,'h[cgs]',&
+        6,'rho[cgs]',&
+        7,'vx[cgs]',&
+        8,'vy[cgs]',   &
+        9,'vz[cgs]', &
+        10,'T[K]'
 
 !!!!! UNITS UNITS UNIIIIIIIIIIIIIIIIIIIIIIIIIIIITS !!!!!!!!!!!!!!!!!
  do j=1,npart
-      write(iunit,'(8(1pe18.10,1x))') xyzh(1,j)*udist,xyzh(2,j)*udist,xyzh(3,j)*udist,xyzh(4,j)*udist,vxyzu(1,j)*unit_velocity,vxyzu(2,j)*unit_velocity,vxyzu(3,j)*unit_velocity,vxyzu(5,j)
+      write(iunit,'(10(1pe18.10,1x))') particlemass*umass,xyzh(1,j)*udist,xyzh(2,j)*udist,xyzh(3,j)*udist,xyzh(4,j)*udist,rhoh(xyzh(4,j),particlemass)*unit_density,vxyzu(1,j)*unit_velocity,vxyzu(2,j)*unit_velocity,vxyzu(3,j)*unit_velocity,vxyzu(5,j)
  enddo
  close(iunit)
 
