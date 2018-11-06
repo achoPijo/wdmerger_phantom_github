@@ -525,13 +525,13 @@ endif
           ! calculate terms required in the force evaluation
           !
           if (maxvxyzu == 5) then
-#ifdef TEMPEVOLUTION            
+#ifdef TEMPEVOLUTION
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                      visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
                      xpartveci(itempi),xmass(:,i),cvi,dPdTi)
-#endif          
+#endif
           else
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
@@ -1627,7 +1627,7 @@ end subroutine force
               !--calculate j terms (which were precalculated outside loop for i)
               !
               if (maxvxyzu == 5) then
-#ifdef TEMPEVOLUTION                
+#ifdef TEMPEVOLUTION
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
@@ -1714,11 +1714,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
-              if (sqrt(rij2) < 0.005) then
-                 dendissterm = vsigu*dtempij*(auterm*grkerni*cvi + autermj*grkernj*cvj)
-              else
-                 dendissterm = 0.
-              endif
+              dendissterm = vsigu*dtempij*((cvi+cvj)/2)*(auterm*grkerni + autermj*grkernj)
            endif
         endif
 

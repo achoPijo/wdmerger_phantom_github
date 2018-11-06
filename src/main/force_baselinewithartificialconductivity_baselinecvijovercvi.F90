@@ -1369,7 +1369,7 @@ end subroutine force
   rho21i = rho1i*rho1i
   mrhoi5  = 0.5*pmassi*rho1i
   !avterm  = mrhoi5*alphai       !  artificial viscosity parameter
-  auterm  = mrhoi5*alphau*cvi       !  artificial thermal conductivity parameter
+  auterm  = mrhoi5*alphau       !  artificial thermal conductivity parameter
   avBterm = mrhoi5*alphaB*rho1i
 !
 !--initialise the following to zero for the case
@@ -1640,7 +1640,7 @@ end subroutine force
                          realviscosity,divvj,bulkvisc,strainj,stressmax)
               endif
               mrhoj5   = 0.5*pmassj*rho1j
-              autermj  = mrhoj5*alphau*cvj
+              autermj  = mrhoj5*alphau
               avBtermj = mrhoj5*alphaB*rho1j
 
               vsigj = max(vwavej - beta*projv,0.)
@@ -1714,7 +1714,7 @@ ifgas: if (iamgasi .and. iamgasj) then
            endif
            if (maxvxyzu == 4) dendissterm = vsigu*denij*(auterm*grkerni + autermj*grkernj)
            if (maxvxyzu == 5) then
-              dendissterm = vsigu*dtempij*(auterm*grkerni + autermj*grkernj)
+              dendissterm = vsigu*dtempij*(auterm*grkerni*cvi + autermj*grkernj*cvj)
            endif
         endif
 

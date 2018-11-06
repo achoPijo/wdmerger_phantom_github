@@ -8,8 +8,7 @@
 !  MODULE: analysis print
 !
 !  DESCRIPTION:
-!  Analysis routine check whether ddensity profile corresponds to that of 
-!  a polytrope
+!  Analysis routine to print actual conditions to file
 !
 !  REFERENCES: None
 !
