@@ -1466,7 +1466,7 @@ end subroutine force
         ! Determing if particle j is far enough from i that it should not add its hydrodynamic 
         ! contribution (problem dependent)
 #ifdef TEMPEVOLUTION        
-        if (sqrt(rij2) > 0.05) then !0.05 is five wd radii
+        if (sqrt(rij2) > 0.02) then !0.05 is five wd radii
            add_contribution = .false.
         endif
 #endif
