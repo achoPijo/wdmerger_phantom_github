@@ -588,7 +588,7 @@ subroutine write_options_eos(iunit)
  integer, intent(in) :: iunit
 
  write(iunit,"(/,a)") '# options controlling equation of state'
- call write_inopt(ieos,'ieos','eqn of state (1=isoth;2=adiab;3=locally iso;8=barotropic)',iunit)
+ call write_inopt(ieos,'ieos','eqn of state (1=isoth;2=adiab;3=locally iso;8=barotropic;15=helmholtz)',iunit)
  call write_inopt(gmw,'mu','mean molecular weight',iunit)
  select case(ieos)
  case(8)
@@ -615,7 +615,7 @@ subroutine write_options_eos(iunit)
     call write_inopt(X_in,'X','hydrogen mass fraction',iunit)
     call write_inopt(Z_in,'Z','metallicity',iunit)
  case(15)
-    call write_inopt(relflag,'relflag','1 temperature is constant, 2 temperature IS evolved, 3 energy is evolved',iunit)
+    call write_inopt(relflag,'relflag','1=temperature constant, 2=energy evolution with temperature evolution constraint, 3=energy evolution, 4=temperature evolution',iunit)
 
  end select
 

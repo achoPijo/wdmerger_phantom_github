@@ -51,7 +51,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  use part,                    only: igas
  use units,                   only: unit_velocity,utime
  use physcon,                 only: c,pi
- use timestep,                only: tmax, dtmax
+ use timestep,                only: time,tmax, dtmax
  use centreofmass,            only: get_centreofmass,reset_centreofmass                 
  use externalforces,          only: iext_corotate
  use extern_corotate,         only: omega_corotate,dynfac
@@ -191,7 +191,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
        enddo
        !
        !--Set new runtime parameters
-       tmax           =  1.000 !50.*2.*pi/omega   !50 orbits large enough for RLO to occur
+       tmax           =  0.800 !50.*2.*pi/omega   !50 orbits large enough for RLO to occur
        dtmax          =  0.001 !2.*pi/omega/50.   !50 timesteps per  orbit
        
        iexternalforce = 0
@@ -212,8 +212,9 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     !
     !--Set new runtime parameters
     tmax           =    2.                 !2 time units
-    dtmax          =    1./utime           !1 second
+    dtmax          =    0.1!1./utime           !1 second
     iexternalforce =    0
+    damp           =    0.
     !
  endif
  
@@ -222,7 +223,6 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  nfulldump      =    1
  relflag        =    4
  nuc_burn       =    0
-
 
  return
 end subroutine modify_dump
