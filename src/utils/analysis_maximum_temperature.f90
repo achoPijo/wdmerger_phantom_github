@@ -93,7 +93,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         2,'Tmax', &
         3,'rTmax'
     
-    write(iunit,'(3(1pe18.10,1x))') time,Tmax,rTmax,
+    write(iunit,'(3(1pe18.10,1x))') time,Tmax,rTmax
 
      close(iunit)
  endif
