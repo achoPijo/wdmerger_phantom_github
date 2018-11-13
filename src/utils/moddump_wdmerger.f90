@@ -28,7 +28,7 @@
 module moddump
  implicit none
 
- logical, parameter :: use_defaults = .false.  ! if .true. will automatically use default values
+ logical, parameter :: use_defaults = .true.  ! if .true. will automatically use default values
                                                ! if .false., will ask user to prompt new values
  !--The default values
  real,    private   :: separation           = 0.033
@@ -92,6 +92,8 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
        call prompt('Use a corotating frame?',use_corotating_frame)
        !--
        if (use_corotating_frame) call prompt ('Enter desired dynfac',dynfac)
+
+       call prompt('Alpha u',alphau)
     endif
 
     !-- Compute masses
@@ -219,7 +221,9 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  endif
  
  !damp           =    0.
- call prompt('Alpha u',alphau)
+ if (use_defaults) then
+    alphau      =    0.000
+ endif
  nfulldump      =    1
  relflag        =    4
  nuc_burn       =    0
