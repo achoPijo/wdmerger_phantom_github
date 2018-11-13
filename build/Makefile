@@ -1627,7 +1627,7 @@ physcon.o: .make_mathflags
 # these are the sources for phantom setup utility
 #
 SRCSETUP= utils_omp.F90 utils_sort.f90 utils_timing.f90 utils_filenames.f90 utils_summary.F90 \
-          utils_tables.f90 random.f90 ${DOMAIN} set_binary.f90 nuc_reactions.f90\
+          utils_tables.f90 random.f90 ${DOMAIN} set_binary.f90\
           utils_indtimesteps.F90 partinject.F90 ${LINKLIST} \
           ${SRCTURB} ${SRCNIMHD} ${SRCCHEM} ${SRCPHOTO} \
           ptmass.F90 energies.F90 \
