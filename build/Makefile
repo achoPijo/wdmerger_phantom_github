@@ -1230,8 +1230,8 @@ endif
 
 ifeq ($(SYSTEM), ifortstamp)
     FC= ifort
-    FFLAGS= -O3 -ipo -mcmodel=medium -shared-intel -warn uninitialized \
-            -warn unused -warn truncated_source -xMIC-AVX512
+    FFLAGS= -O3 -ipo -xMIC-AVX512 -mcmodel=medium -shared-intel -warn uninitialized \
+            -warn unused -warn truncated_source 
     DBLFLAG= -r8
     DEBUGFLAG= -check all -WB -traceback -g -fpe0 -fp-stack-check
     KNOWN_SYSTEM=yes
