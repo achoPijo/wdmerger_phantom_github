@@ -1228,6 +1228,22 @@ ifeq ($(SYSTEM), ifort)
     LIBCXX = -cxxlib
 endif
 
+ifeq ($(SYSTEM), ifortstamp)
+    FC= ifort
+    FFLAGS= -O3 -ipo -mcmodel=medium -shared-intel -warn uninitialized \
+            -warn unused -warn truncated_source -xMIC-AVX512
+    DBLFLAG= -r8
+    DEBUGFLAG= -check all -WB -traceback -g -fpe0 -fp-stack-check
+    KNOWN_SYSTEM=yes
+    ENDIANFLAGBIG= -convert big_endian
+    ENDIANFLAGLITTLE= -convert little_endian
+# or use setenv F_UFMTENDIAN=big:45 at runtime (e.g. for unit 45 only)
+    OMPFLAGS = -openmp
+    CC = icc
+    CCFLAGS = -O3 -ipo -mcmodel=medium
+    LIBCXX = -cxxlib
+endif
+
 ifeq ($(SYSTEM), ifortgcc)
     FC= ifort
 #    FFLAGS= -fast -warn all
