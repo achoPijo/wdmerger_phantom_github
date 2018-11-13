@@ -15,7 +15,7 @@
 !
 !  OWNER: Jose Miguel Blanco
 !
-!  $Id: 84ed0e272041a6f892ad0629ee19cdcec2275109 $
+!  $Id: fed1eb61c5cdf5aa93e91dcf6c500fc4baefa0aa $
 !
 !  RUNTIME PARAMETERS: None
 !
@@ -23,17 +23,16 @@
 !+
 !--------------------------------------------------------------------------
 module setup
- use extern_gwinspiral, only: Nstar
  use part,              only: maxvxyzu
  use units,             only: utime
  implicit none
 
+ integer            :: Nstar(2) = 0  ! give default value in case dump header not read
  real(kind=8)       :: udist,umass
  character(len=20)  :: dist_unit,mass_unit
  logical            :: use_prompt, iexist, binary
  integer            :: np
  real               :: mstar, mstar2 = 0.d0, Tin
-
  public :: setpart
 
  private
@@ -46,19 +45,21 @@ contains
 !+
 !----------------------------------------------------------------
 subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,time,fileprefix)
- use centreofmass,only: reset_centreofmass 
- use eos,         only: ieos, equationofstate, init_eos,finish_eos,relflag
- use eos_helmholtz, only: tmaxhelmeos,tminhelmeos
- use dim,         only: maxp
- use io,          only: master
- use kernel,      only: hfact_default
- use options,     only: iexternalforce,nfulldump,damp
- use part,        only: igas,rhoh
- use physcon,     only: solarm,solarr,pi,planckh,mass_electron_cgs,mass_proton_cgs
- use prompting,   only: prompt
- use timestep,    only: tmax, dtmax
- use units,       only: set_units, select_unit, unit_pressure, unit_density
- use white_dwarf, only: set_wd
+ use centreofmass,  only: reset_centreofmass 
+ use eos,           only: ieos, equationofstate, init_eos,finish_eos,relflag
+ use eos_helmholtz, only: tmaxhelmeos,tminhelmeos,xmass,speciesmax
+ use dim,           only: maxp
+ use io,            only: master
+ use kernel,        only: hfact_default
+ use options,       only: iexternalforce,nfulldump,damp,alphau
+ use part,          only: igas,rhoh
+ use physcon,       only: solarm,solarr,pi,planckh,mass_electron_cgs,mass_proton_cgs
+ use prompting,     only: prompt
+ use timestep,      only: tmax, dtmax
+ use units,         only: set_units, select_unit, unit_pressure, unit_density
+ use white_dwarf,   only: set_wd
+ use io,            only: warning
+ use nuc_reactions, only: nuc_burn
 
  integer,           intent(in)    :: id
  integer,           intent(inout) :: npart
@@ -70,11 +71,16 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  character(len=20), intent(in)    :: fileprefix
  real,              intent(out)   :: vxyzu(:,:)
  real,              parameter     :: mue=2.0d0
- real                             :: K,K_cgs,cvi,densi,dummyponrhoi,dummyspsoundi
+ real                             :: K,K_cgs,cvi,densi,dummyponrhoi,dummyspsoundi,tff,R1,R2
  character(len=120)               :: setupfile,inname
  logical                          :: write_setup
  integer                          :: i, ierr
 
+ !
+ !--Initializations
+ !
+ R1=0.
+ R2=0.
  !
  ! Set default units
  !
@@ -129,33 +135,42 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     !
     ! Using prompts, determine the parameters the users wishes:
     !         mass unit, distance unit, binary setup?, mass of star(s), number of particles 
-    !
-    ierr = 1
-    do while (ierr /= 0)
-       call prompt('Enter mass unit (e.g. solarm,jupiterm,earthm)',mass_unit)
-       call select_unit(mass_unit,umass,ierr)
-       if (ierr /= 0) print "(a)",' ERROR: mass unit not recognised'
-    enddo
+    ! MODIFIED TO ENTER AUTOMATICALLY SOME FIXED INPUT
+    !ierr = 1
+    !do while (ierr /= 0)
+    !   call prompt('Enter mass unit (e.g. solarm,jupiterm,earthm)',mass_unit)
+    !   call select_unit(mass_unit,umass,ierr)
+    !   if (ierr /= 0) print "(a)",' ERROR: mass unit not recognised'
+    !enddo
+    mass_unit = "solarm"
+    umass = solarm
+    !ierr = 1
+    !do while (ierr /= 0)
+    !   call prompt('Enter distance unit (e.g. solarr,au,pc,kpc,0.1pc)',dist_unit)
+    !   call select_unit(dist_unit,udist,ierr)
+    !   if (ierr /= 0) print "(a)",' ERROR: length unit not recognised'
+    !enddo
+    dist_unit = "solarr"
+    udist = solarr
+    !if (maxvxyzu == 5) then
+    !   call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
+    !endif
+    Tin = 10000000.
+    call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
     
-    ierr = 1
-    do while (ierr /= 0)
-       call prompt('Enter distance unit (e.g. solarr,au,pc,kpc,0.1pc)',dist_unit)
-       call select_unit(dist_unit,udist,ierr)
-       if (ierr /= 0) print "(a)",' ERROR: length unit not recognised'
-    enddo
-    
-    if (maxvxyzu == 5) then
-       call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
-    endif
-
     call prompt('Set up a binary system?',binary)
-    
+    !binary = .false.
+
     call prompt('Enter the total number of particles',np,0,maxp)
+    !np = 200000
     if (binary) then
        call prompt('Enter the mass of star 1(code units)', mstar,0.d0)
        call prompt('Enter the mass of star 2(code units)', mstar2,0.d0)
+       !mstar = 1.0
+       !mstar2 = 0.8
     else
        call prompt('Enter the mass of the star (code units)', mstar,0.d0)
+       !mstar = 0.8
     endif
     write_setup = .true.
  endif
@@ -164,6 +179,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  !
  call set_units(dist=udist,mass=umass,G=1.d0)
 
+ 
  npart = np
  npartoftype(igas) = npart
 
@@ -182,22 +198,25 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     ! Separate the stars so they are isolated and can be relaxed without 
     ! interacting with each other
     !
+    R1=maxval(xyzh(1,1:Nstar(1)))
+    R2=maxval(xyzh(1,Nstar(1)+1:npart))
     do i=1,Nstar(1)
-       xyzh(1,i)=xyzh(1,i)-1000
+       xyzh(1,i)=xyzh(1,i)-100.
     enddo
     do i=Nstar(1)+1,npart
-       xyzh(1,i)=xyzh(1,i)+1000
+       xyzh(1,i)=xyzh(1,i)+100.
     enddo
-    massoftype(igas) = (mstar+mstar2)/npart 
+    massoftype(igas) = (mstar+mstar2)/npart
  else
     Nstar(1) = npart
     call set_wd(npart,hfact,mstar,xyzh)
     massoftype(igas) = mstar/npart
+    R1=maxval(xyzh(1,1:Nstar(1)))
  endif
 
  ! REVISE need to build an if clause depending on whether ISOTHERMAL is 
  ! declared or not. Our default for now is ISOTHERMAL = YES
- vxyzu(1:3,:) = 0
+ vxyzu(1:3,:) = 0.
  ! REVISE maybe for binary want to put both stars in orbit so if relaxation is too slow they wont fall together
  
  !
@@ -209,6 +228,29 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  ! 
  
  call init_eos(ieos,ierr)
+
+ ! set the mass weightings of each species
+ ! currently depends on the star's mass
+ ! TODO: update this to be set by user at runtime
+ if (binary) then 
+    call star_comp(xmass(:,1:Nstar(1)),Nstar(1),mstar)
+    call star_comp(xmass(:,Nstar(1)+1:npart),Nstar(2),mstar2)
+ else
+    call star_comp(xmass(:,1:Nstar(1)),Nstar(1),mstar)
+    
+ endif
+
+ do i=1,npart
+    if (sum(xmass(1:speciesmax-1,i)) > 1.0+tiny(xmass) .or. sum(xmass(1:speciesmax-1,i)) < 1.0-tiny(xmass)) then
+      call warning('eos_helmholtz', 'mass fractions total != 1')
+      ierr = 1
+      return
+    endif
+ enddo
+
+
+
+
  do i=1,npart
     densi = rhoh(xyzh(4,i),massoftype(igas))
     if (maxvxyzu==4) then
@@ -226,25 +268,36 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     if (maxvxyzu == 5) then
        vxyzu(5,i) = Tin
        call equationofstate(ieos,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
-                            tempi=Tin,cvi=cvi)
+                            tempi=Tin,xmassi=xmass(:,i),cvi=cvi)
        vxyzu(4,i) = Tin*cvi
     endif
  enddo
- call finish_eos(ieos,ierr)
 
  !
- ! Write setup file as exact mass will depend on the lambert solution iteration
+ ! Write setup file as exact mass will depend on the lane-emden solution iteration
  !
  call write_setupfile(setupfile)
 
  !
+ !--Compute freefall time
+ !
+ !--If binary choose the frefall time from the more massive star
+ !
+ if (binary) then
+    tff=max((pi/2.)*(R1**(3./2.))/sqrt(2.*mstar),(pi/2.)*(R2**(3./2.))/sqrt(2.*mstar2))
+ else
+    tff=(pi/2.)*(R1**(3./2.))/sqrt(2.*mstar)
+ endif
+ !
  !--Set new runtime parameters
- tmax           =   2.                 !2 time units
- dtmax          =   1./utime           !1 second
- damp           =    0.1
- nfulldump      =   10
+ tmax           =    2.                 !2 time units
+ dtmax          =    1./utime           !1 second
+ damp           =    1/tff              !
+ nfulldump      =    1
  iexternalforce =    0
- relflag        =    .false.
+ alphau         =    0
+ relflag        =    1
+ nuc_burn       =    0
 
 end subroutine setpart
 !-----------------------------------------------------------------------
@@ -279,7 +332,7 @@ subroutine write_setupfile(filename)
  write(iunit,"(/,a)") '# number of particles and mass of star(s)'
  if (binary) then
     call write_inopt(Nstar(1)+Nstar(2),'ntotal','Total number of particles',iunit)
-    call write_inopt(mstar,'mstar','Mass of star 1 [code units]',iunit)
+    call write_inopt(mstar,'mstar1','Mass of star 1 [code units]',iunit)
     call write_inopt(mstar2,'mstar2','mass of star 2 [code units]',iunit)
     call write_inopt(Nstar(1),'Nstar1','number of particles of star 1',iunit)
     call write_inopt(Nstar(2),'Nstar2','number of particles of star 2',iunit)
@@ -320,8 +373,8 @@ subroutine read_setupfile(filename,ierr)
  nerr= nerr + ierr
  call read_inopt(dummy,'utime',db,ierr)
 
-if (maxvxyzu == 5) then
-    call read_inopt(Tin,'Tin',db,ierr)
+ if (maxvxyzu == 5) then
+    call read_inopt(Tin,'Temperature',db,ierr)
  endif
 
  call read_inopt(binary,'binary',db,ierr)
@@ -336,7 +389,7 @@ if (maxvxyzu == 5) then
  else
     call read_inopt(np,'ntotal',db,ierr)
     nerr= nerr + ierr
-    call read_inopt(mstar,'mstar1',db,ierr)
+    call read_inopt(mstar,'mstar',db,ierr)
     nerr= nerr + ierr
  endif
 
@@ -366,14 +419,50 @@ if (maxvxyzu == 5) then
     ierr = 1
     nerr = nerr + ierr
  endif
+
  if (nerr > 0) then
-    print "(1x,a,i2,a)",'Setup_wd: ',nerr,' error(s) during read of setup file'
+    print "(1x,a,i2,a)",'Setup_wd: ',nerr,' error(s) during read of setup file.'
+    print *,"Please, insert next your setup options "
     ierr = 1
  endif
 
  call close_db(db)
 
 end subroutine read_setupfile
+!-----------------------------------------------------------------------
+!+
+!  Return star composition based on star mass
+!+
+!-----------------------------------------------------------------------
+subroutine star_comp(composition,nstar,massstar)
+ real, intent(inout) :: composition(:,:)
+ integer, intent(in) :: nstar
+ real,    intent(in) :: massstar
+ integer             :: i
+
+    if (massstar <= 0.45) then
+       do i=1,nstar
+          composition(:,i) = 0.0
+          composition(2,i) = 1.0
+       enddo
+    else if (massstar > 0.45 .and. massstar <= 1.1 ) then
+       do i=1,nstar
+          composition(:,i) = 0.0
+          composition(3,i) = 0.4
+          composition(4,i) = 0.6
+       enddo
+    else
+       do i=1,nstar
+          composition(:,i) = 0.0
+          composition(4,i) = 0.8
+          composition(5,i) = 0.2
+       enddo
+    endif
+ 
+
+end subroutine star_comp
+
+
 
 
 end module setup

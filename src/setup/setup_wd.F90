@@ -30,9 +30,13 @@ module setup
  integer            :: Nstar(2) = 0  ! give default value in case dump header not read
  real(kind=8)       :: udist,umass
  character(len=20)  :: dist_unit,mass_unit
- logical            :: use_prompt, iexist, binary
- integer            :: np
- real               :: mstar, mstar2 = 0.d0, Tin
+ logical            :: iexist
+ logical            :: use_prompt = .true.
+ logical            :: binary     = .true.
+ integer            :: np         = 50000
+ real               :: mstar      = 0.6d0
+ real               :: mstar2     = 0.6d0
+ real               :: Tin        = 1.d7
  public :: setpart
 
  private
@@ -119,7 +123,6 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  
 
  write_setup  = .false.
- use_prompt   = .true.   ! allow user input
  !
  ! determine if an .in file exists !REVISE, dont think this is needed
  !
@@ -152,26 +155,22 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     !enddo
     dist_unit = "solarr"
     udist = solarr
-    !if (maxvxyzu == 5) then
-    !   call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
-    !endif
-    Tin = 10000000.
-    call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
-    
-    call prompt('Set up a binary system?',binary)
-    !binary = .false.
 
-    call prompt('Enter the total number of particles',np,0,maxp)
-    !np = 200000
-    if (binary) then
-       call prompt('Enter the mass of star 1(code units)', mstar,0.d0)
-       call prompt('Enter the mass of star 2(code units)', mstar2,0.d0)
-       !mstar = 1.0
-       !mstar2 = 0.8
-    else
-       call prompt('Enter the mass of the star (code units)', mstar,0.d0)
-       !mstar = 0.8
+    if (use_prompt) then 
+       call prompt('Initial Temperature',Tin,tminhelmeos,tmaxhelmeos)
+       call prompt('Set up a binary system?',binary)
+       call prompt('Enter the total number of particles',np,0,maxp)
+       if (binary) then
+          call prompt('Enter the mass of star 1(code units)', mstar,0.6d0)
+          call prompt('Enter the mass of star 2(code units)', mstar2,0.6d0)
+       else
+          call prompt('Enter the mass of the star (code units)', mstar,0.6d0)
+       endif
     endif
+   
+
+
+    
     write_setup = .true.
  endif
  !
