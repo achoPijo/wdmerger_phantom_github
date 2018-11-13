@@ -31,7 +31,7 @@ module setup
  real(kind=8)       :: udist,umass
  character(len=20)  :: dist_unit,mass_unit
  logical            :: iexist
- logical            :: use_prompt = .true.
+ logical            :: use_prompt = .false.
  logical            :: binary     = .true.
  integer            :: np         = 50000
  real               :: mstar      = 0.6d0
@@ -289,8 +289,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  endif
  !
  !--Set new runtime parameters
- tmax           =    2.                 !2 time units
- dtmax          =    1./utime           !1 second
+ tmax           =    0.1                !2 time units
+ dtmax          =    0.01   !1./utime   !1 second
  damp           =    1/tff              !
  nfulldump      =    1
  iexternalforce =    0
