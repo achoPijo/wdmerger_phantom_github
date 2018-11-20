@@ -1921,7 +1921,7 @@ ifgas: if (iamgasi .and. iamgasj) then
   !sound speed monitoring
   !printparticlei = -1 ! CHECK condition to not monitor, comment if you want to monitor the different variables
   !if (i == printparticlei) then
-!
+  !
   !   iunit=9
   !   fileout = 'monitoring.dat'
   !   inquire(file=trim(fileout),exist=iexist)
@@ -1951,7 +1951,7 @@ ifgas: if (iamgasi .and. iamgasj) then
   !  
   !      close(iunit)
   !   endif
-  endif
+  !endif
   !----------------------------------------------
 
   return
