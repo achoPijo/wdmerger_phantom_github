@@ -1536,7 +1536,7 @@ end subroutine force
        ! !sound speed monitoring
        ! if (i==printparticlei) then
        !    maxprojvi=max(-maxprojvi,-projv)
-        endif
+       ! endif
         !-----------------------------------
 
         if (iamgasj .and. maxvxyzu >= 4) then
