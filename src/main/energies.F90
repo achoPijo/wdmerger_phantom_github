@@ -494,12 +494,17 @@ subroutine compute_energies(t)
 !--add contribution from sink particles
 !
 print *, 208
+pritn *, nptmass
 
 !$omp do
  do i=1,nptmass
+    print *, 2080
     xi     = xyzmh_ptmass(1,i)
+    print *, 20801
     yi     = xyzmh_ptmass(2,i)
+    print *, 20801
     zi     = xyzmh_ptmass(3,i)
+    print *, 20801
     pmassi = xyzmh_ptmass(4,i)
     print *,2081
     !--acci is the accreted mass on the sink
