@@ -494,8 +494,9 @@ subroutine compute_energies(t)
 !--add contribution from sink particles
 !
 print *, 208
-pritn *, nptmass
+print *, nptmass
 
+if (nptmass .gt. 0) then
 !$omp do
  do i=1,nptmass
     print *, 2080
@@ -543,6 +544,7 @@ pritn *, nptmass
     print *, 2084
  enddo
 !$omp enddo
+endif
 !$omp critical(collatedata)
  call collate_ev_data(ielements,ev_action,ev_data_thread,ev_data)
 
