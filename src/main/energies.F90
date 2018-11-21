@@ -221,7 +221,7 @@ subroutine compute_energies(t)
 
        rhoi = rhoh(hi,pmassi)
        call ev_update(ev_data_thread,rhoi,irhoX,irhoA)
-       print *, 205
+       !print *, 205
        if (.not.gas_only) then
           select case(itype)
           case(igas)
@@ -238,7 +238,7 @@ subroutine compute_energies(t)
              call ev_rhoupdate(ev_data_thread,rhoi,iblgX, iblgA, itype,np_rho_thread)
           end select
        endif
-       print *, 206
+       !print *, 206
        np   = np + 1
 
        vxi  = vxyzu(1,i)
@@ -319,7 +319,7 @@ subroutine compute_energies(t)
                 etherm = etherm + pmassi*ponrhoi/(gamma_pwp(rhoi)-1.)*gasfrac
              endif
           endif
-          print *, 207
+          !print *, 207
           vsigi = spsoundi
           ! entropy
           call ev_update(ev_data_thread,pmassi*ponrhoi*rhoi**(1.-gamma),iA=ientrop)
@@ -501,6 +501,7 @@ print *, 208
     yi     = xyzmh_ptmass(2,i)
     zi     = xyzmh_ptmass(3,i)
     pmassi = xyzmh_ptmass(4,i)
+    print *,2081
     !--acci is the accreted mass on the sink
     acci   = xyzmh_ptmass(imacc,i)
     accretedmass = accretedmass + acci
@@ -510,7 +511,7 @@ print *, 208
     vzi    = vxyz_ptmass(3,i)
 
     !phii   = fxyz_ptmass(4,i)
-
+    print *, 2082
     xmom   = xmom + pmassi*vxi
     ymom   = ymom + pmassi*vyi
     zmom   = zmom + pmassi*vzi
@@ -525,7 +526,8 @@ print *, 208
 
     v2i    = vxi*vxi + vyi*vyi + vzi*vzi
     ekin   = ekin + pmassi*v2i
-
+    print *, calc_erot
+    print *, 2083
     ! rotational energy around each axis through the origin
     if (calc_erot) then
        call get_erot(xi,yi,zi,vxi,vyi,vzi,pmassi,erotxi,erotyi,erotzi)
@@ -533,6 +535,7 @@ print *, 208
        eroty = eroty + erotyi
        erotz = erotz + erotzi
     endif
+    print *, 2084
  enddo
 !$omp enddo
 !$omp critical(collatedata)
