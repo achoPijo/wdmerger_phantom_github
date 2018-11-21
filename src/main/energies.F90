@@ -537,6 +537,7 @@ print *, 208
 !$omp enddo
 !$omp critical(collatedata)
  call collate_ev_data(ielements,ev_action,ev_data_thread,ev_data)
+
  if (.not.gas_only) then
     do i = 1,maxtypes
        np_rho(i) = np_rho(i) + np_rho_thread(i)
@@ -545,6 +546,7 @@ print *, 208
 !$omp end critical(collatedata)
 !$omp end parallel
 
+ print *, 209
  !--Determing the number of active particles
  nptot     = reduce_fn('+',np)
  if (nptot > 0.) then
@@ -554,6 +556,7 @@ print *, 208
  endif
  !--Finalise the arrays
  call finalise_ev_data(ielements,ev_data,ev_action,dnptot)
+ print *,210
 
  ekin = 0.5*ekin
  emag = 0.5*emag
@@ -585,7 +588,7 @@ print *, 208
  ev_data(ietot)   = etot
  ev_data(itotmom) = totmom
  ev_data(iangtot) = angtot
-
+ print *, 210
  if (calc_erot) then
     erotx = 0.5*erotx
     eroty = 0.5*eroty
