@@ -519,11 +519,8 @@ subroutine startrun(infile,logfile,evfile,dumpfile)
 !
  if (id==master) call write_header(2,infile,evfile,logfile,dumpfile,ntot)
  if (calc_erot) call get_erot_com(npart,xyzh,vxyzu,nptmass,xyzmh_ptmass,vxyz_ptmass)
- print *, 1
  call init_evfile(ievfile,evfile)
- print *, 2
  call write_evfile(time,dt)
- print *, 3 
  if (id==master) call write_evlog(iprint)
 
 #ifdef MFLOW

@@ -154,9 +154,7 @@ subroutine compute_energies(t)
  totlum      = 0.
  ionfrac_eta = 0.
  np_rho      = 0
- print *, 201
  call initialise_ev_data(ielements,ev_action,ev_data)
- print *, 202
 !
 !$omp parallel default(none) &
 !$omp shared(xyzh,vxyzu,iexternalforce,npart,t,id) &
@@ -199,9 +197,7 @@ subroutine compute_energies(t)
 !$omp reduction(+:np,xmom,ymom,zmom,angx,angy,angz,erotx,eroty,erotz,mgas,mdust) &
 !$omp reduction(+:naccreted,xmomacc,ymomacc,zmomacc,angaccx,angaccy,angaccz) &
 !$omp reduction(+:ekin,etherm,emag,epot,vrms,rmsmach,accretedmass,totlum)
- print *, 203
  call initialise_ev_data(ielements,ev_action,ev_data_thread)
- print *, 204
  np_rho_thread = 0
 !$omp do
  do i=1,npart
@@ -221,7 +217,6 @@ subroutine compute_energies(t)
 
        rhoi = rhoh(hi,pmassi)
        call ev_update(ev_data_thread,rhoi,irhoX,irhoA)
-       !print *, 205
        if (.not.gas_only) then
           select case(itype)
           case(igas)
@@ -238,7 +233,7 @@ subroutine compute_energies(t)
              call ev_rhoupdate(ev_data_thread,rhoi,iblgX, iblgA, itype,np_rho_thread)
           end select
        endif
-       !print *, 206
+
        np   = np + 1
 
        vxi  = vxyzu(1,i)
@@ -319,7 +314,6 @@ subroutine compute_energies(t)
                 etherm = etherm + pmassi*ponrhoi/(gamma_pwp(rhoi)-1.)*gasfrac
              endif
           endif
-          !print *, 207
           vsigi = spsoundi
           ! entropy
           call ev_update(ev_data_thread,pmassi*ponrhoi*rhoi**(1.-gamma),iA=ientrop)
@@ -493,21 +487,12 @@ subroutine compute_energies(t)
 !
 !--add contribution from sink particles
 !
-print *, 208
-print *, nptmass
-
-if (nptmass .gt. 0) then
 !$omp do
  do i=1,nptmass
-    print *, 2080
     xi     = xyzmh_ptmass(1,i)
-    print *, 20801
     yi     = xyzmh_ptmass(2,i)
-    print *, 20801
     zi     = xyzmh_ptmass(3,i)
-    print *, 20801
     pmassi = xyzmh_ptmass(4,i)
-    print *,2081
     !--acci is the accreted mass on the sink
     acci   = xyzmh_ptmass(imacc,i)
     accretedmass = accretedmass + acci
@@ -517,7 +502,7 @@ if (nptmass .gt. 0) then
     vzi    = vxyz_ptmass(3,i)
 
     !phii   = fxyz_ptmass(4,i)
-    print *, 2082
+
     xmom   = xmom + pmassi*vxi
     ymom   = ymom + pmassi*vyi
     zmom   = zmom + pmassi*vzi
@@ -532,8 +517,7 @@ if (nptmass .gt. 0) then
 
     v2i    = vxi*vxi + vyi*vyi + vzi*vzi
     ekin   = ekin + pmassi*v2i
-    print *, calc_erot
-    print *, 2083
+
     ! rotational energy around each axis through the origin
     if (calc_erot) then
        call get_erot(xi,yi,zi,vxi,vyi,vzi,pmassi,erotxi,erotyi,erotzi)
@@ -541,13 +525,10 @@ if (nptmass .gt. 0) then
        eroty = eroty + erotyi
        erotz = erotz + erotzi
     endif
-    print *, 2084
  enddo
 !$omp enddo
-endif
 !$omp critical(collatedata)
  call collate_ev_data(ielements,ev_action,ev_data_thread,ev_data)
-
  if (.not.gas_only) then
     do i = 1,maxtypes
        np_rho(i) = np_rho(i) + np_rho_thread(i)
@@ -556,7 +537,6 @@ endif
 !$omp end critical(collatedata)
 !$omp end parallel
 
- print *, 209
  !--Determing the number of active particles
  nptot     = reduce_fn('+',np)
  if (nptot > 0.) then
@@ -566,7 +546,6 @@ endif
  endif
  !--Finalise the arrays
  call finalise_ev_data(ielements,ev_data,ev_action,dnptot)
- print *,210
 
  ekin = 0.5*ekin
  emag = 0.5*emag
@@ -598,7 +577,7 @@ endif
  ev_data(ietot)   = etot
  ev_data(itotmom) = totmom
  ev_data(iangtot) = angtot
- print *, 210
+
  if (calc_erot) then
     erotx = 0.5*erotx
     eroty = 0.5*eroty

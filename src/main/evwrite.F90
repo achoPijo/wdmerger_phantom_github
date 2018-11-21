@@ -313,7 +313,7 @@ subroutine write_evfile(t,dt)
  character(len=35) :: ev_format
 
  call compute_energies(t)
- print *, 21
+
  if (id==master) then
     !
     !--fill in additional details that are not calculated in energies.f
@@ -322,14 +322,11 @@ subroutine write_evfile(t,dt)
        ev_data(imacc1) = accretedmass1
        ev_data(imacc2) = accretedmass2
     endif
-    print *, 22
     !
     !--write line to .ev file (should correspond to header, below)
     !
     write(ev_format,'(a,I3,a)')"(",ielements,"(1pe18.10,1x))"
-    print *, 23
     write(ievfile,ev_format) ev_data(1:ielements)
-    print *, 24
     call flush(ievfile)
  endif
 
