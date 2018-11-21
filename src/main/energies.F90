@@ -154,7 +154,9 @@ subroutine compute_energies(t)
  totlum      = 0.
  ionfrac_eta = 0.
  np_rho      = 0
+ print *, 201
  call initialise_ev_data(ielements,ev_action,ev_data)
+ print *, 202
 !
 !$omp parallel default(none) &
 !$omp shared(xyzh,vxyzu,iexternalforce,npart,t,id) &
@@ -197,7 +199,9 @@ subroutine compute_energies(t)
 !$omp reduction(+:np,xmom,ymom,zmom,angx,angy,angz,erotx,eroty,erotz,mgas,mdust) &
 !$omp reduction(+:naccreted,xmomacc,ymomacc,zmomacc,angaccx,angaccy,angaccz) &
 !$omp reduction(+:ekin,etherm,emag,epot,vrms,rmsmach,accretedmass,totlum)
+ print *, 203
  call initialise_ev_data(ielements,ev_action,ev_data_thread)
+ print *, 204
  np_rho_thread = 0
 !$omp do
  do i=1,npart
@@ -217,6 +221,7 @@ subroutine compute_energies(t)
 
        rhoi = rhoh(hi,pmassi)
        call ev_update(ev_data_thread,rhoi,irhoX,irhoA)
+       print *, 205
        if (.not.gas_only) then
           select case(itype)
           case(igas)
@@ -233,7 +238,7 @@ subroutine compute_energies(t)
              call ev_rhoupdate(ev_data_thread,rhoi,iblgX, iblgA, itype,np_rho_thread)
           end select
        endif
-
+       print *, 206
        np   = np + 1
 
        vxi  = vxyzu(1,i)
@@ -314,6 +319,7 @@ subroutine compute_energies(t)
                 etherm = etherm + pmassi*ponrhoi/(gamma_pwp(rhoi)-1.)*gasfrac
              endif
           endif
+          print *, 207
           vsigi = spsoundi
           ! entropy
           call ev_update(ev_data_thread,pmassi*ponrhoi*rhoi**(1.-gamma),iA=ientrop)
@@ -487,6 +493,8 @@ subroutine compute_energies(t)
 !
 !--add contribution from sink particles
 !
+print *, 208
+
 !$omp do
  do i=1,nptmass
     xi     = xyzmh_ptmass(1,i)
