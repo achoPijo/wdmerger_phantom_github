@@ -33,7 +33,7 @@ module setup
  logical            :: iexist
  logical            :: use_prompt = .false.
  logical            :: binary     = .true.
- integer            :: np         = 50000
+ integer            :: np         = 10000000
  real               :: mstar      = 0.6d0
  real               :: mstar2     = 0.6d0
  real               :: Tin        = 1.d7
