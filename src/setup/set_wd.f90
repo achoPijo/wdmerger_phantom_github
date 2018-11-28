@@ -112,6 +112,7 @@ subroutine set_wd(nbody, hfact, masstot, xyzh)
 !--Use a Bisection strategy in order to solve Lane-Embden 
 !  equation for the given mass
 !
+      print *, 11
       WRITE(*,*) ' '
       WRITE(*,*) '************************************************** '
       WRITE(*,*) 'Using a bisection scheme to solve the lane-embden'
@@ -145,6 +146,7 @@ subroutine set_wd(nbody, hfact, masstot, xyzh)
          ENDIF
          WRITE(*,'(A5,1(1F7.4),A8,1F7.4)') 'M_WD=',masstot,' M_Bisec=',mass
       ENDDO whileloop1
+      print *, 12
 !
 !--Call lanembden subroutine a last time, saving this time the
 !  values for density, radius, pressure, etc
@@ -161,7 +163,9 @@ subroutine set_wd(nbody, hfact, masstot, xyzh)
 !!$OMP shared(massp,rad2,radmax,temp,endit,ka1,fh) private(p,dr2,xc,yc,zc,i) &
 !!$OMP private(done,iseed)
 !!$OMP DO SCHEDULE(runtime)
+      print *, 13
       partloop1 :DO p=1,nbody
+         print *, 131
          dr2 = huge(xc)
          CALL SEED(p*time())         
          DO WHILE (dr2 > rad2)
@@ -181,9 +185,11 @@ subroutine set_wd(nbody, hfact, masstot, xyzh)
 !
 !--Compute density using Lane-Embden equation solution
 !
+         print *, 132
          i = 0
          done = .FALSE.
          whileloop2 : DO WHILE (done.EQV..FALSE.)
+            print *, 1321
             i = i + 1
 !
             IF ((radle(i) <= DSQRT(dr2)).AND.                       &
@@ -200,6 +206,7 @@ subroutine set_wd(nbody, hfact, masstot, xyzh)
                xyzh(4,p)   = hfact*((massp/rho(p))**(1./3.))  !hfact*((xyzhm(5,p)/rho(p))**(1./3.))
                done        = .TRUE.
             ENDIF
+            print *, 1322
 !
             IF (i == endit) THEN
                PRINT*, 'Particle',p,' not found'
@@ -207,6 +214,7 @@ subroutine set_wd(nbody, hfact, masstot, xyzh)
             ENDIF
          ENDDO whileloop2
       ENDDO partloop1
+      print *, 14
 !!$OMP END DO
 !!$OMP END PARALLEL
 !

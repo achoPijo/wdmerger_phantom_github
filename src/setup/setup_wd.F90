@@ -191,8 +191,11 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     !
     ! Generate each star
     !
+    print *, 1
     call set_wd(Nstar(1),hfact,mstar,xyzh(:,1:Nstar(1)))
-    call set_wd(Nstar(2),hfact,mstar2,xyzh(:,Nstar(1)+1:npart))    
+    print *, 2
+    call set_wd(Nstar(2),hfact,mstar2,xyzh(:,Nstar(1)+1:npart))  
+    print *, 3   
     !
     ! Separate the stars so they are isolated and can be relaxed without 
     ! interacting with each other
