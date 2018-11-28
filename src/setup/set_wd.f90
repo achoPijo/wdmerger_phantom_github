@@ -189,7 +189,6 @@ subroutine set_wd(nbody, hfact, masstot, xyzh)
          i = 0
          done = .FALSE.
          whileloop2 : DO WHILE (done.EQV..FALSE.)
-            print *, 1321
             i = i + 1
 !
             IF ((radle(i) <= DSQRT(dr2)).AND.                       &
@@ -206,13 +205,13 @@ subroutine set_wd(nbody, hfact, masstot, xyzh)
                xyzh(4,p)   = hfact*((massp/rho(p))**(1./3.))  !hfact*((xyzhm(5,p)/rho(p))**(1./3.))
                done        = .TRUE.
             ENDIF
-            print *, 1322
 !
             IF (i == endit) THEN
                PRINT*, 'Particle',p,' not found'
                STOP
             ENDIF
          ENDDO whileloop2
+         print *, 133
       ENDDO partloop1
       print *, 14
 !!$OMP END DO
