@@ -213,8 +213,8 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
                                 ! reset velocity
     !
     !--Set new runtime parameters
-    tmax           =    2.                 !2 time units
-    dtmax          =    0.1!1./utime           !1 second
+    tmax           =    0.7                 !2 time units
+    dtmax          =    0.001 !1./utime           !1 second
     iexternalforce =    0
     damp           =    0.
     !
