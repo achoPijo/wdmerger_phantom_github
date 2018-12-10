@@ -225,7 +225,11 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     alphau      =    0.000
  endif
  nfulldump      =    1
- relflag        =    4
+ if (use_corotating_frame) then
+    relflag        =    1  
+ else
+    relflag        =    4
+ endif
  nuc_burn       =    0
 
  return
