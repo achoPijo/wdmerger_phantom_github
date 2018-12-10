@@ -31,9 +31,9 @@ module moddump
  logical, parameter :: use_defaults = .true.  ! if .true. will automatically use default values
                                                ! if .false., will ask user to prompt new values
  !--The default values
- real,    private   :: separation           = 0.033
- logical, private   :: use_irr_init         = .true.
- logical, private   :: use_corotating_frame = .false.
+ real,    private   :: separation           = 0.06
+ logical, private   :: use_irr_init         = .false.
+ logical, private   :: use_corotating_frame = .true.
  logical, private   :: binary               = .true.
  logical, private   :: use_relocation       = .true.
 

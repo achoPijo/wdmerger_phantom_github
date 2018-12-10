@@ -34,7 +34,7 @@ module extern_corotate
  !  and can be changed in the input file
  !
  real, public :: omega_corotate = 1.
- real, public :: dynfac         = 50.
+ real, public :: dynfac         = 20.
 
  public :: update_coriolis_leapfrog
  public :: get_coriolis_force,get_centrifugal_force
