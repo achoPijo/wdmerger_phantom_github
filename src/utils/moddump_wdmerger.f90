@@ -28,7 +28,7 @@
 module moddump
  implicit none
 
- logical, parameter :: use_defaults = .true.  ! if .true. will automatically use default values
+ logical, parameter :: use_defaults = .false.  ! if .true. will automatically use default values
                                                ! if .false., will ask user to prompt new values
  !--The default values
  real,    private   :: separation           = 0.06
