@@ -1307,7 +1307,7 @@ end subroutine force
   real :: dustfraci,dustfracj,tsi,sqrtrhodustfraci,sqrtrhodustfracj !,vsigeps,depsdissterm
   logical :: usej
   !sound speed monitoring
-  !integer :: printparticlei,iunit
+  integer :: printparticlei,iunit
   real    :: maxprojvi,maxvsigavi
   logical                      :: iexist
   character(len=120)           :: fileout
@@ -1533,10 +1533,10 @@ end subroutine force
         dvz = xpartveci(ivzi) - vxyzu(3,j)
         projv = dvx*runix + dvy*runiy + dvz*runiz
 
-       ! !sound speed monitoring
-       ! if (i==printparticlei) then
-       !    maxprojvi=max(-maxprojvi,-projv)
-       ! endif
+        !sound speed monitoring
+        if (i==printparticlei) then
+           maxprojvi=max(-maxprojvi,-projv)
+        endif
         !-----------------------------------
 
         if (iamgasj .and. maxvxyzu >= 4) then
@@ -1550,10 +1550,10 @@ end subroutine force
            !--work out vsig for timestepping and av
            vsigi   = max(vwavei - beta*projv,0.)
            vsigavi = max(alphai*vwavei - beta*projv,0.)!CHECK
-           !!sound speed monitoring
-           !if (i==printparticlei) then
-           !   maxvsigavi=max(maxvsigavi,vsigavi)
-           !endif
+           !sound speed monitoring
+           if (i==printparticlei) then
+              maxvsigavi=max(maxvsigavi,vsigavi)
+           endif
            !-----------------------
            if (vsigi > vsigmax) vsigmax = vsigi
 
@@ -1919,39 +1919,39 @@ ifgas: if (iamgasi .and. iamgasj) then
   enddo loop_over_neighbours2
   
   !sound speed monitoring
-  !printparticlei = -1 ! CHECK condition to not monitor, comment if you want to monitor the different variables
-  !if (i == printparticlei) then
-  !
-  !   iunit=9
-  !   fileout = 'monitoring.dat'
-  !   inquire(file=trim(fileout),exist=iexist)
-  !   if (iexist) then
-  !      open(iunit,file=fileout,status='old',position='append')
-  !      
-  !      write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
-  !  
-  !      close(iunit)
-  !   else
-  !      open(iunit,file=fileout,status='new')
-  !      write(iunit,"('#',12(1x,'[',i2.2,1x,a11,']',2x))") &
-  !          1,'time',      &
-  !          2,'alphai',    &
-  !          3,'spsoundi[cm/s]',  &
-  !          4,'cs_polytrope[cm/s]', &
-  !          5,'Pi[dyne/cm2]',        &
-  !          6,'maxprojvi[cm/s]', &
-  !          7,'tempi',     &
-  !          8,'hi',        &
-  !          9,'rhoi[g/cm3]',     &
-  !         10,'dudtdissi', &
-  !         11,'vsigavi[cm/s]',   &
-  !         12,'gradkerni'
-  !      
-  !      write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
-  !  
-  !      close(iunit)
-  !   endif
-  !endif
+  printparticlei = -1 ! CHECK condition to not monitor, comment if you want to monitor the different variables
+  if (i == printparticlei) then
+
+     iunit=9
+     fileout = 'monitoring.dat'
+     inquire(file=trim(fileout),exist=iexist)
+     if (iexist) then
+        open(iunit,file=fileout,status='old',position='append')
+        
+        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
+    
+        close(iunit)
+     else
+        open(iunit,file=fileout,status='new')
+        write(iunit,"('#',12(1x,'[',i2.2,1x,a11,']',2x))") &
+            1,'time',      &
+            2,'alphai',    &
+            3,'spsoundi[cm/s]',  &
+            4,'cs_polytrope[cm/s]', &
+            5,'Pi[dyne/cm2]',        &
+            6,'maxprojvi[cm/s]', &
+            7,'tempi',     &
+            8,'hi',        &
+            9,'rhoi[g/cm3]',     &
+           10,'dudtdissi', &
+           11,'vsigavi[cm/s]',   &
+           12,'gradkerni'
+        
+        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
+    
+        close(iunit)
+     endif
+  endif
   !----------------------------------------------
 
   return
