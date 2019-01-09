@@ -31,9 +31,9 @@ module setup
  real(kind=8)       :: udist,umass
  character(len=20)  :: dist_unit,mass_unit
  logical            :: iexist
- logical            :: use_prompt = .false.
+ logical            :: use_prompt = .true.
  logical            :: binary     = .true.
- integer            :: np         = 10000000
+ integer            :: np         = 100000
  real               :: mstar      = 0.6d0
  real               :: mstar2     = 0.6d0
  real               :: Tin        = 1.d7
