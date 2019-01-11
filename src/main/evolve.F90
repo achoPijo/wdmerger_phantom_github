@@ -145,6 +145,7 @@ use mf_write,          only:binpos_write
  etot_in   = etot
  angtot_in = angtot
  totmom_in = totmom
+ print *, "refresh totmom_in"
  mdust_in  = mdust
  should_conserve_energy = (maxvxyzu==4 .and. ieos==2 .and. icooling==0 .and. &
                            ipdv_heating==1 .and. ishock_heating==1 &
@@ -400,6 +401,9 @@ use mf_write,          only:binpos_write
        nskipped = 0
        call get_timings(t1,tcpu1)
        call write_evfile(time,dt)
+       print *, totmom_in
+       print *, totmom
+       print *, "check"
        if (should_conserve_momentum) call check_conservation_error(totmom,totmom_in,1.e-1,'linear momentum')
        if (should_conserve_angmom)   call check_conservation_error(angtot,angtot_in,1.e-1,'angular momentum')
        if (should_conserve_energy)   call check_conservation_error(etot,etot_in,1.e-1,'energy')
