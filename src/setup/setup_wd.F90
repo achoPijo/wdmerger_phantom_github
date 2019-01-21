@@ -161,8 +161,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
        call prompt('Set up a binary system?',binary)
        call prompt('Enter the total number of particles',np,0,maxp)
        if (binary) then
-          call prompt('Enter the mass of star 1(code units)', mstar,0.6d0)
-          call prompt('Enter the mass of star 2(code units)', mstar2,0.6d0)
+          call prompt('Enter the mass of star 1(code units)', mstar,0.0d0)
+          call prompt('Enter the mass of star 2(code units)', mstar2,0.0d0)
        else
           call prompt('Enter the mass of the star (code units)', mstar,0.d0)
        endif
