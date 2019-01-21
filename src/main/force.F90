@@ -817,6 +817,10 @@ isgas: if (iamgasi) then
 else
 
        if (maxvxyzu > 4) fxyzu(4,i) = 0.
+#ifdef TEMPEVOLUTION
+       if (maxvxyzu == 5) fxyzu(5,i) = 0.
+#endif
+
        ! timestep based on Courant condition for non-gas particles
        vsigdtc = vsigmax
        if (vsigdtc > tiny(vsigdtc)) then
