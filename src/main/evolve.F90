@@ -143,8 +143,8 @@ use mf_write,          only:binpos_write
  tzero     = time
  dtlast    = 0.
  etot_in   = etot
- angtot_in = angtot
- totmom_in = 0.0000 !totmom  !modified to allow for restart without initializing totmom_in
+ angtot_in = 0.00000000d0 ! angtot only for single stars
+ totmom_in = 0.00000000d0 !totmom  !modified to allow for restart without initializing totmom_in
  mdust_in  = mdust
  should_conserve_energy = (maxvxyzu==4 .and. ieos==2 .and. icooling==0 .and. &
                            ipdv_heating==1 .and. ishock_heating==1 &
