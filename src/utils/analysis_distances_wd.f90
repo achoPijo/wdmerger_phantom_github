@@ -108,6 +108,7 @@ subroutine read_Nstar_from_setup(filename,ierr)
  logical                       :: binary
  !
  call open_db_from_file(db,filename,lu,ierr)
+ print *,ierr
  if (ierr /= 0) return
  write(*, '(1x,2a)') 'Setup_wd: Reading setup Nstar options from ',trim(filename)
  !
