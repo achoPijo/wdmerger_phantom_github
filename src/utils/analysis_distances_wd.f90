@@ -25,6 +25,7 @@ module analysis
  implicit none
  character(len=20), parameter, public :: analysistype = 'centerofmass'
  logical, private :: firstcall = .true.
+ character(len=200) ::setupfile = 'wd.tetup'
 
  public :: do_analysis
 
@@ -44,11 +45,11 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in) :: particlemass,time
  real                         :: xpos1(3),vpos1(3),xpos2(3),vpos2(3),distance
  logical                      :: iexist
- character(len=200)           :: fileout,setupfile
+ character(len=200)           :: fileout
  integer                      :: ierr
  
  !-- PROMPT TO ASK FOR THE SETUP FILE TO CHECK THE VALUES OF NSTAR1 AND NSTAR2
- setupfile = 'wd.setup'
+
  if (  firstcall ) then
     call prompt('Enter file name for the setup: ', setupfile)
  endif
