@@ -71,8 +71,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !
  ! Call centre of mass subroutine
  !
- call get_centreofmass(xpos1,vpos1,Nstar(1),xyzh(1:Nstar(1)),vxyzu(1:Nstar(1)),nptmass,xyzmh_ptmass,vxyz_ptmass)
- call get_centreofmass(xpos2,vpos2,Nstar(2),xyzh(Nstar(1)+1:npart),vxyzu(Nstar(1)+1:npart),nptmass,xyzmh_ptmass,vxyz_ptmass)
+ call get_centreofmass(xpos1,vpos1,Nstar(1),xyzh(1:Nstar(1),:),vxyzu(1:Nstar(1),:),nptmass,xyzmh_ptmass,vxyz_ptmass)
+ call get_centreofmass(xpos2,vpos2,Nstar(2),xyzh(Nstar(1)+1:npart,:),vxyzu(Nstar(1)+1:npart,:),nptmass,xyzmh_ptmass,vxyz_ptmass)
  !
  ! compute distance between centers of mass of both stars
  !
