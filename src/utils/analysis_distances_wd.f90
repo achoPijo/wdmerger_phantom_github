@@ -42,7 +42,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in) :: particlemass,time
  real                         :: xpos(3),vpos(3)
  logical                      :: iexist
- character(len=200)           :: fileout
+ character(len=200)           :: fileout,setupfile
+ integer                      :: ierr
  
  !-- PROMPT TO ASK FOR THE SETUP FILE TO CHECK THE VALUES OF NSTAR1 AND NSTAR2
  call prompt('Enter file name for the setup: ', setupfile)
