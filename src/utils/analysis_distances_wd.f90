@@ -62,8 +62,6 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !--Check particle numbers
  if (Nstar(1) <= 0 .or. Nstar(2) <= 0) call fatal('moddump','Require particle numbers in both stars')
 
- print *, Nstar(1)
- print *, Nstar(2)
  !
  ! Open file (appendif exists)
  !
