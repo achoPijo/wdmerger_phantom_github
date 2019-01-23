@@ -12,7 +12,7 @@
 !
 !  REFERENCES: None
 !
-!  OWNER: James Wurster
+!  OWNER: Jose Miguel Blanco
 !
 !  $Id: 710fd2514e754b4af37500156be0a1839dc2c485 $
 !
@@ -55,7 +55,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !
  ! Open file (appendif exists)
  !
- fileout = trim(dumpfile(1:INDEX(dumpfile,'_')-1))//'_com.dat'
+ fileout = trim(dumpfile(1:INDEX(dumpfile,'_')-1))//'distances.dat'
  inquire(file=fileout,exist=iexist)
  if ( .not.iexist .or. firstcall ) then
     firstcall = .false.

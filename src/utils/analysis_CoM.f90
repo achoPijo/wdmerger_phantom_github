@@ -45,7 +45,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !
  ! Open file (appendif exists)
  !
- fileout = trim(dumpfile(1:INDEX(dumpfile,'_')-1))//'_com.dat'
+ fileout = trim(dumpfile(1:INDEX(dumpfile,'_')-1))//'com.dat'
  inquire(file=fileout,exist=iexist)
  if ( .not.iexist .or. firstcall ) then
     firstcall = .false.
