@@ -48,9 +48,14 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  integer                      :: ierr
  
  !-- PROMPT TO ASK FOR THE SETUP FILE TO CHECK THE VALUES OF NSTAR1 AND NSTAR2
- call prompt('Enter file name for the setup: ', setupfile)
- !setupfile='wd.setup'
+ if (  firstcall ) then
+    call prompt('Enter file name for the setup: ', setupfile)
+ endif
+ 
  call read_Nstar_from_setup(trim(setupfile),ierr)
+ !call prompt('Enter file name for the setup: ', setupfile)
+ !!setupfile='wd.setup'
+ !call read_Nstar_from_setup(trim(setupfile),ierr)
 
  !--Check particle numbers
  if (Nstar(1) <= 0 .or. Nstar(2) <= 0) call fatal('moddump','Require particle numbers in both stars')
