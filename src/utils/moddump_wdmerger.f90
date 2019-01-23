@@ -71,9 +71,10 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
 
  if (binary) then
 
-    !-- PROMPT TO ASK FOR THE SETUP FILE TO CHECK THE VALUES OF NSTAR1 AND NSTAR2
-    !call prompt('Enter file name for the setup: ', setupfile)
     setupfile='wd.setup'
+    !-- PROMPT TO ASK FOR THE SETUP FILE TO CHECK THE VALUES OF NSTAR1 AND NSTAR2
+    call prompt('Enter file name for the setup: ', setupfile)
+
     call read_Nstar_from_setup(setupfile,ierr)
    
     !--Check particle numbers
