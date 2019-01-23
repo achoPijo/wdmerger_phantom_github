@@ -48,6 +48,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  integer                      :: ierr
  
  !-- PROMPT TO ASK FOR THE SETUP FILE TO CHECK THE VALUES OF NSTAR1 AND NSTAR2
+ setupfile = 'wd.setup'
  if (  firstcall ) then
     call prompt('Enter file name for the setup: ', setupfile)
  endif
