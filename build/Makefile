@@ -126,8 +126,8 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
     #KERNEL=quintic
     SETUPFILE= setup_wd.f90 
     KNOWN_SETUP=yes
-    ANALYSIS= density_profiles.o analysis_distances_wd.f90  
-    MODFILE= moddump_default.f90
+    ANALYSIS= density_profiles.o analysis_maximum_temperature.f90  
+    MODFILE= moddump_wdmerger.f90
     #MORRIS_MONAGHAN= yes
 
 endif

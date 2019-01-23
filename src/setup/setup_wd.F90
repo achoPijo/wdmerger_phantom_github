@@ -72,7 +72,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  real,              intent(out)   :: massoftype(:)
  real,              intent(out)   :: polyk,gamma,hfact
  real,              intent(inout) :: time
- character(len=20), intent(in)    :: fileprefix
+ character(len=40), intent(in)    :: fileprefix
  real,              intent(out)   :: vxyzu(:,:)
  real,              parameter     :: mue=2.0d0
  real                             :: K,K_cgs,cvi,densi,dummyponrhoi,dummyspsoundi,tff,R1,R2
