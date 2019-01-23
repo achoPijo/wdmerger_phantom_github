@@ -40,7 +40,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  integer,          intent(in) :: num,npart,iunit
  real,             intent(in) :: xyzh(:,:),vxyzu(:,:)
  real,             intent(in) :: particlemass,time
- real                         :: xpos1(3),vpos1(3),xpos2(3),vpos2(3)
+ real                         :: xpos1(3),vpos1(3),xpos2(3),vpos2(3),distance
  logical                      :: iexist
  character(len=200)           :: fileout,setupfile
  integer                      :: ierr
