@@ -33,7 +33,7 @@ contains
 
 subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  use part,         only: nptmass,xyzmh_ptmass,vxyz_ptmass
- use centreofmass, only: reset_CoM
+ use centreofmass, only: reset_centreofmass
  character(len=*), intent(in)    :: dumpfile
  integer,          intent(in)    :: num,npart,iunit
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:)
