@@ -128,7 +128,7 @@ ifeq ($(SETUP), whitedwarf) #CHNGCODE
     KNOWN_SETUP=yes
     ANALYSIS= density_profiles.o analysis_CoM.f90  
     MODFILE= moddump_wdmerger.f90
-    CORRECT_BULK_MOTION=yes
+    #CORRECT_BULK_MOTION=yes
     #MORRIS_MONAGHAN= yes
     #LIVE_ANALYSIS=yes 
 

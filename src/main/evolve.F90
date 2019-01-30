@@ -74,6 +74,7 @@ subroutine evol(infile,logfile,evfile,dumpfile)
 #ifdef CORRECT_BULK_MOTION
  use centreofmass,     only:correct_bulk_motion
 #endif
+use centreofmass,     only:reset_centreofmass
 #ifdef MPI
  use part,             only:ideadhead,shuffle_part
 #endif
@@ -298,6 +299,9 @@ use mf_write,          only:binpos_write
        call step(npart,nactive,time,dt,dtextforce,dtnew)
     endif
     dtlast = dt
+
+    !--reset_CoM
+    call reset_centreofmass(npart,xyzh,vxyzu,nptmass,xyzmh_ptmass,vxyz_ptmass)
 
     !--timings for step call
     call get_timings(t2,tcpu2)
