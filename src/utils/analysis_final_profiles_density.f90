@@ -80,6 +80,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        maxdens  = rhoh(xyzh(4,i),particlemass)
     endif
  enddo
+ print *, npart
  print *, xdens
 
  do i=1,npart
