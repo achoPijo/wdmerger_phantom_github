@@ -161,7 +161,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         9,'ncountz'
 
  do j=1,nrpoints
-      write(iunit,'(9(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j),keplertab(j),ncountxtab(j),ncountztab(j)
+      write(iunit,'(9(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j)/utime,keplertab(j)/utime,ncountxtab(j),ncountztab(j)
  enddo
  close(iunit)
 
