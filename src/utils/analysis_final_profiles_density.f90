@@ -50,7 +50,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  integer             :: i,j,ierr,ncountx,ncountz
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
- real                :: omegatab(nrpoints),keplertab(nrpoints),rsample,maxdens
+ real                :: omegatab(nrpoints),keplertab(nrpoints),ncountxtab(nrpoints),ncountztab(nrpoints),rsample,maxdens
  real                :: vec(3),xcom(3),vcom(3),xdens(3)
  character(len=200)  :: fileout
 
@@ -64,7 +64,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  rhotabz(:)        = 0.
  omegatab(:)      = 0.
  keplertab(:)     = 0.
- rsample = 0.00001
+ ncountxtab(:)    =0.
+ ncountztab(:)    =0.
+ rsample = 0.001
  call prompt('rsample in code units?',rsample)
  mtot         = npart*particlemass
  !--------------
@@ -109,10 +111,11 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     do j=1,npart
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
 
-       if (xyzh(1,j) < rtab(i) + dr/2 .and. xyzh(1,j) > rtab(i) - dr/2 .and. sqrt(xyzh(3,j)**2 + xyzh(2,j)**2) < rsample) then
+       !if (xyzh(1,j) < rtab(i) + dr/2 .and. xyzh(1,j) > rtab(i) - dr/2 .and. sqrt(xyzh(3,j)**2 + xyzh(2,j)**2) < rsample) then
+       if (sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) < rtab(i) + dr/2 .and. sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) > rtab(i) - dr/2 .and. xyzh(3,j) < rsample) then
 
           rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
-          Ttabx(i)      = Ttabx(i) + vxyzu(5,i)
+          Ttabx(i)     = Ttabx(i) + vxyzu(5,i)
           call cross_product3D(xyzh(1:3,i),vxyzu(1:3,i),vec(:))
           omegatab(i)  = omegatab(i) + vec(3)
           ncountx = ncountx + 1
@@ -135,6 +138,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        Ttabz(i)     = Ttabz(i)/ncountz
     endif
 
+    ncountxtab(i) = ncountx
+    ncountztab(i) = ncountz
+
  enddo
 
  !
@@ -143,17 +149,19 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  fileout = trim(dumpfile)//'_radialprofiles.dat'
  open(iunit,file=fileout,status='replace')
- write(iunit,"('#',7(1x,'[',i2.2,1x,a11,']',2x))") &
+ write(iunit,"('#',9(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'r',  &
         2,'Temperature x [K]',   &
         3,'Density x [g/cm3]', &
         4,'Temperature z [K]',   &
         5,'Density z [g/cm3]',  &
         6,'omegatab',   &
-        7,'keplertab'
+        7,'keplertab',  &
+        8,'ncountx',    &
+        9,'ncountz'
 
  do j=1,nrpoints
-      write(iunit,'(7(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j),keplertab(j)
+      write(iunit,'(9(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j),keplertab(j),ncountxtab(j),ncountztab(j)
  enddo
  close(iunit)
 
