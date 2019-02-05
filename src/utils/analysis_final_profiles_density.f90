@@ -80,9 +80,10 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        maxdens  = rhoh(xyzh(4,i),particlemass)
     endif
  enddo
+ print *, xdens
 
  do i=1,npart
-    xyzh(1:3,i)  = xyzh(1:3,i)  - xdens!xcom(1:3)
+    xyzh(1:3,i)  = xyzh(1:3,i)  - xdens(1:3)!xcom(1:3)
     vxyzu(1:3,i) = vxyzu(1:3,i) - vcom(1:3)
  enddo
  !-- Loop over all particles to obtain Radius of star (POSSIBLE PROBLEM EJECTED PARTICLES)
