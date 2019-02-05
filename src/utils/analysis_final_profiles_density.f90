@@ -101,7 +101,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  rtab(1)=dr
  do i=2,nrpoints
     rtab(i)      = rtab(i-r)+dr
-    keplertab(i) = sqrt(mtot/rtab(i))
+    keplertab(i) = sqrt(mtot/rtab(i))/r
  enddo
 
  do i=1,nrpoints
