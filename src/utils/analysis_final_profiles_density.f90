@@ -70,7 +70,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !--------------
  
  !call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
- call get_centreofmass(xcom,vcom,40000,xyzh(1:40000,:),vxyzu(1:40000,:))
+ call get_centreofmass(xcom,vcom,npart,xyzh(:,:),vxyzu(:,:))
  do i=1,npart
     xyzh(1:3,i)  = xyzh(1:3,i)  - xcom(1:3)
     vxyzu(1:3,i) = vxyzu(1:3,i) - vcom(1:3)
