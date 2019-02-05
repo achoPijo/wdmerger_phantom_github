@@ -46,7 +46,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(inout) :: xyzh(:,:),vxyzu(:,:) !due to reset center of mass
  real,             intent(in)    :: particlemass,time
 
- integer, parameter  :: nrpoints = 2000
+ integer, parameter  :: nrpoints = 20000
  integer             :: i,j,ierr,ncountx,ncountz
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
@@ -67,7 +67,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  ncountxtab(:)    =0.
  ncountztab(:)    =0.
  rsample = 0.001
- call prompt('rsample in code units?',rsample)
+ nrpoints = 2000
+ call prompt('rsample in code units?', rsample)
+ !call prompt('number of points', nrpoints)
  mtot         = npart*particlemass
  !--------------
  
@@ -112,7 +114,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
 
        !if (xyzh(1,j) < rtab(i) + dr/2 .and. xyzh(1,j) > rtab(i) - dr/2 .and. sqrt(xyzh(3,j)**2 + xyzh(2,j)**2) < rsample) then
-       if (sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) < rtab(i) + dr/2 .and. sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) > rtab(i) - dr/2 .and. xyzh(3,j) < rsample) then
+       if (sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) < rtab(i) + dr/2 .and. sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) > rtab(i) - dr/2 .and. abs(xyzh(3,j)) < rsample) then
 
           rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
           Ttabx(i)     = Ttabx(i) + vxyzu(5,j)
@@ -167,7 +169,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
 
  !
- !-- INCLUDE A FILE OUTPUT WITH TMAX,
+ !-- INCLUDE A FILE OUTPUT WITH TMAX omegamax locations
  ! 
 
 
