@@ -115,15 +115,15 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
        if (sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) < rtab(i) + dr/2 .and. sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) > rtab(i) - dr/2 .and. xyzh(3,j) < rsample) then
 
           rhotabx(i)   = rhotabx(i) + rhoh(xyzh(4,j),particlemass)
-          Ttabx(i)     = Ttabx(i) + vxyzu(5,i)
-          call cross_product3D(xyzh(1:3,i),vxyzu(1:3,i),vec(:))
+          Ttabx(i)     = Ttabx(i) + vxyzu(5,j)
+          call cross_product3D(xyzh(1:3,j),vxyzu(1:3,j),vec(:))
           omegatab(i)  = omegatab(i) + vec(3)
           ncountx = ncountx + 1
        endif
        if (xyzh(3,j) < rtab(i) + dr/2 .and. xyzh(3,j) > rtab(i) - dr/2 .and. sqrt(xyzh(1,j)**2 + xyzh(2,j)**2) < rsample) then
 
           rhotabz(i)   = rhotabz(i) + rhoh(xyzh(4,j),particlemass)
-          Ttabz(i)     = Ttabz(i) + vxyzu(5,i)
+          Ttabz(i)     = Ttabz(i) + vxyzu(5,j)
           ncountz = ncountz + 1
        endif
     enddo
