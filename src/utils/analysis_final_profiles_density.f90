@@ -50,7 +50,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  integer             :: i,j,ierr,ncountx,ncountz
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
- real                :: omegatab(nrpoints),keplertab(nrpoints),ncountxtab(nrpoints),ncountztab(nrpoints),rsample,maxdens
+ real                :: omegatab(nrpoints),keplertab(nrpoints),ncountxtab(nrpoints),ncountztab(nrpoints),macumtab(i),rsample,maxdens,macum
  real                :: vec(3),xcom(3),vcom(3),xdens(3)
  character(len=200)  :: fileout
 
@@ -58,14 +58,16 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  !-- Initialization
  !
  rtab(:)          = 0.
- Ttabx(:)          = 0.
- rhotabx(:)        = 0.
- Ttabz(:)          = 0.
- rhotabz(:)        = 0.
+ Ttabx(:)         = 0.
+ rhotabx(:)       = 0.
+ Ttabz(:)         = 0.
+ rhotabz(:)       = 0.
  omegatab(:)      = 0.
  keplertab(:)     = 0.
- ncountxtab(:)    =0.
- ncountztab(:)    =0.
+ ncountxtab(:)    = 0.
+ ncountztab(:)    = 0.
+ macumtab(:)      = 0.
+ macum            = 0.
  rsample = 0.001
  !nrpoints = 2000
  call prompt('rsample in code units?', rsample)
@@ -102,8 +104,16 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  dr = rmax/nrpoints
  rtab(1)=dr
  do i=2,nrpoints
-    rtab(i)      = rtab(i-r)+dr
-    keplertab(i) = sqrt(mtot/rtab(i))/rtab(i)
+    rtab(i)  = rtab(i-r)+dr
+    macum    = 0.
+    do j = 1,npart
+       r = sqrt(xyzh(1,j)**2+xyzh(2,j)**2+xyzh(3,j)**2)
+       if (r < rtab(i)) then
+          macum = macum + particlemass
+       endif
+    enddo
+    keplertab(i) = sqrt(macum/rtab(i))/rtab(i) !!!!KEPLEEEER SI WITH ACCUMULATED MASS!!!!!!!
+    macumtab(i)  = macum
  enddo
 
  do i=1,nrpoints
@@ -151,7 +161,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  fileout = trim(dumpfile)//'_radialprofiles.dat'
  open(iunit,file=fileout,status='replace')
- write(iunit,"('#',9(1x,'[',i2.2,1x,a11,']',2x))") &
+ write(iunit,"('#',10(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'r',  &
         2,'Temperature x [K]',   &
         3,'Density x [g/cm3]', &
@@ -159,11 +169,12 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         5,'Density z [g/cm3]',  &
         6,'omegatab',   &
         7,'keplertab',  &
-        8,'ncountx',    &
-        9,'ncountz'
+        8,'macumtab',   &
+        9,'ncountx',    &
+       10,'ncountz'
 
  do j=1,nrpoints
-      write(iunit,'(9(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j)/utime,keplertab(j)/utime,ncountxtab(j),ncountztab(j)
+      write(iunit,'(10(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j)/utime,keplertab(j)/utime,macumtab(j),ncountxtab(j),ncountztab(j)
  enddo
  close(iunit)
 
