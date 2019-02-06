@@ -50,7 +50,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  integer             :: i,j,ierr,ncountx,ncountz
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
- real                :: omegatab(nrpoints),keplertab(nrpoints),ncountxtab(nrpoints),ncountztab(nrpoints),macumtab(i),rsample,maxdens,macum
+ real                :: omegatab(nrpoints),keplertab(nrpoints),ncountxtab(nrpoints),ncountztab(nrpoints),macumtab(nrpoints),rsample,maxdens,macum
  real                :: vec(3),xcom(3),vcom(3),xdens(3)
  character(len=200)  :: fileout
 
