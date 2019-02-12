@@ -154,7 +154,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
     ncountxtab(i) = ncountx
     ncountztab(i) = ncountz
-    centrifugalacctab(i)  = (omegatab(i)**2)/rtab(i)
+    centrifugalacctab(i)  = (omegatab(i)**2)*rtab(i)
 
  enddo
 
