@@ -51,6 +51,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real                :: rmax,rTmax,Tmax,dr,mtot,r
  real                :: rtab(nrpoints),Ttabx(nrpoints),Ttabz(nrpoints),Ttab(nrpoints),rhotab(nrpoints),rhotabx(nrpoints),rhotabz(nrpoints)
  real                :: omegatab(nrpoints),keplertab(nrpoints),ncountxtab(nrpoints),ncountztab(nrpoints),macumtab(nrpoints),rsample,maxdens,macum
+ real                :: halfgravacctab(nrpoints),centrifugalacctab(nrpoints)
  real                :: vec(3),xcom(3),vcom(3),xdens(3)
  character(len=200)  :: fileout
 
@@ -114,6 +115,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     enddo
     keplertab(i) = sqrt(macum/rtab(i))/rtab(i) !!!!KEPLEEEER SI WITH ACCUMULATED MASS!!!!!!!
     macumtab(i)  = macum
+    halfgravacctab(i) = (1/2)*macumtab(i)/(rtab(i)**2) !helf gravitational acceleration
  enddo
 
  do i=1,nrpoints
@@ -143,7 +145,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     if (ncountx /= 0) then
        rhotabx(i)   = rhotabx(i)/ncountx
        Ttabx(i)     = Ttabx(i)/ncountx
-       omegatab(i) = omegatab(i)/ncountx
+       omegatab(i)  = omegatab(i)/ncountx
     endif
     if (ncountz /= 0) then
        rhotabz(i)   = rhotabz(i)/ncountz
@@ -152,6 +154,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
     ncountxtab(i) = ncountx
     ncountztab(i) = ncountz
+    centrifugalacctab(i)  = (omgeatab(i)**2)/rtab(i)
 
  enddo
 
@@ -161,7 +164,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  fileout = trim(dumpfile)//'_radialprofiles.dat'
  open(iunit,file=fileout,status='replace')
- write(iunit,"('#',10(1x,'[',i2.2,1x,a11,']',2x))") &
+ write(iunit,"('#',12(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'r',  &
         2,'Temperature x [K]',   &
         3,'Density x [g/cm3]', &
@@ -171,10 +174,12 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         7,'keplertab',  &
         8,'macumtab',   &
         9,'ncountx',    &
-       10,'ncountz'
+       10,'ncountz',    &
+       11,'halfgravacctab',    &
+       12,'ncountz',    &
 
  do j=1,nrpoints
-      write(iunit,'(10(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j)/utime,keplertab(j)/utime,macumtab(j),ncountxtab(j),ncountztab(j)
+      write(iunit,'(12(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j)/utime,keplertab(j)/utime,macumtab(j),ncountxtab(j),ncountztab(j),halfgravacctab(j),centrifugalacctab(j)
  enddo
  close(iunit)
 
