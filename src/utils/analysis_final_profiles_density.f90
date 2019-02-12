@@ -68,6 +68,8 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  ncountxtab(:)    = 0.
  ncountztab(:)    = 0.
  macumtab(:)      = 0.
+ halfgravacctab(:)    = 0.
+ centrifugalacctab(:) = 0.
  macum            = 0.
  rsample = 0.001
  !nrpoints = 2000
@@ -115,7 +117,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     enddo
     keplertab(i) = sqrt(macum/rtab(i))/rtab(i) !!!!KEPLEEEER SI WITH ACCUMULATED MASS!!!!!!!
     macumtab(i)  = macum
-    halfgravacctab(i) = (1/2)*macumtab(i)/(rtab(i)**2) !helf gravitational acceleration
+    halfgravacctab(i) = (1./2.)*macumtab(i)/(rtab(i)**2) !half gravitational acceleration
  enddo
 
  do i=1,nrpoints
