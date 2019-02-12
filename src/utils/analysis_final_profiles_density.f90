@@ -176,7 +176,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
         9,'ncountx',    &
        10,'ncountz',    &
        11,'halfgravacctab',    &
-       12,'ncountz',    &
+       12,'ncountz'
 
  do j=1,nrpoints
       write(iunit,'(12(1pe18.10,1x))') rtab(j),Ttabx(j),rhotabx(j)*unit_density,Ttabz(j),rhotabz(j)*unit_density,omegatab(j)/utime,keplertab(j)/utime,macumtab(j),ncountxtab(j),ncountztab(j),halfgravacctab(j),centrifugalacctab(j)
