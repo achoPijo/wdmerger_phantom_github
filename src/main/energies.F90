@@ -32,7 +32,7 @@ module energies
 
  integer, public :: itime,iekin,ietherm,iemag,iepot,ietot,itotmom,iangtot,irhoX,irhoA, &
                     idt,ientrop,irms, &
-                    idustX,idustA,ibdyX,ibdyA,istarX,istarA,idmX,idmA,iblgX,iblgA,igasX,igasA, &
+                    idustX,idustA,ibdyX,ibdyA,istarX,istarA,idmX,idmA,iblgX,iblgA,igasX,igasA,iheliumX,iheliumA, &
                     ialphaX,idivBX,idivBA,ihdivBX,ihdivBA,ibetaX,ibetaA,ibetaN, &
                     itX,itA,itN,ietaFX,ietaFA,ietaFN,iohmX,iohmA,iohmN,iohmfX,iohmfA,iohmfN, &
                     ihallX,ihallA,ihallN,iahallX,iahallA,iahallN, &
@@ -75,7 +75,7 @@ contains
 subroutine compute_energies(t)
  use dim,  only:maxp,maxvxyzu,maxalpha,maxtypes,use_dustfrac,mhd_nonideal,lightcurve
  use part, only:rhoh,xyzh,vxyzu,massoftype,npart,maxphase,iphase, &
-           alphaind,Bxyz,Bevol,divcurlB,iamtype,igas,idust,iboundary,istar,idarkmatter,ibulge, &
+           alphaind,Bxyz,Bevol,divcurlB,iamtype,igas,idust,iboundary,istar,idarkmatter,ibulge,ihelium, &
            nptmass,xyzmh_ptmass,vxyz_ptmass,isdeadh,isdead_or_accreted,epot_sinksink,&
            imacc,ispinx,ispiny,ispinz,mhd,maxvecp,divBsymm,gravity,poten,dustfrac,&
            n_R,n_electronT,ionfrac_eta
@@ -167,7 +167,7 @@ subroutine compute_energies(t)
 !$omp shared(use_ohm,use_hall,use_ambi,ion_rays,ion_thermal,nelements,n_R,n_electronT,ionfrac_eta) &
 !$omp shared(ielements,ev_data,ev_action,np_rho,erot_com) &
 !$omp shared(calc_erot,gas_only,irhoX,irhoA,ialphaX,iviscX,iviscA,iviscN) &
-!$omp shared(idustX,idustA,ibdyX,ibdyA,istarX,istarA,idmX,idmA,iblgX,iblgA,igasX,igasA) &
+!$omp shared(idustX,idustA,ibdyX,ibdyA,istarX,istarA,idmX,idmA,iblgX,iblgA,igasX,igasA,iheliumX,iheliumA) &
 !$omp shared(idtgX,idtgA,idtgN,itsA,itsN,ientrop) &
 !$omp shared(idivBX,idivBA,ihdivBX,ihdivBA,ibetaX,ibetaA,ibetaN) &
 !$omp shared(itX,itA,itN,ietaFX,ietaFA,ietaFN,iohmX,iohmA,iohmN,iohmfX,iohmfA,iohmfN) &
@@ -231,6 +231,8 @@ subroutine compute_energies(t)
              call ev_rhoupdate(ev_data_thread,rhoi,idmX,  idmA,  itype,np_rho_thread)
           case(ibulge)
              call ev_rhoupdate(ev_data_thread,rhoi,iblgX, iblgA, itype,np_rho_thread)
+          case(ihelium)
+             call ev_rhoupdate(ev_data_thread,rhoi,iheliumX, iheliumA, itype,np_rho_thread)
           end select
        endif
 
@@ -283,7 +285,7 @@ subroutine compute_energies(t)
        !
        ! the following apply ONLY to gas particles
        !
-       isgas: if (itype==igas) then
+       isgas: if (itype==igas.or.itype=ihelium) then
 
           if (use_dustfrac) then
              dustfraci   = dustfrac(i)
@@ -604,6 +606,7 @@ subroutine compute_energies(t)
     if (np_rho(istar)       > 0) ev_data(istarA) = ev_data(istarA)*nptot/np_rho(istar)
     if (np_rho(idarkmatter) > 0) ev_data(idmA)   = ev_data(idmA)  *nptot/np_rho(idarkmatter)
     if (np_rho(ibulge)      > 0) ev_data(iblgA)  = ev_data(iblgA) *nptot/np_rho(ibulge)
+    if (np_rho(ihelium)      > 0) ev_data(iheliumA)  = ev_data(iheliumA) *nptot/np_rho(ihelium)
  endif
  vrms      = sqrt(reduce_fn('+',vrms)*dnptot)
  rmsmach   = sqrt(reduce_fn('+',rmsmach)*dnptot)

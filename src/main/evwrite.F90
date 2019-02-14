@@ -28,7 +28,7 @@ module evwrite
  use energies, only: inumev,ielements,ievU,ievI,iev0,ievS,ievA,ievX,ievN,ev_data,ev_action
  use energies, only: itime,iekin,ietherm,iemag,iepot,ietot,itotmom,iangtot,irhoX,irhoA,idt,ientrop, &
                      irms,&
-                     idustX,idustA,ibdyX,ibdyA,istarX,istarA,idmX,idmA,iblgX,iblgA,igasX,igasA, &
+                     idustX,idustA,ibdyX,ibdyA,istarX,istarA,idmX,idmA,iblgX,iblgA,igasX,igasA,iheliumX,iheliumA, &
                      ialphaX,idivBX,idivBA,ihdivBX,ihdivBA,ibetaX,ibetaA,ibetaN, &
                      itX,itA,itN,ietaFX,ietaFA,ietaFN,iohmX,iohmA,iohmN,iohmfX,iohmfA,iohmfN, &
                      ihallX,ihallA,ihallN,iahallX,iahallA,iahallN, &
@@ -65,7 +65,7 @@ subroutine init_evfile(iunit,evfile)
  use io,        only: id,master,warning
  use dim,       only: maxalpha,maxp,mhd,mhd_nonideal,use_dustfrac,calc_erot,lightcurve
  use options,   only: ishock_heating,ipdv_heating
- use part,      only: igas,idust,iboundary,istar,idarkmatter,ibulge,nptmass,npartoftype
+ use part,      only: igas,idust,iboundary,istar,idarkmatter,ibulge,ihelium,nptmass,npartoftype
  use ptmass,    only: icreate_sinks
  use nicil,     only: use_ohm,use_hall,use_ambi,ion_rays,ion_thermal,nelements,nlevels
  use viscosity, only: irealvisc
@@ -105,6 +105,7 @@ subroutine init_evfile(iunit,evfile)
     call fill_rho_label(ev_fmt,'rho star',i,istarX,istarA,npartoftype(istar),      gas_only)
     call fill_rho_label(ev_fmt,'rho dm',  i,idmX,  idmA,  npartoftype(idarkmatter),gas_only)
     call fill_rho_label(ev_fmt,'rho blg', i,iblgX, iblgA, npartoftype(ibulge),     gas_only)
+    call fill_rho_label(ev_fmt,'rho he', i,iheliumX, iheliumA, npartoftype(ihelium),gas_only)
     if (.not.gas_only) then
        call fill_rho_label(ev_fmt,'rho gas',i,igasX,igasA,npartoftype(igas),       gas_only)
     endif

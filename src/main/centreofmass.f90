@@ -33,7 +33,7 @@ contains
 !----------------------------------------------------------------
 !+
 !  routine to reset the centre of mass in the initial conditions
-!  (assuming equal mass particles)
+!  (assuming equal mass particles) NOT TRUE! different mass particles thorugh get_centreofmass
 !+
 !----------------------------------------------------------------
 subroutine reset_centreofmass(npart,xyzh,vxyzu,nptmass,xyzmh_ptmass,vxyz_ptmass)

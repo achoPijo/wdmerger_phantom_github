@@ -105,8 +105,8 @@ module dim
  !
  ! Maximum number of particle types
  !
- integer, parameter :: maxtypes = 6
-
+ integer, parameter :: maxtypes = 7
+ 
  !
  ! Number of dimensions, where it is needed
  ! (Phantom is hard wired to ndim=3 in a lot of

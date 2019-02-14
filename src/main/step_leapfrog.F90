@@ -79,7 +79,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
  use options,        only:damp,tolv,iexternalforce,icooling
  use part,           only:xyzh,vxyzu,fxyzu,fext,divcurlv,divcurlB,Bevol,dBevol, &
                           isdead_or_accreted,rhoh,dhdrho,&
-                          iphase,iamtype,massoftype,maxphase,igas,mhd,maxBevol,&
+                          iphase,iamtype,massoftype,maxphase,igas,ihelium,mhd,maxBevol,&
                           switches_done_in_derivs,iboundary,get_ntypes,npartoftype,&
                           dustfrac,dustevol,ddustfrac,alphaind,maxvecp,nptmass
  use eos,            only:get_spsound
@@ -483,7 +483,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !$omp private(i)
 !$omp do schedule(runtime)
  do i=1,npart
-    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),xmass(:,i),relflag)
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(iamtype(iphase(i))),xmass(:,i),relflag)
  enddo
 !$omp enddo
 !$omp end parallel

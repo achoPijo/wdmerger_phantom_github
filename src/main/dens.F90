@@ -124,7 +124,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
  use options,   only:ieos,tolh,alphaB,alpha,alphamax
  use part,      only:mhd,maxBevol,rhoh,dhdrho,rhoanddhdrho,massoftype,&
                      ll,get_partinfo,iactive,maxgradh,&
-                     hrho,iphase,maxphase,igas,idust,iboundary,iamgas,periodic,&
+                     hrho,iphase,maxphase,igas,idust,iboundary,iamgas,iamhelium,periodic,&
                      set_boundaries_to_active,all_active,n_R,n_electronT
 #ifdef FINVSQRT
  use fastmath,  only:finvsqrt
@@ -190,7 +190,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
 
  integer :: iamtypei,isize
  logical :: ifilledcellcache,ifilledneighcache,moreincell,activecell,activeneighbsonly
- logical :: iactivei,iamgasi,iamdusti,getdv,realviscosity,igotrmatrix,bisection
+ logical :: iactivei,iamgasi,iamhei,iamdusti,getdv,realviscosity,igotrmatrix,bisection
  logical :: getdB,converged
 #ifdef MPI
  integer, parameter :: maxrecv = 3 + ndivcurlv + ndivcurlB + 6
@@ -254,7 +254,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
 !$omp private(hnew,spsoundi,temperaturei) &
 !$omp private(divcurlvi) &
 !$omp private(divcurlBi) &
-!$omp private(activecell,iactivei,iamgasi,iamdusti) &
+!$omp private(activecell,iactivei,iamgasi,iamhei,iamdusti) &
 !$omp private(igotrmatrix) &
 !$omp private(rhosum,xpartveci,rhodusti) &
 !$omp private(term,xi_limiter) &
@@ -325,6 +325,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
     if (maxphase==maxp) then
        call get_partinfo(iphase(i),iactivei,iamdusti,iamtypei)
        iamgasi = iamgas(iphase(i))
+       iamhei  = iamhelium(iphase(i))
     else
        iactivei = .true.
        iamtypei = igas
@@ -553,7 +554,7 @@ subroutine densityiterate(icall,npart,nactive,xyzh,vxyzu,divcurlv,divcurlB,Bevol
        !
        ! Cullen & Dehnen (2010) viscosity switch, set alphaloc
        !
-       if (nalpha >= 2 .and. iamgasi) then
+       if (nalpha >= 2 .and. (iamgasi .or. iamhei)) then
 #ifdef TEMPEVOLUTION
           spsoundi = get_spsound(ieos,xyzh(:,i),real(rhoi),vxyzu(:,i),xmass(:,i))    
 #else
@@ -718,7 +719,7 @@ pure subroutine get_density_sums(i,xpartveci,hi1,hi21,iamtypei,iamgasi,listneigh
   use fastmath, only:finvsqrt
 #endif
   use kernel,   only:get_kernel,get_kernel_grav1
-  use part,     only:iphase,iamgas,iamtype,maxphase,iboundary,idust
+  use part,     only:iphase,iamgas,iamhelium,iamtype,maxphase,iboundary,idust
   use dim,      only:ndivcurlv,gravity,maxp,nalpha,use_dustfrac,use_dust
   integer,      intent(in)    :: i
   real,         intent(in)    :: xpartveci(:)
@@ -843,7 +844,7 @@ pure subroutine get_density_sums(i,xpartveci,hi1,hi21,iamtypei,iamgasi,listneigh
            iphasej   = iphase(j)
            iamtypej  = iamtype(iphasej)
            same_type = ((iamtypei == iamtypej) .or. (iamtypej==iboundary))
-           gas_gas   = (iamgasi .and. same_type)  ! this ensure that boundary particles are included in gas_gas calculations
+           gas_gas   = ((iamgasi.or.iamhelium(iphase(i))) .and. same_type)  ! this ensure that boundary particles are included in gas_gas calculations
         endif
 
         sametype: if (same_type) then

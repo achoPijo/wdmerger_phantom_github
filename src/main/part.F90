@@ -220,10 +220,11 @@ module part
  integer, parameter :: istar = 4
  integer, parameter :: idarkmatter = 5
  integer, parameter :: ibulge = 6
+ integer, parameter :: ihelium = 7
  integer, parameter :: iunknown = 0
  logical            :: set_boundaries_to_active = .true.
  character(len=5), dimension(maxtypes), parameter :: &
-    labeltype = (/'gas  ','dust ','bound','star ','darkm','bulge'/)
+    labeltype = (/'gas  ','dust ','bound','star ','darkm','bulge','he   '/)
 !
 !--generic interfaces for routines
 !
@@ -496,6 +497,15 @@ pure elemental logical function iamdust(iphasei)
  iamdust = int(itype)==idust
 
 end function iamdust
+
+pure elemental logical function iamhelium(iphasei)
+ integer(kind=1), intent(in) :: iphasei
+ integer :: itype
+
+ itype = iamtype(iphasei)
+ iamhelium = int(itype)==ihelium
+
+end function iamgas
 
 pure integer function get_ntypes(noftype)
  integer, intent(in) :: noftype(:)
