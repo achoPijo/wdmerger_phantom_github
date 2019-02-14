@@ -505,7 +505,7 @@ pure elemental logical function iamhelium(iphasei)
  itype = iamtype(iphasei)
  iamhelium = int(itype)==ihelium
 
-end function iamgas
+end function iamhelium
 
 pure integer function get_ntypes(noftype)
  integer, intent(in) :: noftype(:)
