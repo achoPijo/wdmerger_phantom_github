@@ -483,7 +483,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 !$omp private(i)
 !$omp do schedule(runtime)
  do i=1,npart
-    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(iamtype(iphase(i))),xmass(:,i),relflag)
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(iamtype(iphase(i)))),xmass(:,i),relflag)
  enddo
 !$omp enddo
 !$omp end parallel
