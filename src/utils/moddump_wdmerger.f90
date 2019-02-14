@@ -57,6 +57,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  use extern_corotate,         only: omega_corotate,dynfac
  use extern_gwinspiral,       only: Nstar
  use nuc_reactions,           only: nuc_burn
+ use eos_helmholtz,           only: xmass,speciesmax
  integer, intent(inout)    :: npart
  integer, intent(inout)    :: npartoftype(:)
  real,    intent(inout)    :: massoftype(:)
@@ -64,7 +65,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  integer                   :: i,ierr
  real                      :: xcom1(3),xcom2(3),vcom1(3),vcom2(3)
  real                      :: rad1,rad2,mstar1,mstar2,mtotal, omega, omega2    !CHNGCODE added omega
- real                      :: xcm1,xcm2,ycm1,ycm2,r1,r2
+ real                      :: xcm1,xcm2,ycm1,ycm2,r1,r2,densi,Tnew,dummyponrhoi,dummyspsoundi,cvi
  character(len=120)        :: setupfile
 
  call prompt('Is this a binary setup?', binary)
@@ -102,6 +103,17 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     mstar2 = Nstar(2) * massoftype(igas)
     mtotal = npart  * massoftype(igas)
     
+    !-- Set temperature of stars to a new values
+    do i=1,npart
+       Tnew = 100000
+       densi = rhoh(xyzh(4,i),massoftype(igas))
+       if (maxvxyzu == 5) then
+          vxyzu(5,i) = Tnew
+          call equationofstate(15,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
+                               tempi=Tnew,xmassi=xmass(:,i),cvi=cvi)
+          vxyzu(4,i) = Tnew*cvi
+       endif
+    enddo
 
    
    
