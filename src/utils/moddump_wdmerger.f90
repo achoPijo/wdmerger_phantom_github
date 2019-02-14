@@ -44,11 +44,11 @@ contains
 !-----------------------------------------------------------------------
 
 subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
- use eos,                     only: relflag
+ use eos,                     only: relflag, equationofstate
  use io,                      only: iprint,fatal
  use prompting,               only: prompt
  use options,                 only: iexternalforce,nfulldump,damp,alphau
- use part,                    only: igas
+ use part,                    only: igas,rhoh
  use units,                   only: unit_velocity,utime
  use physcon,                 only: c,pi
  use timestep,                only: time,tmax, dtmax
@@ -107,12 +107,11 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     do i=1,npart
        Tnew = 100000
        densi = rhoh(xyzh(4,i),massoftype(igas))
-       if (maxvxyzu == 5) then
-          vxyzu(5,i) = Tnew
-          call equationofstate(15,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
-                               tempi=Tnew,xmassi=xmass(:,i),cvi=cvi)
-          vxyzu(4,i) = Tnew*cvi
-       endif
+       vxyzu(5,i) = Tnew
+       call equationofstate(15,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
+                            tempi=Tnew,xmassi=xmass(:,i),cvi=cvi)
+       vxyzu(4,i) = Tnew*cvi
+
     enddo
 
    
