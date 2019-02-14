@@ -31,11 +31,12 @@ module setup
  real(kind=8)       :: udist,umass
  character(len=20)  :: dist_unit,mass_unit
  logical            :: iexist
- logical            :: use_prompt = .true.
- logical            :: binary     = .true.
- integer            :: np         = 100000
+ logical            :: use_prompt = .false.
+ logical            :: binary     = .false.
+ integer            :: np         = 50000
  real               :: mstar      = 0.6d0
  real               :: mstar2     = 0.6d0
+ real               :: mhelium    = 0.1d0
  real               :: Tin        = 1.d7
  public :: setpart
 
@@ -56,7 +57,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  use io,            only: master
  use kernel,        only: hfact_default
  use options,       only: iexternalforce,nfulldump,damp,alphau
- use part,          only: igas,rhoh
+ use part,          only: igas,ihelium,rhoh,iphase
  use physcon,       only: solarm,solarr,pi,planckh,mass_electron_cgs,mass_proton_cgs
  use prompting,     only: prompt
  use timestep,      only: tmax, dtmax
@@ -78,7 +79,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  real                             :: K,K_cgs,cvi,densi,dummyponrhoi,dummyspsoundi,tff,R1,R2
  character(len=120)               :: setupfile,inname
  logical                          :: write_setup
- integer                          :: i, ierr
+ integer                          :: i, ierr,nstar,nhelium
 
  !
  !--Initializations
@@ -208,9 +209,15 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     massoftype(igas) = (mstar+mstar2)/npart
  else
     Nstar(1) = npart
-    call set_wd(npart,hfact,mstar,xyzh)
-    massoftype(igas) = mstar/npart
-    R1=maxval(xyzh(1,1:Nstar(1)))
+    nstar = int(npart/2)
+    nhelium = npart - nstar
+    call set_wd(nstar,hfact,mstar,xyzh)
+    massoftype(igas) = mstar/nstar
+    massoftype(ihelium) = mhelium/nhelium
+    R1=maxval(xyzh(1,1:nstar))
+    do i=1:nhelium
+       xyzh(1:3,nstar+i)=xyzh(1:3,i)+R1*100
+    enddo
  endif
 
  ! REVISE need to build an if clause depending on whether ISOTHERMAL is 
@@ -235,8 +242,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     call star_comp(xmass(:,1:Nstar(1)),Nstar(1),mstar)
     call star_comp(xmass(:,Nstar(1)+1:npart),Nstar(2),mstar2)
  else
-    call star_comp(xmass(:,1:Nstar(1)),Nstar(1),mstar)
-    
+    call star_comp(xmass(:,1:nstar),nstar,mstar)
+    call star_comp(xmass(:,nstar+1:),nhelium,mhelium)
  endif
 
  do i=1,npart
@@ -247,11 +254,18 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     endif
  enddo
 
-
+ !Set iphase
+ do i=1,npart
+    if (i > nstar) then
+       iphase(i) = ihelium
+    else
+       iphase(i) = igas
+    endif
+ enddo
 
 
  do i=1,npart
-    densi = rhoh(xyzh(4,i),massoftype(igas))
+    densi = rhoh(xyzh(4,i),massoftype(iphase(i)))
     if (maxvxyzu==4) then
        if (gamma < 1.00001) then
           vxyzu(4,i) = polyk
