@@ -479,7 +479,7 @@ subroutine step(npart,nactive,t,dtsph,dtextforce,dtnew)
 
 #ifdef TEMPEVOLUTION
 !$omp parallel default(none)&
-!$omp shared(xyzh,vxyzu,massoftype,npart,xmass,relflag) &
+!$omp shared(xyzh,vxyzu,massoftype,npart,xmass,iphase,relflag) &
 !$omp private(i)
 !$omp do schedule(runtime)
  do i=1,npart
