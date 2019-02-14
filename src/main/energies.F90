@@ -285,7 +285,7 @@ subroutine compute_energies(t)
        !
        ! the following apply ONLY to gas particles
        !
-       isgas: if (itype==igas.or.itype=ihelium) then
+       isgas: if (itype==igas.or.itype==ihelium) then
 
           if (use_dustfrac) then
              dustfraci   = dustfrac(i)
