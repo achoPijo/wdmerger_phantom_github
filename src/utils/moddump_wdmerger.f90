@@ -44,7 +44,7 @@ contains
 !-----------------------------------------------------------------------
 
 subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
- use eos,                     only: relflag, equationofstate
+ use eos,                     only: relflag, equationofstate,init_eos
  use io,                      only: iprint,fatal
  use prompting,               only: prompt
  use options,                 only: iexternalforce,nfulldump,damp,alphau
@@ -104,6 +104,9 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     mtotal = npart  * massoftype(igas)
     
     !-- Set temperature of stars to a new values
+
+    call init_eos(15,ierr)
+
     do i=1,npart
        Tnew = 100000
        densi = rhoh(xyzh(4,i),massoftype(igas))
