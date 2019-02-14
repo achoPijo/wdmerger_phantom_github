@@ -1537,7 +1537,7 @@ end subroutine force
         if (.not. add_contribution) then
            iamgasj = .false.
            usej    = .false.
-           iamhelium = .false.
+           iamheliumj = .false.
         endif
         !--get dv : needed for timestep and av term
         dvx = xpartveci(ivxi) - vxyzu(1,j)
