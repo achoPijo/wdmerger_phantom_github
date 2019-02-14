@@ -105,17 +105,17 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     
     !-- Set temperature of stars to a new values
 
-    call init_eos(15,ierr)
+    !call init_eos(15,ierr)
 
-    do i=1,npart
-       Tnew = 100000
-       densi = rhoh(xyzh(4,i),massoftype(igas))
-       vxyzu(5,i) = Tnew
-       call equationofstate(15,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
-                            tempi=Tnew,xmassi=xmass(:,i),cvi=cvi)
-       vxyzu(4,i) = Tnew*cvi
+    !do i=1,npart
+    !   Tnew = 100000
+    !   densi = rhoh(xyzh(4,i),massoftype(igas))
+    !   vxyzu(5,i) = Tnew
+    !   call equationofstate(15,dummyponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
+    !                        tempi=Tnew,xmassi=xmass(:,i),cvi=cvi)
+    !   vxyzu(4,i) = Tnew*cvi
 
-    enddo
+    !enddo
 
    
    
