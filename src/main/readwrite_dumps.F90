@@ -194,7 +194,7 @@ end subroutine end_threadwrite
 !+
 !--------------------------------------------------------------------
 character(len=lenid) function fileident(firstchar,codestring)
- use part, only:h2chemistry,mhd,maxBevol,npartoftype,idust,gravity,lightcurve,use_dustfrac
+ use part, only:h2chemistry,mhd,maxBevol,npartoftype,idust,ihelium,gravity,lightcurve,use_dustfrac
  character(len=2), intent(in) :: firstchar
  character(len=*), intent(in), optional :: codestring
  character(len=10) :: datestring, timestring
@@ -209,6 +209,7 @@ character(len=lenid) function fileident(firstchar,codestring)
  string = ' '
  if (gravity) string = trim(string)//'+grav'
  if (npartoftype(idust) > 0) string = trim(string)//'+dust'
+ if (npartoftype(ihelium) > 0) string = trim(string)//'+he'
  if (use_dustfrac) string = trim(string)//'+1dust'
  if (h2chemistry) string = trim(string)//'+H2chem'
  if (lightcurve) string = trim(string)//'+lightcurve'
@@ -1468,7 +1469,7 @@ subroutine unfill_header(hdr,phantomdump,got_tags,nparttot, &
  use dim,   only:maxp
  use io,    only:master ! check this
  use eos,   only:isink
- use part,  only:maxtypes,igas,idust
+ use part,  only:maxtypes,igas,idust,ihelium
  use units, only:udist,umass,utime,set_units_extra,set_units
  use dump_utils, only:extract,dump_h
  type(dump_h), intent(in) :: hdr
@@ -1520,6 +1521,7 @@ subroutine unfill_header(hdr,phantomdump,got_tags,nparttot, &
  if (nblocks==1) then
     npartoftype(1:ntypesinfile) = int(npartoftypetot(1:ntypesinfile))
     if (npartoftype(idust) > 0) write(*,*) 'n(gas) = ',npartoftype(igas),' n(dust) = ',npartoftype(idust)
+    if (npartoftype(ihelium) > 0) write(*,*) 'n(gas) = ',npartoftype(igas),' n(helium) = ',npartoftype(ihelium)
  endif
  call extract('isink',isink,hdr,ierr1)
 
