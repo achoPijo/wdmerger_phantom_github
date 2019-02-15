@@ -181,7 +181,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
 
  
  npart = np
- npartoftype(igas) = npart
+! npartoftype(igas) = npart
 
  if (binary) then
     !
@@ -256,11 +256,14 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  enddo
 
  !Set iphase
+ npartoftype(:) = 0
  do i=1,npart
     if (i > npstar) then
        iphase(i) = ihelium
+       npartoftype(ihelium) = npartoftype(ihelium)+1
     else
        iphase(i) = igas
+       npartoftype(igas) = npartoftype(igas)+1
     endif
  enddo
 
