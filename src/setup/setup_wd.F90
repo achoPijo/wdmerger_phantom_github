@@ -215,7 +215,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     massoftype(igas) = mstar/nstar
     massoftype(ihelium) = mhelium/nhelium
     R1=maxval(xyzh(1,1:nstar))
-    do i=1:nhelium
+    do i=1,nhelium
        xyzh(1:3,nstar+i)=xyzh(1:3,i)/100+R1*1.1
        xyzh(4,nstar+i)  = R1/100
     enddo
