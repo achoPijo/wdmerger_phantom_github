@@ -216,7 +216,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     massoftype(ihelium) = mhelium/nhelium
     R1=maxval(xyzh(1,1:nstar))
     do i=1:nhelium
-       xyzh(1:3,nstar+i)=xyzh(1:3,i)+R1*100
+       xyzh(1:3,nstar+i)=xyzh(1:3,i)/100+R1*1.1
+       xyzh(4,nstar+i)  = R1/100
     enddo
  endif
 
@@ -304,7 +305,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  !
  !--Set new runtime parameters
  tmax           =    0.1                !2 time units
- dtmax          =    0.01   !1./utime   !1 second
+ dtmax          =    0.001   !1./utime   !1 second
  damp           =    1/tff              !
  nfulldump      =    1
  iexternalforce =    0
