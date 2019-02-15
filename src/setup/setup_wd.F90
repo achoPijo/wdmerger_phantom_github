@@ -79,7 +79,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  real                             :: K,K_cgs,cvi,densi,dummyponrhoi,dummyspsoundi,tff,R1,R2
  character(len=120)               :: setupfile,inname
  logical                          :: write_setup
- integer                          :: i, ierr,nstar,nhelium
+ integer                          :: i, ierr,npstar,nhelium
 
  !
  !--Initializations
@@ -209,15 +209,15 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     massoftype(igas) = (mstar+mstar2)/npart
  else
     Nstar(1) = npart
-    nstar = int(npart/2)
-    nhelium = npart - nstar
-    call set_wd(nstar,hfact,mstar,xyzh)
-    massoftype(igas) = mstar/nstar
+    npstar = int(npart/2)
+    nhelium = npart - npstar
+    call set_wd(npstar,hfact,mstar,xyzh)
+    massoftype(igas) = mstar/npstar
     massoftype(ihelium) = mhelium/nhelium
-    R1=maxval(xyzh(1,1:nstar))
+    R1=maxval(xyzh(1,1:npstar))
     do i=1,nhelium
-       xyzh(1:3,nstar+i)=xyzh(1:3,i)/100+R1*1.1
-       xyzh(4,nstar+i)  = R1/100
+       xyzh(1:3,npstar+i)=xyzh(1:3,i)/100+R1*1.1
+       xyzh(4,npstar+i)  = R1/100
     enddo
  endif
 
@@ -243,8 +243,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     call star_comp(xmass(:,1:Nstar(1)),Nstar(1),mstar)
     call star_comp(xmass(:,Nstar(1)+1:npart),Nstar(2),mstar2)
  else
-    call star_comp(xmass(:,1:nstar),nstar,mstar)
-    call star_comp(xmass(:,nstar+1:),nhelium,mhelium)
+    call star_comp(xmass(:,1:npstar),npstar,mstar)
+    call star_comp(xmass(:,npstar+1:),nhelium,mhelium)
  endif
 
  do i=1,npart
@@ -257,7 +257,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
 
  !Set iphase
  do i=1,npart
-    if (i > nstar) then
+    if (i > npstar) then
        iphase(i) = ihelium
     else
        iphase(i) = igas
