@@ -211,12 +211,16 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     Nstar(1) = npart
     npstar = int(npart/2)
     nhelium = npart - npstar
+    print *,npstar
+    print *,nhelium
     call set_wd(npstar,hfact,mstar,xyzh)
     massoftype(igas) = mstar/npstar
     massoftype(ihelium) = mhelium/nhelium
     R1=maxval(xyzh(1,1:npstar))
     do i=1,nhelium
-       xyzh(1:3,npstar+i)=xyzh(1:3,i)/100+R1*1.1
+       xyzh(1,npstar+i)=xyzh(1,i)/100+sign(R1*1.1,xyzh(1,i))
+       xyzh(2,npstar+i)=xyzh(2,i)/100+sign(R1*1.1,xyzh(2,i))
+       xyzh(3,npstar+i)=xyzh(3,i)/100+sign(R1*1.1,xyzh(3,i))
        xyzh(4,npstar+i)  = R1/100
     enddo
  endif
