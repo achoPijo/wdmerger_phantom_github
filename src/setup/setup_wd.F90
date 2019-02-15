@@ -218,9 +218,10 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     massoftype(ihelium) = mhelium/nhelium
     R1=maxval(xyzh(1,1:npstar))
     do i=1,nhelium
-       xyzh(1,npstar+i)=xyzh(1,i)/100+sign(R1*1.1,xyzh(1,i))
-       xyzh(2,npstar+i)=xyzh(2,i)/100+sign(R1*1.1,xyzh(2,i))
-       xyzh(3,npstar+i)=xyzh(3,i)/100+sign(R1*1.1,xyzh(3,i))
+       !xyzh(1,npstar+i)=xyzh(1,i)/100+sign(R1*1.1,xyzh(1,i))
+       !xyzh(2,npstar+i)=xyzh(2,i)/100+sign(R1*1.1,xyzh(2,i))
+       !xyzh(3,npstar+i)=xyzh(3,i)/100+sign(R1*1.1,xyzh(3,i))
+       xyzh(1:3,npstar+i)=xyzh(1:3,i)*R1*1.1/sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)+xyzh(1:3,i)/100
        xyzh(4,npstar+i)  = R1/100
     enddo
  endif
