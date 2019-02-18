@@ -221,8 +221,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
        !xyzh(1,npstar+i)=xyzh(1,i)/100+sign(R1*1.1,xyzh(1,i))
        !xyzh(2,npstar+i)=xyzh(2,i)/100+sign(R1*1.1,xyzh(2,i))
        !xyzh(3,npstar+i)=xyzh(3,i)/100+sign(R1*1.1,xyzh(3,i))
-       xyzh(1:3,npstar+i)=xyzh(1:3,i)*R1*3/sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)+xyzh(1:3,i)/100
-       xyzh(4,npstar+i)  = R1/100
+       xyzh(1:3,npstar+i)=xyzh(1:3,i)*R1*1.1/sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)+xyzh(1:3,i)/100
+       xyzh(4,npstar+i)  = -1
     enddo
  endif
 
