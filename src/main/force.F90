@@ -1219,7 +1219,7 @@ end subroutine force
   use fastmath,    only:finvsqrt
 #endif
   use kernel,      only:grkern,cnormk,radkern2
-  use part,        only:igas,,ihelium,maxphase,iactive,iamtype,iamdust,idust,get_partinfo,iboundary
+  use part,        only:igas,ihelium,maxphase,iactive,iamtype,iamdust,idust,get_partinfo,iboundary
   use part,        only:mhd,maxvxyzu,maxBevol,maxstrain
   use dim,         only:maxalpha,maxp,mhd_nonideal,gravity,use_dust,use_dustfrac,lightcurve
   use part,        only:rhoh,maxgradh,straintensor
