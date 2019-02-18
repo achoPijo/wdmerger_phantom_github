@@ -214,7 +214,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     radius=maxval(xyzh(1,1:npartoftype(igas)))
 
     do i=npartoftype(igas)+1,npart
-       xyzh(4,i)=radius/2
+       xyzh(4,i)=-xyzh(4,i)
     enddo
 
     do i=1,npart
