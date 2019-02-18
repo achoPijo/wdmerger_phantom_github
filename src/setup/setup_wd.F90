@@ -57,7 +57,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  use io,            only: master
  use kernel,        only: hfact_default
  use options,       only: iexternalforce,nfulldump,damp,alphau
- use part,          only: igas,ihelium,rhoh,iphase
+ use part,          only: igas,ihelium,rhoh,iphase,isetphase
  use physcon,       only: solarm,solarr,pi,planckh,mass_electron_cgs,mass_proton_cgs
  use prompting,     only: prompt
  use timestep,      only: tmax, dtmax
@@ -221,8 +221,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
        !xyzh(1,npstar+i)=xyzh(1,i)/100+sign(R1*1.1,xyzh(1,i))
        !xyzh(2,npstar+i)=xyzh(2,i)/100+sign(R1*1.1,xyzh(2,i))
        !xyzh(3,npstar+i)=xyzh(3,i)/100+sign(R1*1.1,xyzh(3,i))
-       xyzh(1:3,npstar+i)=xyzh(1:3,i)*R1*1.1/sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)+xyzh(1:3,i)/100
-       xyzh(4,npstar+i)  = -1
+       xyzh(1:3,npstar+i)=xyzh(1:3,i)*R1*1.0/sqrt(xyzh(1,i)**2+xyzh(2,i)**2+xyzh(3,i)**2)+xyzh(1:3,i)/100
+       xyzh(4,npstar+i)  = xyzh(4,1)! R1/50
     enddo
  endif
 
@@ -249,7 +249,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     call star_comp(xmass(:,Nstar(1)+1:npart),Nstar(2),mstar2)
  else
     call star_comp(xmass(:,1:npstar),npstar,mstar)
-    call star_comp(xmass(:,npstar+1:),nhelium,mhelium)
+    call star_comp(xmass(:,npstar+1:npart),nhelium,mhelium)
  endif
 
  do i=1,npart
@@ -264,10 +264,10 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
  npartoftype(:) = 0
  do i=1,npart
     if (i > npstar) then
-       iphase(i) = ihelium
+       iphase(i) = isetphase(ihelium,iactive=.true.)
        npartoftype(ihelium) = npartoftype(ihelium)+1
     else
-       iphase(i) = igas
+       iphase(i) = isetphase(igas,iactive=.true.)
        npartoftype(igas) = npartoftype(igas)+1
     endif
  enddo

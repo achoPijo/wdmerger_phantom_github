@@ -209,12 +209,16 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     !--Restart velocity                     
     vxyzu(1:3,:) = 0.0
     !--Reset centre of mass location 
-    call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
+    !call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
    
     radius=maxval(xyzh(1,1:npartoftype(igas)))
 
-    do i=npartoftype(ihelium)+1,npart
+    do i=npartoftype(igas)+1,npart
        xyzh(4,i)=radius/10
+    enddo
+
+    do i=npart
+       if (xyzh(4,i)<0.0) print *, "hnegativee!!!"
     enddo
 
 
@@ -224,7 +228,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     tmax           =    0.1                      !2 time units
     dtmax          =    0.001   !1./utime           !1 second
     iexternalforce =    0
-    damp           =    0.
+    !damp           =    0.
     !
  endif
  
