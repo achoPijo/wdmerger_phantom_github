@@ -64,7 +64,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
  integer                   :: i,ierr
  real                      :: xcom1(3),xcom2(3),vcom1(3),vcom2(3)
  real                      :: rad1,rad2,mstar1,mstar2,mtotal, omega, omega2    !CHNGCODE added omega
- real                      :: xcm1,xcm2,ycm1,ycm2,r1,r2,R1
+ real                      :: xcm1,xcm2,ycm1,ycm2,r1,r2,radius
  character(len=120)        :: setupfile
 
  call prompt('Is this a binary setup?', binary)
@@ -211,10 +211,10 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     !--Reset centre of mass location 
     call reset_centreofmass(npart,xyzh(:,:),vxyzu(:,:))
    
-    R1=maxval(xyzh(1,1:npartoftype(igas)))
+    radius=maxval(xyzh(1,1:npartoftype(igas)))
 
     do i=npartoftype(ihelium)+1,npart
-       xyzh(4,i)=R1/10
+       xyzh(4,i)=radius/10
     enddo
 
 
