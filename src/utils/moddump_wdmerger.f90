@@ -217,7 +217,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
        xyzh(4,i)=radius/10
     enddo
 
-    do i=npart
+    do i=1,npart
        if (xyzh(4,i)<0.0) print *, "hnegativee!!!"
     enddo
 
