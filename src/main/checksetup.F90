@@ -174,7 +174,7 @@ subroutine check_setup(nerror,nwarn,restart)
  if (nbad > 0) then
     print*,'Error in setup: negative, zero or ridiculous h on ',nbad,' of ',npart,' particles'
     print*,' hmin = ',hmin,' hmax = ',hmax
-    nerror = nerror + 1
+    !nerror = nerror + 1
  endif
 !
 !--check for negative thermal energies
