@@ -326,11 +326,11 @@ endif
 
 #ifdef TEMPEVOLUTION
 !$omp parallel default(none)&
-!$omp shared(xyzh,vxyzu,massoftype,npart,xmass,relflag) &
+!$omp shared(xyzh,vxyzu,massoftype,npart,xmass,iphase,relflag) &
 !$omp private(i)
 !$omp do schedule(runtime)
  do i=1,npart
-    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(igas)),xmass(:,i),relflag)
+    call helmholtz_energytemperature_switch(vxyzu(5,i),vxyzu(4,i),rhoh(xyzh(4,i),massoftype(iamtype(iphase(i)))),xmass(:,i),relflag)
  enddo
 !$omp enddo
 !$omp end parallel
