@@ -441,7 +441,7 @@ endif
 
        if (maxphase==maxp) then
           call get_partinfo(iphase(i),iactivei,iamdusti,iamtypei)
-          iamgasi    = (iamtypei==igas)
+          iamgasi = (iamtypei==igas)
           iamheliumi = (iamtypei==ihelium)
        else
           iactivei = .true.
@@ -527,11 +527,13 @@ endif
           ! calculate terms required in the force evaluation
           !
           if (maxvxyzu == 5) then
+#ifdef TEMPEVOLUTION
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
                      vwavei,sxxi,sxyi,sxzi,syyi,syzi,szzi, &
                      visctermiso,visctermaniso,realviscosity,divcurlvi(1),bulkvisc,straini,stressmax, &
                      xpartveci(itempi),xmass(:,i),cvi,dPdTi)
+#endif
           else
              call get_P(rhoi,rho1i,xpartveci(ixi),xpartveci(iyi),xpartveci(izi), &
                      pmassi,xpartveci(ieni),Bxi,Byi,Bzi,dustfraci,ponrhoi,pro2i,pri,spsoundi, &
@@ -718,6 +720,7 @@ isgas: if (iamgasi.or.iamheliumi) then
              endif
           endif
           if (maxvxyzu >= 4) fxyzu(4,i) = fxyz4 !REVISE This is a check on temperature and energy evolution
+#ifdef TEMPEVOLUTION
           if (maxvxyzu == 5) then 
              if (relflag == 1) then
                 fxyzu(4,i) = 0.
@@ -726,6 +729,7 @@ isgas: if (iamgasi.or.iamheliumi) then
                 fxyzu(5,i) = fxyz5
              endif
           endif 
+#endif
        endif
 
        dtclean = bignumber
@@ -815,6 +819,10 @@ isgas: if (iamgasi.or.iamheliumi) then
 else
 
        if (maxvxyzu > 4) fxyzu(4,i) = 0.
+#ifdef TEMPEVOLUTION
+       if (maxvxyzu == 5) fxyzu(5,i) = 0.
+#endif
+
        ! timestep based on Courant condition for non-gas particles
        vsigdtc = vsigmax
        if (vsigdtc > tiny(vsigdtc)) then
@@ -1211,7 +1219,7 @@ end subroutine force
   use fastmath,    only:finvsqrt
 #endif
   use kernel,      only:grkern,cnormk,radkern2
-  use part,        only:igas,ihelium,maxphase,iactive,iamtype,iamdust,idust,get_partinfo,iboundary
+  use part,        only:igas,,ihelium,maxphase,iactive,iamtype,iamdust,idust,get_partinfo,iboundary
   use part,        only:mhd,maxvxyzu,maxBevol,maxstrain
   use dim,         only:maxalpha,maxp,mhd_nonideal,gravity,use_dust,use_dustfrac,lightcurve
   use part,        only:rhoh,maxgradh,straintensor
@@ -1234,7 +1242,7 @@ end subroutine force
 #endif
   use timestep,    only:bignumber,time !sound speed monitoring added time
   use options,     only:overcleanfac
-  use units,       only:unit_density
+  use units,       only:unit_density,unit_velocity,unit_pressure
 #ifdef TEMPEVOLUTION
  use eos_helmholtz,  only:xmass
 #endif
@@ -1310,18 +1318,10 @@ end subroutine force
   logical                      :: iexist
   character(len=120)           :: fileout
   !------------------------
-  !Monaghan 1992 and Rosswog 2008 descrption of Artificial viscosity
-  real    ::fi,fj,rhoij,hij,alphaij,rij,csij,hrfactor
-  !-------------------------
   !sound speed monitoring
   maxprojvi = 0.
   maxvsigavi = 0.
   !-----------------------
-
-  !-----------------------
-  !Monaghan 1992 and Rosswog 2008 descrption of Artificial viscosity
-  fi = sqrt(divcurlv(1,i)**2)/(sqrt(divcurlv(2,i)**2+divcurlv(3,i)**2+divcurlv(4,i)**2)+sqrt(divcurlv(1,i)**2))
-  !---------------------------------------------
 
   fsum(:) = 0.
   vsigmax = 0.
@@ -1389,9 +1389,6 @@ end subroutine force
   visctermanisoj = 0.
   cvj = 0.
   dPdTj = 0.
-  !Monaghan 1992 and Rosswog 2008 descrption of Artificial viscosity
-  fj=0.
-  !----------------------------------------------------------
 
   loop_over_neighbours2: do n = 1,nneigh
 
@@ -1511,7 +1508,7 @@ end subroutine force
         if (mhd) usej = .true.
         if (use_dust .or. use_dustfrac) usej = .true.
         if (maxvxyzu >= 4 .and. .not.gravity) usej = .true.
-        if (maxvxyzu == 5) usej = .true. !USEJCHANGE 
+        !if (maxvxyzu == 5) usej = .true. !USEJCHANGE 
 
         !--get individual timestep/ multiphase information (querying iphase)
         if (maxphase==maxp) then
@@ -1551,17 +1548,17 @@ end subroutine force
         endif
         !-----------------------------------
 
-        if ((iamgasj.or.iamheliumj).and. maxvxyzu >= 4) then
+        if ((iamgasj.or.iamheliumj) .and. maxvxyzu >= 4) then
            enj   = vxyzu(4,j)
            denij = xpartveci(ieni) - enj
            if (maxvxyzu == 5) tempj = vxyzu(5,j)
         else
            denij = 0.
         endif
-        if ((iamgasi.or.iamheliumi).and. (iamgasj.or.iamheliumj)) then
+        if ((iamgasi.or.iamheliumi) .and. (iamgasj.or.iamheliumj)) then
            !--work out vsig for timestepping and av
            vsigi   = max(vwavei - beta*projv,0.)
-           vsigavi = max(alphai*fi*(vwavei - beta*projv*hi/(sqrt(rij2)+0.1*hi)),0.)!CHECK
+           vsigavi = max(alphai*vwavei - beta*projv,0.)!CHECK
            !sound speed monitoring
            if (i==printparticlei) then
               maxvsigavi=max(maxvsigavi,vsigavi)
@@ -1616,10 +1613,12 @@ end subroutine force
               !--calculate j terms (which were precalculated outside loop for i)
               !
               if (maxvxyzu == 5) then
+#ifdef TEMPEVOLUTION
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
                          sxxj,sxyj,sxzj,syyj,syzj,szzj,visctermisoj,visctermanisoj, &
                          realviscosity,divvj,bulkvisc,strainj,stressmax,tempj,xmass(:,j))!,cvj,dPdTj) !USEJCHANGE
+#endif
               else
                  call get_P(rhoj,rho1j,xj,yj,zj,pmassj,enj,Bxj,Byj,Bzj,dustfracj, &
                          ponrhoj,pro2j,prj,spsoundj,vwavej, &
@@ -1630,12 +1629,8 @@ end subroutine force
               autermj  = mrhoj5*alphau
               avBtermj = mrhoj5*alphaB*rho1j
 
-              !Monaghan 1992 and Rosswog 2008 descrption of Artificial viscosity
-              fj = sqrt(divcurlv(1,j)**2)/(sqrt(divcurlv(2,j)**2+divcurlv(3,j)**2+divcurlv(4,j)**2)+sqrt(divcurlv(1,j)**2))
-              !---------------------------------------------
-
               vsigj = max(vwavej - beta*projv,0.)
-              vsigavj = max(alphaj*fj*(vwavej - beta*projv*hj/(sqrt(rij2)+0.1*hj)),0.)!CHECK
+              vsigavj = max(alphaj*vwavej - beta*projv,0.)!CHECK
               if (vsigj > vsigmax) vsigmax = vsigj
            else
               vsigj = max(-projv,0.)
@@ -1683,18 +1678,12 @@ ifgas: if ((iamgasi.or.iamheliumi) .and. (iamgasj.or.iamheliumj)) then
         dudtdissi = -0.5*pmassj*rho1i*alphai*spsoundi*hi*rij1*projv**2*grkerni
 #else
         if (projv < 0.) then
-           alphaij  = (alphai + alphaj)*(fi + fj)/4
-           rhoij    = (1/rho1i + 1/rho1j)/2
-           hij      = (hi + hj)/2
-           rij      = sqrt(rij2)
-           csij     = (vwavei + vwavej)/2
-           hrfactor = hij / (rij + 0.1*hij)
            !--add av term to pressure
-                     gradpi = pmassj*(pro2i - 0.5*(projv/rhoij)*hrfactor*(alphaij*(csij-beta*projv*hrfactor)))*grkerni
-           if (usej) gradpj = pmassj*(pro2j - 0.5*(projv/rhoij)*hrfactor*(alphaij*(csij-beta*projv*hrfactor)))*grkernj
+                     gradpi = pmassj*(pro2i - 0.5*rho1i*vsigavi*projv)*grkerni
+           if (usej) gradpj = pmassj*(pro2j - 0.5*rho1j*vsigavj*projv)*grkernj
 
-           !--energy conservation from artificial viscosity (need j term)
-           dudtdissi = -0.5*pmassj*(projv/rhoij)*hrfactor*alphaij*(csij-beta*projv*hrfactor)*projv*grkerni !CHECK
+           !--energy conservation from artificial viscosity (don't need j term)
+           dudtdissi = -0.5*pmassj*rho1i*vsigavi*projv**2*grkerni !CHECK
         else
                      gradpi = pmassj*pro2i*grkerni
            if (usej) gradpj = pmassj*pro2j*grkernj
@@ -1948,25 +1937,26 @@ ifgas: if ((iamgasi.or.iamheliumi) .and. (iamgasj.or.iamheliumj)) then
      if (iexist) then
         open(iunit,file=fileout,status='old',position='append')
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(pro2i*rhoi**2),maxprojvi,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi,grkerni
+        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
     
         close(iunit)
      else
         open(iunit,file=fileout,status='new')
-        write(iunit,"('#',11(1x,'[',i2.2,1x,a11,']',2x))") &
+        write(iunit,"('#',12(1x,'[',i2.2,1x,a11,']',2x))") &
             1,'time',      &
             2,'alphai',    &
-            3,'spsoundi',  &
-            4,'Pi',    &
-            5,'maxprojvi', &
-            6,'tempi',     &
-            7,'hi',        &
-            8,'rho1i',     &
-            9,'dudtdissi', &
-           10,'vsigavi', &
-           11,'gradkerni'
+            3,'spsoundi[cm/s]',  &
+            4,'cs_polytrope[cm/s]', &
+            5,'Pi[dyne/cm2]',        &
+            6,'maxprojvi[cm/s]', &
+            7,'tempi',     &
+            8,'hi',        &
+            9,'rhoi[g/cm3]',     &
+           10,'dudtdissi', &
+           11,'vsigavi[cm/s]',   &
+           12,'gradkerni'
         
-        write(iunit,'(11(1pe18.10,1x))') time,alphai,spsoundi,(pro2i*rhoi**2),maxprojvi,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi,grkerni
+        write(iunit,'(12(1pe18.10,1x))') time,alphai,spsoundi*unit_velocity,sqrt(pro2i*rhoi*4/3)*unit_velocity,(pro2i*rhoi**2)*unit_pressure,maxprojvi*unit_velocity,xpartveci(itempi),hi,(1/rho1i)*unit_density,dudtdissi,maxvsigavi*unit_velocity,grkerni
     
         close(iunit)
      endif
