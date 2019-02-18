@@ -100,7 +100,7 @@ subroutine force(icall,npart,xyzh,vxyzu,fxyzu,divcurlv,divcurlB,Bevol,dBevol,dus
  use options,      only:alpha,alphau,alphaB,beta, &
                         ipdv_heating,ishock_heating,iresistive_heating,icooling, &
                         psidecayfac,overcleanfac
- use part,         only:rhoh,dhdrho,rhoanddhdrho,massoftype,&
+ use part,         only:rhoh,dhdrho,rhoanddhdrho,massoftype,iamtype,&
                         alphaind,abundance,nabundances, &
                         ll,get_partinfo,iactive,gradh,&
                         hrho,iphase,maxphase,igas,ihelium,iboundary,maxgradh,straintensor, &
