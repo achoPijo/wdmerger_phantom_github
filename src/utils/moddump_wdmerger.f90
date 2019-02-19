@@ -221,6 +221,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
        if (xyzh(4,i)<0.0) print *, "hnegativee!!!"
     enddo
 
+    print *, npartoftype
 
   
     !

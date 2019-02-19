@@ -272,6 +272,8 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     endif
  enddo
 
+ print *, npartoftype
+
 
  do i=1,npart
     densi = rhoh(xyzh(4,i),massoftype(iphase(i)))
