@@ -222,7 +222,7 @@ subroutine modify_dump(npart,npartoftype,massoftype,xyzh,vxyzu)
     enddo
 
 
-                                ! reset velocity
+  
     !
     !--Set new runtime parameters
     tmax           =    0.1                      !2 time units

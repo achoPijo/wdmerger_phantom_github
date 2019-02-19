@@ -33,7 +33,7 @@ module setup
  logical            :: iexist
  logical            :: use_prompt = .false.
  logical            :: binary     = .false.
- integer            :: np         = 50000
+ integer            :: np         = 100000
  real               :: mstar      = 0.6d0
  real               :: mstar2     = 0.6d0
  real               :: mhelium    = 0.1d0
@@ -209,7 +209,7 @@ subroutine setpart(id,npart,npartoftype,xyzh,massoftype,vxyzu,polyk,gamma,hfact,
     massoftype(igas) = (mstar+mstar2)/npart
  else
     Nstar(1) = npart
-    npstar = int(npart/2)
+    npstar = 25000
     nhelium = npart - npstar
     print *,npstar
     print *,nhelium
