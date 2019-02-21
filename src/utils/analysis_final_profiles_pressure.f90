@@ -52,14 +52,17 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  integer, parameter  :: nrpoints = 2000
  integer             :: i,j,ierr
  real                :: rmax,rTmax,Tmax,dr,mtot,r,ponrhoi,densi,dummyspsoundi
- real                :: press(npart),rtab(npart)
+ real                :: press(npart),rtab(npart),presshe(npart),pressco(npart),mass(npart)
  real                :: vec(3),xcom(3),vcom(3),xdens(3)
  character(len=200)  :: fileout
 
  !
  !-- Initialization
  !
- press(:)          = 0.
+ mass(:) =0.
+ press(:) = 0.
+ presshe(:)          = 0.
+ pressco(:)       =0.
  rtab(:)           = 0.
 
 ! ieos = 15
@@ -76,6 +79,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
     call equationofstate(ieos,ponrhoi,dummyspsoundi,densi,xyzh(1,i),xyzh(2,i),xyzh(3,i), &
                             tempi=vxyzu(5,i),xmassi=xmass(:,i))
     press(i)=ponrhoi*densi
+    mass(i) =massoftype(iphase(i))
+    if (iphase(i) == 7) presshe(i) = press(i)
+    if (iphase(i) == 1) pressco(i) = press(i)
  enddo
 
  !
@@ -84,12 +90,15 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
 
  fileout = trim(dumpfile)//'_press.dat'
  open(iunit,file=fileout,status='replace')
- write(iunit,"('#',2(1x,'[',i2.2,1x,a11,']',2x))") &
+ write(iunit,"('#',5(1x,'[',i2.2,1x,a11,']',2x))") &
         1,'r',  &
-        2,'Pressure'
+        2,'Pressure', &
+        3,'Mass', &
+        4,'Pressure he', &
+        5,'Pressure co'
 
- do j=1,nrpoints
-      write(iunit,'(2(1pe18.10,1x))') rtab(j),press(j)
+ do j=1,npart
+      write(iunit,'(5(1pe18.10,1x))') rtab(j),press(j),mass(j),presshe(j),pressco(j)
  enddo
  close(iunit)
 
