@@ -35,7 +35,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  use io,           only: fatal
  use dim,          only: maxp,maxvxyzu
  use centreofmass, only: reset_centreofmass,get_centreofmass
- use part,         only: igas,iamtype,iphase,maxphase,rhoh
+ use part,         only: igas,iamtype,iphase,maxphase,rhoh,massoftype
  use prompting,    only: prompt
 ! use setbinary,    only: L1_point
  use units,        only: umass,udist,utime,unit_density,unit_pressure
