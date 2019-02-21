@@ -50,7 +50,7 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  real,             intent(in)    :: particlemass,time
 
  integer, parameter  :: nrpoints = 2000
- integer             :: i,j,ieos,ierr
+ integer             :: i,j,ierr
  real                :: rmax,rTmax,Tmax,dr,mtot,r,ponrhoi,densi,dummyspsoundi
  real                :: press(npart),rtab(npart)
  real                :: vec(3),xcom(3),vcom(3),xdens(3)
@@ -62,9 +62,9 @@ subroutine do_analysis(dumpfile,num,xyzh,vxyzu,particlemass,npart,time,iunit)
  press(:)          = 0.
  rtab(:)           = 0.
 
- ieos = 15
+! ieos = 15
  ierr = 0
- call init_eos(ieos,ierr)
+ call init_eos(15,ierr)
 
  !
  !-- 
